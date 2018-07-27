@@ -8,14 +8,12 @@ buildscript {
 }
 
 group = 'com.synopsys.integration'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 apply plugin: 'com.blackducksoftware.integration.library'
 
 dependencies {
-    compile 'com.blackducksoftware.integration:integration-rest:0.0.4'
+    compile 'com.blackducksoftware.integration:integration-rest:0.0.6'
 
-    compile 'org.apache.commons:commons-compress:1.17'
-
-    testCompile 'org.slf4j:slf4j-simple:1.7.25'
+    testCompile 'org.mockito:mockito-core:2.18.3'
 }

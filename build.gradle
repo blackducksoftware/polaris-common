@@ -8,14 +8,14 @@ buildscript {
 }
 
 group = 'com.synopsys.integration'
-version = '0.0.4-SNAPSHOT'
+version = '0.1.0'
 
 apply plugin: 'com.blackducksoftware.integration.library'
 
 nexusStaging { packageGroup = 'com.synopsys' }
 
 dependencies {
-    compile 'com.blackducksoftware.integration:integration-rest:0.0.7'
+    compile 'com.blackducksoftware.integration:integration-rest:0.1.0'
 
     testCompile 'org.mockito:mockito-core:2.18.3'
 }

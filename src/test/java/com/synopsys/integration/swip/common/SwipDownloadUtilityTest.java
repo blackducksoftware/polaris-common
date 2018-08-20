@@ -12,12 +12,12 @@ import org.junit.Assume;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.blackducksoftware.integration.log.IntLogger;
-import com.blackducksoftware.integration.rest.connection.RestConnection;
-import com.blackducksoftware.integration.rest.request.Request;
-import com.blackducksoftware.integration.rest.request.Response;
-import com.blackducksoftware.integration.test.tool.TestLogger;
-import com.blackducksoftware.integration.util.CleanupZipExpander;
+import com.synopsys.integration.log.IntLogger;
+import com.synopsys.integration.rest.connection.RestConnection;
+import com.synopsys.integration.rest.request.Request;
+import com.synopsys.integration.rest.request.Response;
+import com.synopsys.integration.test.tool.TestLogger;
+import com.synopsys.integration.util.CleanupZipExpander;
 
 public class SwipDownloadUtilityTest {
     @Test

@@ -148,15 +148,16 @@ public class SwipDownloadUtility {
         logger.debug(String.format("last time downloaded: %d", lastTimeDownloaded));
 
         final Request downloadRequest = new Request.Builder(downloadUrl).build();
-        final Optional<Response> optionalResponse = restConnection.executeGetRequestIfModifiedSince(downloadRequest, lastTimeDownloaded);
-        if (optionalResponse.isPresent()) {
-            final Response response = optionalResponse.get();
-            try {
+        try (Response response = restConnection.executeRequest(downloadRequest)) {
+            final long lastModifiedOnServer = response.getLastModified();
+            if (lastModifiedOnServer == lastTimeDownloaded) {
+                logger.debug("The Swip CLI has not been modified since it was last downloaded - skipping download.");
+                return getBinDirectory();
+            } else {
                 logger.info("Downloading the Swip CLI.");
                 try (InputStream responseStream = response.getContent()) {
                     cleanupZipExpander.expand(responseStream, installDirectory);
                 }
-                final long lastModifiedOnServer = response.getLastModified();
                 versionFile.setLastModified(lastModifiedOnServer);
 
                 final File binDirectory = getBinDirectory();
@@ -165,12 +166,7 @@ public class SwipDownloadUtility {
                 logger.info(String.format("Swip CLI downloaded successfully."));
 
                 return binDirectory;
-            } finally {
-                response.close();
             }
-        } else {
-            logger.debug("The Swip CLI has not been modified since it was last downloaded - skipping download.");
-            return getBinDirectory();
         }
     }
 

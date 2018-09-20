@@ -39,9 +39,10 @@ public class SwipDownloadUtilityTest {
         final InputStream zipFileStream = getClass().getResourceAsStream("/swip_mac.zip");
         final Response mockResponse = Mockito.mock(Response.class);
         Mockito.when(mockResponse.getContent()).thenReturn(zipFileStream);
+        Mockito.when(mockResponse.getLastModified()).thenReturn(Long.MAX_VALUE);
 
         final RestConnection mockRestConnection = Mockito.mock(RestConnection.class);
-        Mockito.when(mockRestConnection.executeGetRequestIfModifiedSince(Mockito.any(Request.class), Mockito.anyLong())).thenReturn(Optional.of(mockResponse));
+        Mockito.when(mockRestConnection.executeRequest(Mockito.any(Request.class))).thenReturn(mockResponse);
 
         final IntLogger intLogger = new TestLogger();
         final Path tempDirectory = Files.createTempDirectory(null);
@@ -58,8 +59,11 @@ public class SwipDownloadUtilityTest {
 
     @Test
     public void testNotDownloadIfNotUpdatedOnServer() throws Exception {
+        final Response mockResponse = Mockito.mock(Response.class);
+        Mockito.when(mockResponse.getLastModified()).thenReturn(0L);
+
         final RestConnection mockRestConnection = Mockito.mock(RestConnection.class);
-        Mockito.when(mockRestConnection.executeGetRequestIfModifiedSince(Mockito.any(Request.class), Mockito.anyLong())).thenReturn(Optional.empty());
+        Mockito.when(mockRestConnection.executeRequest(Mockito.any(Request.class))).thenReturn(mockResponse);
 
         final TestLogger intLogger = new TestLogger();
 
@@ -80,9 +84,10 @@ public class SwipDownloadUtilityTest {
         final InputStream zipFileStream = getClass().getResourceAsStream("/swip_mac.zip");
         final Response mockResponse = Mockito.mock(Response.class);
         Mockito.when(mockResponse.getContent()).thenReturn(zipFileStream);
+        Mockito.when(mockResponse.getLastModified()).thenReturn(Long.MAX_VALUE);
 
         final RestConnection mockRestConnection = Mockito.mock(RestConnection.class);
-        Mockito.when(mockRestConnection.executeGetRequestIfModifiedSince(Mockito.any(Request.class), Mockito.anyLong())).thenReturn(Optional.of(mockResponse));
+        Mockito.when(mockRestConnection.executeRequest(Mockito.any(Request.class))).thenReturn(mockResponse);
 
         final TestLogger intLogger = new TestLogger();
 

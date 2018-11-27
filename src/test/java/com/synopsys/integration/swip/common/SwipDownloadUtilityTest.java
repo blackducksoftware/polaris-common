@@ -1,5 +1,9 @@
 package com.synopsys.integration.swip.common;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -7,31 +11,31 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.synopsys.integration.log.BufferedIntLogger;
 import com.synopsys.integration.log.IntLogger;
+import com.synopsys.integration.log.LogLevel;
+import com.synopsys.integration.log.SilentIntLogger;
 import com.synopsys.integration.rest.connection.RestConnection;
 import com.synopsys.integration.rest.request.Request;
 import com.synopsys.integration.rest.request.Response;
-import com.synopsys.integration.test.tool.TestLogger;
 import com.synopsys.integration.util.CleanupZipExpander;
 
 public class SwipDownloadUtilityTest {
     @Test
     public void testActualDownload() {
         final String swipCLIDownloadPath = System.getenv("SWIP_CLI_DOWNLOAD_PATH");
-        Assume.assumeTrue(StringUtils.isNotBlank(swipCLIDownloadPath));
+        assumeTrue(StringUtils.isNotBlank(swipCLIDownloadPath));
         final File downloadTarget = new File(swipCLIDownloadPath);
 
-        final IntLogger intLogger = new TestLogger();
+        final IntLogger intLogger = new SilentIntLogger();
         final SwipDownloadUtility swipDownloadUtility = SwipDownloadUtility.defaultUtility(intLogger, downloadTarget);
 
         final Optional<String> swipCliPath = swipDownloadUtility.retrieveSwipCliExecutablePath();
-        Assert.assertTrue(swipCliPath.isPresent());
-        Assert.assertTrue(swipCliPath.get().length() > 0);
+        assertTrue(swipCliPath.isPresent());
+        assertTrue(swipCliPath.get().length() > 0);
     }
 
     @Test
@@ -44,7 +48,7 @@ public class SwipDownloadUtilityTest {
         final RestConnection mockRestConnection = Mockito.mock(RestConnection.class);
         Mockito.when(mockRestConnection.executeRequest(Mockito.any(Request.class))).thenReturn(mockResponse);
 
-        final IntLogger intLogger = new TestLogger();
+        final IntLogger intLogger = new SilentIntLogger();
         final Path tempDirectory = Files.createTempDirectory(null);
         final File downloadTarget = tempDirectory.toFile();
         downloadTarget.deleteOnExit();
@@ -53,8 +57,8 @@ public class SwipDownloadUtilityTest {
         final SwipDownloadUtility swipDownloadUtility = new SwipDownloadUtility(intLogger, mockRestConnection, cleanupZipExpander, SwipDownloadUtility.DEFAULT_SWIP_SERVER_URL, downloadTarget);
         final Optional<String> swipCliPath = swipDownloadUtility.retrieveSwipCliExecutablePath();
 
-        Assert.assertTrue(swipCliPath.isPresent());
-        Assert.assertTrue(swipCliPath.get().length() > 0);
+        assertTrue(swipCliPath.isPresent());
+        assertTrue(swipCliPath.get().length() > 0);
     }
 
     @Test
@@ -65,7 +69,7 @@ public class SwipDownloadUtilityTest {
         final RestConnection mockRestConnection = Mockito.mock(RestConnection.class);
         Mockito.when(mockRestConnection.executeRequest(Mockito.any(Request.class))).thenReturn(mockResponse);
 
-        final TestLogger intLogger = new TestLogger();
+        final BufferedIntLogger intLogger = new BufferedIntLogger();
 
         final Path tempDirectory = Files.createTempDirectory(null);
         final File downloadTarget = tempDirectory.toFile();
@@ -75,8 +79,8 @@ public class SwipDownloadUtilityTest {
         final SwipDownloadUtility swipDownloadUtility = new SwipDownloadUtility(intLogger, mockRestConnection, cleanupZipExpander, SwipDownloadUtility.DEFAULT_SWIP_SERVER_URL, downloadTarget);
         final Optional<String> swipCliPath = swipDownloadUtility.retrieveSwipCliExecutablePath();
 
-        Assert.assertFalse(swipCliPath.isPresent());
-        Assert.assertTrue(intLogger.getOutputString().contains("skipping download"));
+        assertFalse(swipCliPath.isPresent());
+        assertTrue(intLogger.getOutputString(LogLevel.DEBUG).contains("skipping download"));
     }
 
     @Test
@@ -89,7 +93,7 @@ public class SwipDownloadUtilityTest {
         final RestConnection mockRestConnection = Mockito.mock(RestConnection.class);
         Mockito.when(mockRestConnection.executeRequest(Mockito.any(Request.class))).thenReturn(mockResponse);
 
-        final TestLogger intLogger = new TestLogger();
+        final BufferedIntLogger intLogger = new BufferedIntLogger();
 
         final Path tempDirectory = Files.createTempDirectory(null);
         final File downloadTarget = tempDirectory.toFile();
@@ -102,18 +106,18 @@ public class SwipDownloadUtilityTest {
         // create a directory that should be deleted by the update download/extract code
         final File directoryOfPreviousExtraction = new File(installDirectory, "temp_swip_cli_version");
         directoryOfPreviousExtraction.mkdirs();
-        Assert.assertTrue(directoryOfPreviousExtraction.isDirectory());
-        Assert.assertTrue(directoryOfPreviousExtraction.exists());
+        assertTrue(directoryOfPreviousExtraction.isDirectory());
+        assertTrue(directoryOfPreviousExtraction.exists());
 
         final CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(intLogger);
         final SwipDownloadUtility swipDownloadUtility = new SwipDownloadUtility(intLogger, mockRestConnection, cleanupZipExpander, SwipDownloadUtility.DEFAULT_SWIP_SERVER_URL, downloadTarget);
         final Optional<String> swipCliPath = swipDownloadUtility.retrieveSwipCliExecutablePath();
 
-        Assert.assertTrue(swipCliPath.isPresent());
-        Assert.assertTrue(swipCliPath.get().length() > 0);
-        Assert.assertFalse(directoryOfPreviousExtraction.exists());
-        Assert.assertTrue(intLogger.getOutputString().contains("There were items"));
-        Assert.assertTrue(intLogger.getOutputString().contains("that are being deleted"));
+        assertTrue(swipCliPath.isPresent());
+        assertTrue(swipCliPath.get().length() > 0);
+        assertFalse(directoryOfPreviousExtraction.exists());
+        assertTrue(intLogger.getOutputString(LogLevel.WARN).contains("There were items"));
+        assertTrue(intLogger.getOutputString(LogLevel.WARN).contains("that are being deleted"));
     }
 
 }

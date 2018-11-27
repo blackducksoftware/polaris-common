@@ -1,4 +1,4 @@
-package com.synopsys.integration.swip.common;
+package com.synopsys.integration.polaris.common;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,19 +23,19 @@ import com.synopsys.integration.rest.request.Request;
 import com.synopsys.integration.rest.request.Response;
 import com.synopsys.integration.util.CleanupZipExpander;
 
-public class SwipDownloadUtilityTest {
+public class PolarisDownloadUtilityTest {
     @Test
     public void testActualDownload() {
-        final String swipCLIDownloadPath = System.getenv("SWIP_CLI_DOWNLOAD_PATH");
-        assumeTrue(StringUtils.isNotBlank(swipCLIDownloadPath));
-        final File downloadTarget = new File(swipCLIDownloadPath);
+        final String polarisCLIDownloadPath = System.getenv("POLARIS_CLI_DOWNLOAD_PATH");
+        assumeTrue(StringUtils.isNotBlank(polarisCLIDownloadPath));
+        final File downloadTarget = new File(polarisCLIDownloadPath);
 
         final IntLogger intLogger = new SilentIntLogger();
-        final SwipDownloadUtility swipDownloadUtility = SwipDownloadUtility.defaultUtility(intLogger, downloadTarget);
+        final PolarisDownloadUtility polarisDownloadUtility = PolarisDownloadUtility.defaultUtility(intLogger, downloadTarget);
 
-        final Optional<String> swipCliPath = swipDownloadUtility.retrieveSwipCliExecutablePath();
-        assertTrue(swipCliPath.isPresent());
-        assertTrue(swipCliPath.get().length() > 0);
+        final Optional<String> polarisCliPath = polarisDownloadUtility.retrievePolarisCliExecutablePath();
+        assertTrue(polarisCliPath.isPresent());
+        assertTrue(polarisCliPath.get().length() > 0);
     }
 
     @Test
@@ -54,11 +54,11 @@ public class SwipDownloadUtilityTest {
         downloadTarget.deleteOnExit();
 
         final CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(intLogger);
-        final SwipDownloadUtility swipDownloadUtility = new SwipDownloadUtility(intLogger, mockRestConnection, cleanupZipExpander, SwipDownloadUtility.DEFAULT_SWIP_SERVER_URL, downloadTarget);
-        final Optional<String> swipCliPath = swipDownloadUtility.retrieveSwipCliExecutablePath();
+        final PolarisDownloadUtility polarisDownloadUtility = new PolarisDownloadUtility(intLogger, mockRestConnection, cleanupZipExpander, PolarisDownloadUtility.DEFAULT_POLARIS_SERVER_URL, downloadTarget);
+        final Optional<String> polarisCliPath = polarisDownloadUtility.retrievePolarisCliExecutablePath();
 
-        assertTrue(swipCliPath.isPresent());
-        assertTrue(swipCliPath.get().length() > 0);
+        assertTrue(polarisCliPath.isPresent());
+        assertTrue(polarisCliPath.get().length() > 0);
     }
 
     @Test
@@ -76,10 +76,10 @@ public class SwipDownloadUtilityTest {
         downloadTarget.deleteOnExit();
 
         final CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(intLogger);
-        final SwipDownloadUtility swipDownloadUtility = new SwipDownloadUtility(intLogger, mockRestConnection, cleanupZipExpander, SwipDownloadUtility.DEFAULT_SWIP_SERVER_URL, downloadTarget);
-        final Optional<String> swipCliPath = swipDownloadUtility.retrieveSwipCliExecutablePath();
+        final PolarisDownloadUtility polarisDownloadUtility = new PolarisDownloadUtility(intLogger, mockRestConnection, cleanupZipExpander, PolarisDownloadUtility.DEFAULT_POLARIS_SERVER_URL, downloadTarget);
+        final Optional<String> polarisCliPath = polarisDownloadUtility.retrievePolarisCliExecutablePath();
 
-        assertFalse(swipCliPath.isPresent());
+        assertFalse(polarisCliPath.isPresent());
         assertTrue(intLogger.getOutputString(LogLevel.DEBUG).contains("skipping download"));
     }
 
@@ -99,22 +99,22 @@ public class SwipDownloadUtilityTest {
         final File downloadTarget = tempDirectory.toFile();
         downloadTarget.deleteOnExit();
 
-        final File installDirectory = new File(downloadTarget, SwipDownloadUtility.SWIP_CLI_INSTALL_DIRECTORY);
+        final File installDirectory = new File(downloadTarget, PolarisDownloadUtility.POLARIS_CLI_INSTALL_DIRECTORY);
         installDirectory.mkdirs();
         installDirectory.deleteOnExit();
 
         // create a directory that should be deleted by the update download/extract code
-        final File directoryOfPreviousExtraction = new File(installDirectory, "temp_swip_cli_version");
+        final File directoryOfPreviousExtraction = new File(installDirectory, "temp_polaris_cli_version");
         directoryOfPreviousExtraction.mkdirs();
         assertTrue(directoryOfPreviousExtraction.isDirectory());
         assertTrue(directoryOfPreviousExtraction.exists());
 
         final CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(intLogger);
-        final SwipDownloadUtility swipDownloadUtility = new SwipDownloadUtility(intLogger, mockRestConnection, cleanupZipExpander, SwipDownloadUtility.DEFAULT_SWIP_SERVER_URL, downloadTarget);
-        final Optional<String> swipCliPath = swipDownloadUtility.retrieveSwipCliExecutablePath();
+        final PolarisDownloadUtility polarisDownloadUtility = new PolarisDownloadUtility(intLogger, mockRestConnection, cleanupZipExpander, PolarisDownloadUtility.DEFAULT_POLARIS_SERVER_URL, downloadTarget);
+        final Optional<String> polarisCliPath = polarisDownloadUtility.retrievePolarisCliExecutablePath();
 
-        assertTrue(swipCliPath.isPresent());
-        assertTrue(swipCliPath.get().length() > 0);
+        assertTrue(polarisCliPath.isPresent());
+        assertTrue(polarisCliPath.get().length() > 0);
         assertFalse(directoryOfPreviousExtraction.exists());
         assertTrue(intLogger.getOutputString(LogLevel.WARN).contains("There were items"));
         assertTrue(intLogger.getOutputString(LogLevel.WARN).contains("that are being deleted"));

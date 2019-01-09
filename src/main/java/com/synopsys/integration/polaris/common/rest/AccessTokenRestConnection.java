@@ -1,3 +1,26 @@
+/**
+ * polaris-common
+ *
+ * Copyright (C) 2019 Black Duck Software, Inc.
+ * http://www.blackducksoftware.com/
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.synopsys.integration.polaris.common.rest;
 
 import java.io.IOException;
@@ -29,6 +52,11 @@ import com.synopsys.integration.rest.request.Response;
 
 public class AccessTokenRestConnection extends ReconnectingRestConnection {
     private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String AUTHENTICATION_SPEC = "api/auth/authenticate";
+    private static final String AUTHENTICATION_RESPONSE_KEY = "jwt";
+
+    private static final String ACCESS_TOKEN_REQUEST_KEY = "accesstoken";
+    private static final String ACCESS_TOKEN_REQUEST_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
     private final String baseUrl;
     private final String accessToken;
@@ -78,7 +106,7 @@ public class AccessTokenRestConnection extends ReconnectingRestConnection {
     public final Response attemptAuthentication() throws IntegrationException, IOException {
         final URL authenticationUrl;
         try {
-            authenticationUrl = new URL(getBaseUrl(), "api/auth/authenticate");
+            authenticationUrl = new URL(getBaseUrl(), AUTHENTICATION_SPEC);
         } catch (final MalformedURLException e) {
             throw new IntegrationException("Error constructing the authentication URL: " + e.getMessage(), e);
         }
@@ -119,14 +147,14 @@ public class AccessTokenRestConnection extends ReconnectingRestConnection {
 
     private Map<String, String> getRequestHeaders() {
         final Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/x-www-form-urlencoded");
+        headers.put("Content-Type", ACCESS_TOKEN_REQUEST_CONTENT_TYPE);
 
         return headers;
     }
 
     private StringEntity getEntity() throws IntegrationException {
         try {
-            return new StringEntity("accesstoken=" + accessToken);
+            return new StringEntity(String.format("%s=%s", ACCESS_TOKEN_REQUEST_KEY, accessToken));
         } catch (final UnsupportedEncodingException e) {
             throw new IntegrationException(e);
         }
@@ -134,12 +162,12 @@ public class AccessTokenRestConnection extends ReconnectingRestConnection {
 
     private String readBearerToken(final CloseableHttpResponse response) throws IOException {
         final JsonParser jsonParser = new JsonParser();
-        String bodyToken = "";
+        final String bodyToken;
         try (final InputStream inputStream = response.getEntity().getContent()) {
             bodyToken = IOUtils.toString(inputStream, Charsets.UTF_8);
         }
         final JsonObject bearerResponse = jsonParser.parse(bodyToken).getAsJsonObject();
-        return bearerResponse.get("jwt").getAsString();
+        return bearerResponse.get(AUTHENTICATION_RESPONSE_KEY).getAsString();
     }
 
 }

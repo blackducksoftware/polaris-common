@@ -36,7 +36,6 @@ import org.apache.commons.lang3.SystemUtils;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.rest.connection.RestConnection;
-import com.synopsys.integration.rest.connection.UnauthenticatedRestConnection;
 import com.synopsys.integration.rest.proxy.ProxyInfo;
 import com.synopsys.integration.rest.request.Request;
 import com.synopsys.integration.rest.request.Response;
@@ -44,6 +43,7 @@ import com.synopsys.integration.util.CleanupZipExpander;
 
 public class PolarisDownloadUtility {
     public static final String DEFAULT_POLARIS_SERVER_URL = "https://tools.swip.synopsys.com";
+    public static final Integer DEFAULT_POLARIS_TIMEOUT = 120;
 
     public static final String LINUX_DOWNLOAD_URL = "/swip_cli-linux64.zip";
     public static final String WINDOWS_DOWNLOAD_URL = "/swip_cli-win64.zip";
@@ -59,7 +59,7 @@ public class PolarisDownloadUtility {
     private final File installDirectory;
 
     public static PolarisDownloadUtility defaultUtility(final IntLogger logger, final File downloadTargetDirectory) {
-        final UnauthenticatedRestConnection restConnection = new UnauthenticatedRestConnection(logger, null, ProxyInfo.NO_PROXY_INFO);
+        final RestConnection restConnection = new RestConnection(logger, DEFAULT_POLARIS_TIMEOUT, false, ProxyInfo.NO_PROXY_INFO);
         final CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(logger);
         return new PolarisDownloadUtility(logger, restConnection, cleanupZipExpander, DEFAULT_POLARIS_SERVER_URL, downloadTargetDirectory);
     }
@@ -148,14 +148,14 @@ public class PolarisDownloadUtility {
         logger.debug(String.format("last time downloaded: %d", lastTimeDownloaded));
 
         final Request downloadRequest = new Request.Builder(downloadUrl).build();
-        try (Response response = restConnection.executeRequest(downloadRequest)) {
+        try (final Response response = restConnection.execute(downloadRequest)) {
             final long lastModifiedOnServer = response.getLastModified();
             if (lastModifiedOnServer == lastTimeDownloaded) {
                 logger.debug("The Polaris CLI has not been modified since it was last downloaded - skipping download.");
                 return getBinDirectory();
             } else {
                 logger.info("Downloading the Polaris CLI.");
-                try (InputStream responseStream = response.getContent()) {
+                try (final InputStream responseStream = response.getContent()) {
                     cleanupZipExpander.expand(responseStream, installDirectory);
                 }
                 versionFile.setLastModified(lastModifiedOnServer);

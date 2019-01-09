@@ -46,7 +46,7 @@ public class PolarisDownloadUtilityTest {
         Mockito.when(mockResponse.getLastModified()).thenReturn(Long.MAX_VALUE);
 
         final RestConnection mockRestConnection = Mockito.mock(RestConnection.class);
-        Mockito.when(mockRestConnection.executeRequest(Mockito.any(Request.class))).thenReturn(mockResponse);
+        Mockito.when(mockRestConnection.execute(Mockito.any(Request.class))).thenReturn(mockResponse);
 
         final IntLogger intLogger = new SilentIntLogger();
         final Path tempDirectory = Files.createTempDirectory(null);
@@ -67,7 +67,7 @@ public class PolarisDownloadUtilityTest {
         Mockito.when(mockResponse.getLastModified()).thenReturn(0L);
 
         final RestConnection mockRestConnection = Mockito.mock(RestConnection.class);
-        Mockito.when(mockRestConnection.executeRequest(Mockito.any(Request.class))).thenReturn(mockResponse);
+        Mockito.when(mockRestConnection.execute(Mockito.any(Request.class))).thenReturn(mockResponse);
 
         final BufferedIntLogger intLogger = new BufferedIntLogger();
 
@@ -91,7 +91,7 @@ public class PolarisDownloadUtilityTest {
         Mockito.when(mockResponse.getLastModified()).thenReturn(Long.MAX_VALUE);
 
         final RestConnection mockRestConnection = Mockito.mock(RestConnection.class);
-        Mockito.when(mockRestConnection.executeRequest(Mockito.any(Request.class))).thenReturn(mockResponse);
+        Mockito.when(mockRestConnection.execute(Mockito.any(Request.class))).thenReturn(mockResponse);
 
         final BufferedIntLogger intLogger = new BufferedIntLogger();
 

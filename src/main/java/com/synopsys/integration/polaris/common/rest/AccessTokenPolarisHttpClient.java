@@ -23,11 +23,9 @@
  */
 package com.synopsys.integration.polaris.common.rest;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -45,7 +43,6 @@ import com.synopsys.integration.rest.request.Response;
 import com.synopsys.integration.rest.support.AuthenticationSupport;
 
 public class AccessTokenPolarisHttpClient extends AuthenticatingIntHttpClient {
-    private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String AUTHENTICATION_SPEC = "api/auth/authenticate";
     private static final String AUTHENTICATION_RESPONSE_KEY = "jwt";
 
@@ -74,24 +71,17 @@ public class AccessTokenPolarisHttpClient extends AuthenticatingIntHttpClient {
     public void handleErrorResponse(HttpUriRequest request, Response response) {
         super.handleErrorResponse(request, response);
 
-        authenticationSupport.handleErrorResponse(this, request, response, AccessTokenPolarisHttpClient.AUTHORIZATION_HEADER);
+        authenticationSupport.handleTokenErrorResponse(this, request, response);
     }
 
     @Override
     public boolean isAlreadyAuthenticated(HttpUriRequest request) {
-        return request.containsHeader(AccessTokenPolarisHttpClient.AUTHORIZATION_HEADER);
+        return authenticationSupport.isTokenAlreadyAuthenticated(request);
     }
 
     @Override
-    public void authenticateRequest(HttpUriRequest request) throws IntegrationException {
-        try (Response response = attemptAuthentication()) {
-            if (response.isStatusCodeOkay()) {
-                Optional<String> bearerToken = authenticationSupport.retrieveBearerToken(logger, gson, this, AccessTokenPolarisHttpClient.AUTHENTICATION_RESPONSE_KEY);
-                authenticationSupport.resolveBearerToken(logger, this, request, AccessTokenPolarisHttpClient.AUTHORIZATION_HEADER, bearerToken);
-            }
-        } catch (IOException e) {
-            throw new IntegrationException("The request could not be authenticated with the provided api token: " + e.getMessage(), e);
-        }
+    protected void completeAuthenticationRequest(HttpUriRequest request, Response response) {
+        authenticationSupport.completeTokenAuthenticationRequest(request, response, logger, gson, this, AccessTokenPolarisHttpClient.AUTHENTICATION_RESPONSE_KEY);
     }
 
     @Override

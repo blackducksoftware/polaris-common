@@ -15,7 +15,7 @@ apply plugin: 'com.blackducksoftware.integration.library'
 nexusStaging { packageGroup = 'com.synopsys' }
 
 dependencies {
-    implementation 'com.blackducksoftware.integration:integration-rest:0.6.0'
+    implementation 'com.blackducksoftware.integration:integration-rest:0.7.0'
 
     testImplementation 'org.mockito:mockito-core:2.18.3'
 }

@@ -9,7 +9,7 @@ import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
-import com.synopsys.integration.polaris.common.api.ProjectV0Resources;
+import com.synopsys.integration.polaris.common.api.BranchV0Resources;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClientTestIT;
 import com.synopsys.integration.rest.HttpMethod;
@@ -36,8 +36,8 @@ public class CookbookTestIT {
             logger.info("Response message: " + response.getStatusMessage());
 
             final String contentString = response.getContentString();
-            final ProjectV0Resources projectV0Resources = gson.fromJson(contentString, ProjectV0Resources.class);
-            logger.info("Response content: \n" + projectV0Resources.toString());
+            final BranchV0Resources branches = gson.fromJson(contentString, BranchV0Resources.class);
+            logger.info("Response content: \n" + branches.toString());
         }
     }
 }

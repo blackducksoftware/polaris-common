@@ -50,9 +50,9 @@ public class PolarisEnvironmentCheck {
         return new PolarisEnvironmentCheck(new IntEnvironmentVariables(), System.getProperties());
     }
 
-    public PolarisEnvironmentCheck(IntEnvironmentVariables intEnvironmentVariables, Properties properties) {
+    public PolarisEnvironmentCheck(IntEnvironmentVariables intEnvironmentVariables, Properties javaSystemProperties) {
         this.intEnvironmentVariables = intEnvironmentVariables;
-        this.properties = properties;
+        properties = javaSystemProperties;
     }
 
     public boolean isAccessTokenConfigured() {

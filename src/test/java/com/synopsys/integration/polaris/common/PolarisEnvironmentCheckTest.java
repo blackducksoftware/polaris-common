@@ -8,11 +8,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import com.synopsys.integration.util.IntEnvironmentVariables;
 
 public class PolarisEnvironmentCheckTest {
     private Path tempDirectoryPath;
@@ -29,23 +32,30 @@ public class PolarisEnvironmentCheckTest {
 
     @Test
     public void testInvalidEnvironment() {
-        final PolarisEnvironmentCheck polarisEnvironmentCheck = new PolarisEnvironmentCheck();
-        final boolean canRun = polarisEnvironmentCheck.canRun(tempDirectoryPath.toFile());
+        IntEnvironmentVariables intEnvironmentVariables = new IntEnvironmentVariables();
+        Properties properties = new Properties();
+        properties.put("user.home", tempDirectoryPath.toString());
+        PolarisEnvironmentCheck polarisEnvironmentCheck = new PolarisEnvironmentCheck(intEnvironmentVariables, properties);
+        boolean canRun = polarisEnvironmentCheck.isAccessTokenConfigured();
         assertFalse(canRun);
     }
 
     @Test
     public void testValidEnvironment() throws IOException {
-        final File tempDirectory = tempDirectoryPath.toFile();
-        final File polarisConfig = new File(tempDirectory, PolarisEnvironmentCheck.POLARIS_CONFIG_DIRECTORY);
+        File tempDirectory = tempDirectoryPath.toFile();
+        File polarisConfig = new File(tempDirectory, PolarisEnvironmentCheck.POLARIS_CONFIG_DIRECTORY_DEFAULT);
         polarisConfig.mkdirs();
-        final File polarisAccessToken = new File(polarisConfig, PolarisEnvironmentCheck.POLARIS_ACCESS_TOKEN_FILENAME);
+        File polarisAccessToken = new File(polarisConfig, PolarisEnvironmentCheck.POLARIS_ACCESS_TOKEN_FILENAME_DEFAULT);
         try (FileWriter fileWriter = new FileWriter(polarisAccessToken)) {
             fileWriter.append("test content");
         }
 
-        final PolarisEnvironmentCheck polarisEnvironmentCheck = new PolarisEnvironmentCheck();
-        final boolean canRun = polarisEnvironmentCheck.canRun(tempDirectoryPath.toFile());
+        IntEnvironmentVariables intEnvironmentVariables = new IntEnvironmentVariables();
+        Properties properties = new Properties();
+        properties.put("user.home", tempDirectory.getAbsolutePath());
+        PolarisEnvironmentCheck polarisEnvironmentCheck = new PolarisEnvironmentCheck(intEnvironmentVariables, properties);
+
+        boolean canRun = polarisEnvironmentCheck.isAccessTokenConfigured();
         assertTrue(canRun);
     }
 

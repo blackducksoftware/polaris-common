@@ -43,16 +43,14 @@ public class PolarisEnvironmentCheck {
     public static final String POLARIS_CONFIG_DIRECTORY_DEFAULT = ".swip";
     public static final String POLARIS_ACCESS_TOKEN_FILENAME_DEFAULT = ".access_token";
 
-    private final IntEnvironmentVariables intEnvironmentVariables;
-    private final Properties properties;
+    private final PolarisEnvironment polarisEnvironment;
 
     public static PolarisEnvironmentCheck withSystemDefaults() {
-        return new PolarisEnvironmentCheck(new IntEnvironmentVariables(), System.getProperties());
+        return new PolarisEnvironmentCheck(SystemPolarisEnvironment.withSystemDefaults());
     }
 
-    public PolarisEnvironmentCheck(IntEnvironmentVariables intEnvironmentVariables, Properties javaSystemProperties) {
-        this.intEnvironmentVariables = intEnvironmentVariables;
-        properties = javaSystemProperties;
+    public PolarisEnvironmentCheck(PolarisEnvironment polarisEnvironment) {
+        this.polarisEnvironment = polarisEnvironment;
     }
 
     public boolean isAccessTokenConfigured() {
@@ -66,8 +64,8 @@ public class PolarisEnvironmentCheck {
     }
 
     public Optional<String> getPolarisAccessToken() throws IntegrationException {
-        if (intEnvironmentVariables.containsKey(PolarisEnvironmentCheck.POLARIS_ACCESS_TOKEN_ENVIRONMENT_VARIABLE)) {
-            String accessToken = intEnvironmentVariables.getValue(PolarisEnvironmentCheck.POLARIS_ACCESS_TOKEN_ENVIRONMENT_VARIABLE);
+        if (polarisEnvironment.containsEnvironmentVariable(PolarisEnvironmentCheck.POLARIS_ACCESS_TOKEN_ENVIRONMENT_VARIABLE)) {
+            String accessToken = polarisEnvironment.getEnvironmentVariable(PolarisEnvironmentCheck.POLARIS_ACCESS_TOKEN_ENVIRONMENT_VARIABLE);
             if (StringUtils.isNotBlank(accessToken)) {
                 return Optional.of(accessToken);
             }
@@ -91,15 +89,10 @@ public class PolarisEnvironmentCheck {
     }
 
     private File getPolarisConfigDirectory() {
-        if (intEnvironmentVariables.containsKey(PolarisEnvironmentCheck.POLARIS_HOME_ENVIRONMENT_VARIABLE)) {
-            return new File(intEnvironmentVariables.getValue(PolarisEnvironmentCheck.POLARIS_HOME_ENVIRONMENT_VARIABLE));
+        if (polarisEnvironment.containsEnvironmentVariable(PolarisEnvironmentCheck.POLARIS_HOME_ENVIRONMENT_VARIABLE)) {
+            return new File(polarisEnvironment.getEnvironmentVariable(PolarisEnvironmentCheck.POLARIS_HOME_ENVIRONMENT_VARIABLE), PolarisEnvironmentCheck.POLARIS_CONFIG_DIRECTORY_DEFAULT);
         } else {
-            String userHomeProperty = properties.getProperty("user.home");
-            if (StringUtils.isBlank(userHomeProperty)) {
-                return null;
-            }
-
-            File userHomeDirectory = new File(userHomeProperty);
+            File userHomeDirectory = polarisEnvironment.getUserHome();
             if (null != userHomeDirectory && userHomeDirectory.exists() && userHomeDirectory.isDirectory()) {
                 return new File(userHomeDirectory, PolarisEnvironmentCheck.POLARIS_CONFIG_DIRECTORY_DEFAULT);
             } else {
@@ -110,8 +103,8 @@ public class PolarisEnvironmentCheck {
 
     private File getPolarisAccessTokenFile(File polarisConfigDirectory) {
         String accessTokenFilename = PolarisEnvironmentCheck.POLARIS_ACCESS_TOKEN_FILENAME_DEFAULT;
-        if (intEnvironmentVariables.containsKey(PolarisEnvironmentCheck.POLARIS_ACCESS_TOKEN_FILE_ENVIRONMENT_VARIABLE)) {
-            accessTokenFilename = intEnvironmentVariables.getValue(PolarisEnvironmentCheck.POLARIS_ACCESS_TOKEN_FILE_ENVIRONMENT_VARIABLE);
+        if (polarisEnvironment.containsEnvironmentVariable(PolarisEnvironmentCheck.POLARIS_ACCESS_TOKEN_FILE_ENVIRONMENT_VARIABLE)) {
+            accessTokenFilename = polarisEnvironment.getEnvironmentVariable(PolarisEnvironmentCheck.POLARIS_ACCESS_TOKEN_FILE_ENVIRONMENT_VARIABLE);
         }
 
         File accessTokenFile = new File(polarisConfigDirectory, accessTokenFilename);

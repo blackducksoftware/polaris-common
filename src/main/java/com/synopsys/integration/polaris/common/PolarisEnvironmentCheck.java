@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Optional;
-import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -44,15 +43,15 @@ public class PolarisEnvironmentCheck {
     public static final String POLARIS_ACCESS_TOKEN_FILENAME_DEFAULT = ".access_token";
 
     private final IntEnvironmentVariables intEnvironmentVariables;
-    private final Properties properties;
+    private final File userHomeDirectory;
 
     public static PolarisEnvironmentCheck withSystemDefaults() {
-        return new PolarisEnvironmentCheck(new IntEnvironmentVariables(), System.getProperties());
+        return new PolarisEnvironmentCheck(new IntEnvironmentVariables(), new File(System.getProperty("user.home")));
     }
 
-    public PolarisEnvironmentCheck(IntEnvironmentVariables intEnvironmentVariables, Properties javaSystemProperties) {
+    public PolarisEnvironmentCheck(IntEnvironmentVariables intEnvironmentVariables, File userHomeDirectory) {
         this.intEnvironmentVariables = intEnvironmentVariables;
-        properties = javaSystemProperties;
+        this.userHomeDirectory = userHomeDirectory;
     }
 
     public boolean isAccessTokenConfigured() {
@@ -94,12 +93,6 @@ public class PolarisEnvironmentCheck {
         if (intEnvironmentVariables.containsKey(PolarisEnvironmentCheck.POLARIS_HOME_ENVIRONMENT_VARIABLE)) {
             return new File(intEnvironmentVariables.getValue(PolarisEnvironmentCheck.POLARIS_HOME_ENVIRONMENT_VARIABLE));
         } else {
-            String userHomeProperty = properties.getProperty("user.home");
-            if (StringUtils.isBlank(userHomeProperty)) {
-                return null;
-            }
-
-            File userHomeDirectory = new File(userHomeProperty);
             if (null != userHomeDirectory && userHomeDirectory.exists() && userHomeDirectory.isDirectory()) {
                 return new File(userHomeDirectory, PolarisEnvironmentCheck.POLARIS_CONFIG_DIRECTORY_DEFAULT);
             } else {

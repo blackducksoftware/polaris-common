@@ -8,7 +8,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -33,9 +32,7 @@ public class PolarisEnvironmentCheckTest {
     @Test
     public void testInvalidEnvironment() {
         IntEnvironmentVariables intEnvironmentVariables = new IntEnvironmentVariables();
-        Properties properties = new Properties();
-        properties.put("user.home", tempDirectoryPath.toString());
-        PolarisEnvironmentCheck polarisEnvironmentCheck = new PolarisEnvironmentCheck(intEnvironmentVariables, properties);
+        PolarisEnvironmentCheck polarisEnvironmentCheck = new PolarisEnvironmentCheck(intEnvironmentVariables, tempDirectoryPath.toFile());
         boolean canRun = polarisEnvironmentCheck.isAccessTokenConfigured();
         assertFalse(canRun);
     }
@@ -51,9 +48,7 @@ public class PolarisEnvironmentCheckTest {
         }
 
         IntEnvironmentVariables intEnvironmentVariables = new IntEnvironmentVariables();
-        Properties properties = new Properties();
-        properties.put("user.home", tempDirectory.getAbsolutePath());
-        PolarisEnvironmentCheck polarisEnvironmentCheck = new PolarisEnvironmentCheck(intEnvironmentVariables, properties);
+        PolarisEnvironmentCheck polarisEnvironmentCheck = new PolarisEnvironmentCheck(intEnvironmentVariables, tempDirectory);
 
         boolean canRun = polarisEnvironmentCheck.isAccessTokenConfigured();
         assertTrue(canRun);

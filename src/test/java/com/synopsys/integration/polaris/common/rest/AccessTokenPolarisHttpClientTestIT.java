@@ -60,7 +60,7 @@ public class AccessTokenPolarisHttpClientTestIT {
 
     @Test
     public void unauthorizedTest() throws IntegrationException, IOException {
-        AccessTokenPolarisHttpClient httpClient = new AccessTokenPolarisHttpClient(new PrintStreamIntLogger(System.out, LogLevel.INFO), 300, true, ProxyInfo.NO_PROXY_INFO, baseUrl, accessToken, gson, authenticationSupport);
+        AccessTokenPolarisHttpClient httpClient = new AccessTokenPolarisHttpClient(new PrintStreamIntLogger(System.out, LogLevel.INFO), 300, true, ProxyInfo.NO_PROXY_INFO, baseUrl, "garbage token", gson, authenticationSupport);
 
         String authHeader = "Authorization";
         HttpUriRequest request = Mockito.mock(HttpUriRequest.class);

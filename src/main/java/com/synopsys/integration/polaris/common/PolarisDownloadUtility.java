@@ -35,6 +35,7 @@ import org.apache.commons.lang3.SystemUtils;
 
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.log.IntLogger;
+import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 import com.synopsys.integration.rest.client.IntHttpClient;
 import com.synopsys.integration.rest.proxy.ProxyInfo;
 import com.synopsys.integration.rest.request.Request;
@@ -42,12 +43,11 @@ import com.synopsys.integration.rest.request.Response;
 import com.synopsys.integration.util.CleanupZipExpander;
 
 public class PolarisDownloadUtility {
-    public static final String DEFAULT_POLARIS_SERVER_URL = "https://tools.swip.synopsys.com";
     public static final Integer DEFAULT_POLARIS_TIMEOUT = 120;
 
-    public static final String LINUX_DOWNLOAD_URL = "/swip_cli-linux64.zip";
-    public static final String WINDOWS_DOWNLOAD_URL = "/swip_cli-win64.zip";
-    public static final String MAC_DOWNLOAD_URL = "/swip_cli-macosx.zip";
+    public static final String LINUX_DOWNLOAD_URL = "/api/tools/swip_cli-linux64.zip";
+    public static final String WINDOWS_DOWNLOAD_URL = "/api/tools/swip_cli-win64.zip";
+    public static final String MAC_DOWNLOAD_URL = "/api/tools/swip_cli-macosx.zip";
 
     public static final String POLARIS_CLI_INSTALL_DIRECTORY = "Polaris_CLI_Installation";
     public static final String VERSION_FILENAME = "polarisVersion.txt";
@@ -58,10 +58,21 @@ public class PolarisDownloadUtility {
     private final String polarisServerUrl;
     private final File installDirectory;
 
-    public static PolarisDownloadUtility defaultUtility(IntLogger logger, File downloadTargetDirectory) {
+    public static PolarisDownloadUtility defaultUtility(IntLogger logger, String polarisServerUrl, ProxyInfo proxyInfo, File downloadTargetDirectory) {
+        IntHttpClient intHttpClient = new IntHttpClient(logger, PolarisDownloadUtility.DEFAULT_POLARIS_TIMEOUT, false, proxyInfo);
+        CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(logger);
+        return new PolarisDownloadUtility(logger, intHttpClient, cleanupZipExpander, polarisServerUrl, downloadTargetDirectory);
+    }
+
+    public static PolarisDownloadUtility defaultUtilityNoProxy(IntLogger logger, String polarisServerUrl, File downloadTargetDirectory) {
         IntHttpClient intHttpClient = new IntHttpClient(logger, PolarisDownloadUtility.DEFAULT_POLARIS_TIMEOUT, false, ProxyInfo.NO_PROXY_INFO);
         CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(logger);
-        return new PolarisDownloadUtility(logger, intHttpClient, cleanupZipExpander, PolarisDownloadUtility.DEFAULT_POLARIS_SERVER_URL, downloadTargetDirectory);
+        return new PolarisDownloadUtility(logger, intHttpClient, cleanupZipExpander, polarisServerUrl, downloadTargetDirectory);
+    }
+
+    public static PolarisDownloadUtility fromPolaris(IntLogger logger, AccessTokenPolarisHttpClient polarisHttpClient, File downloadTargetDirectory) {
+        CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(logger);
+        return new PolarisDownloadUtility(logger, polarisHttpClient, cleanupZipExpander, polarisHttpClient.getPolarisServerUrl(), downloadTargetDirectory);
     }
 
     public PolarisDownloadUtility(IntLogger logger, IntHttpClient intHttpClient, CleanupZipExpander cleanupZipExpander, String polarisServerUrl, File downloadTargetDirectory) {

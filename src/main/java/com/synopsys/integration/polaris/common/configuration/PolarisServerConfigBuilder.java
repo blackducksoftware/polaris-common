@@ -294,6 +294,10 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
 
             return Optional.empty();
         }
+
+        public String getAlternateName() {
+            return alternateName;
+        }
     }
 
     public String getPolarisUrl() {

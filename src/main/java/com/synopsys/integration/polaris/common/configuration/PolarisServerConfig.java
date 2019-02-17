@@ -24,6 +24,7 @@
 package com.synopsys.integration.polaris.common.configuration;
 
 import java.net.URL;
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.log.IntLogger;
@@ -59,6 +60,11 @@ public class PolarisServerConfig extends Stringable implements Buildable {
 
     public AccessTokenPolarisHttpClient createPolarisHttpClient(IntLogger logger) {
         return new AccessTokenPolarisHttpClient(logger, timeoutSeconds, alwaysTrustServerCertificate, proxyInfo, polarisUrl.toString(), accessToken, gson, authenticationSupport);
+    }
+
+    public void populateEnvironmentVariables(Map<String, String> environmentVariables) {
+        environmentVariables.put(PolarisServerConfigBuilder.Property.URL.getAlternateName(), polarisUrl.toString());
+        environmentVariables.put(PolarisServerConfigBuilder.Property.ACCESS_TOKEN.getAlternateName(), accessToken);
     }
 
     public URL getPolarisUrl() {

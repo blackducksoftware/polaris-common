@@ -136,6 +136,8 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
             builderStatus.addErrorMessage(" - set from property (POLARIS_ACCESS_TOKEN, SWIP_ACCESS_TOKEN)");
             builderStatus.addErrorMessage(" - found in a provided file path (POLARIS_ACCESS_TOKEN_FILE, SWIP_ACCESS_TOKEN_FILE)");
             builderStatus.addErrorMessage(" - found in the '.access_token' file in a Polaris home directory (POLARIS_HOME, SWIP_HOME, or defaults to USER_HOME/.swip)");
+        } else {
+            accessToken = optionalAccessToken.get();
         }
 
         if (timeoutSeconds <= 0) {
@@ -225,8 +227,8 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
         PROXY_NTLM_DOMAIN("proxyNtlmDomain"),
         PROXY_NTLM_WORKSTATION("proxyNtlmWorkstation"),
         TRUST_CERT("trustCert"),
-        HOME("polarisHome", "SWIP_HOME"),
-        ACCESS_TOKEN_FILE("accessTokenFilePath", "SWIP_ACCESS_TOKEN_FILE"),
+        HOME("polarisHome", PolarisServerConfigBuilder.POLARIS_HOME_ENVIRONMENT_VARIABLE),
+        ACCESS_TOKEN_FILE("accessTokenFilePath", PolarisServerConfigBuilder.POLARIS_ACCESS_TOKEN_FILE_ENVIRONMENT_VARIABLE),
         USER_HOME("userHomePath", "USER_HOME");
 
         private final String fieldName;

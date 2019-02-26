@@ -24,12 +24,14 @@
 package com.synopsys.integration.polaris.common.configuration;
 
 import java.net.URL;
-import java.util.Map;
+import java.util.function.BiConsumer;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.log.IntLogger;
+import com.synopsys.integration.log.SilentIntLogger;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 import com.synopsys.integration.rest.proxy.ProxyInfo;
+import com.synopsys.integration.rest.request.Response;
 import com.synopsys.integration.rest.support.AuthenticationSupport;
 import com.synopsys.integration.util.Buildable;
 import com.synopsys.integration.util.Stringable;
@@ -62,9 +64,9 @@ public class PolarisServerConfig extends Stringable implements Buildable {
         return new AccessTokenPolarisHttpClient(logger, timeoutSeconds, alwaysTrustServerCertificate, proxyInfo, polarisUrl.toString(), accessToken, gson, authenticationSupport);
     }
 
-    public void populateEnvironmentVariables(Map<String, String> environmentVariables) {
-        environmentVariables.put(PolarisServerConfigBuilder.Property.URL.getAlternateName(), polarisUrl.toString());
-        environmentVariables.put(PolarisServerConfigBuilder.Property.ACCESS_TOKEN.getAlternateName(), accessToken);
+    public void populateEnvironmentVariables(BiConsumer<String, String> pairsConsumer) {
+        pairsConsumer.accept(PolarisServerConfigBuilder.Property.URL.getAlternateName(), polarisUrl.toString());
+        pairsConsumer.accept(PolarisServerConfigBuilder.Property.ACCESS_TOKEN.getAlternateName(), accessToken);
     }
 
     public URL getPolarisUrl() {

@@ -17,6 +17,7 @@ import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
 import com.synopsys.integration.rest.HttpMethod;
 import com.synopsys.integration.rest.RestConstants;
+import com.synopsys.integration.rest.client.ConnectionResult;
 import com.synopsys.integration.rest.proxy.ProxyInfo;
 import com.synopsys.integration.rest.request.Request;
 import com.synopsys.integration.rest.request.Response;
@@ -56,6 +57,26 @@ public class AccessTokenPolarisHttpClientTestIT {
             assertTrue(response.isStatusCodeOkay(), "Status code was not OK");
             System.out.println(response.getContentString());
         }
+    }
+
+    @Test
+    public void testSuccessConnectionResult() {
+        assumeTrue(StringUtils.isNotBlank(baseUrl));
+        assumeTrue(StringUtils.isNotBlank(accessToken));
+
+        AccessTokenPolarisHttpClient httpClient = new AccessTokenPolarisHttpClient(new PrintStreamIntLogger(System.out, LogLevel.INFO), 300, true, ProxyInfo.NO_PROXY_INFO, baseUrl, accessToken, gson, authenticationSupport);
+        ConnectionResult connectionResult = httpClient.attemptConnection();
+        assertTrue(connectionResult.isSuccess());
+    }
+
+    @Test
+    public void testFailureConnectionResult() {
+        assumeTrue(StringUtils.isNotBlank(baseUrl));
+        assumeTrue(StringUtils.isNotBlank(accessToken));
+
+        AccessTokenPolarisHttpClient httpClient = new AccessTokenPolarisHttpClient(new PrintStreamIntLogger(System.out, LogLevel.INFO), 300, true, ProxyInfo.NO_PROXY_INFO, baseUrl, accessToken + "make it bad", gson, authenticationSupport);
+        ConnectionResult connectionResult = httpClient.attemptConnection();
+        assertTrue(connectionResult.isFailure());
     }
 
     @Test

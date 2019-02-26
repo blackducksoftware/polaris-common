@@ -143,6 +143,9 @@ public class PolarisServerConfigBuilderTest {
 
         polarisServerConfigBuilder.setFromProperties(properties);
         assertTrue(polarisServerConfigBuilder.isValid());
+
+        PolarisServerConfig polarisServerConfig = polarisServerConfigBuilder.build();
+        assertEquals("fake but valid not blank access token", polarisServerConfig.getAccessToken());
     }
 
     @Test

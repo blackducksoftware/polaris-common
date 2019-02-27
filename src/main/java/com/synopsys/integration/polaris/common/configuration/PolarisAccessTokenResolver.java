@@ -32,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Optional;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.synopsys.integration.log.IntLogger;
@@ -98,8 +99,7 @@ public class PolarisAccessTokenResolver {
 
     private Optional<String> extractAccessToken(File accessTokenFile) {
         try {
-            byte[] accessTokenBytes = Files.readAllBytes(accessTokenFile.toPath());
-            String accessToken = new String(accessTokenBytes, StandardCharsets.UTF_8);
+            String accessToken = FileUtils.readFileToString(accessTokenFile, StandardCharsets.UTF_8);
 
             logger.info(String.format("Using access token from %s file.", accessTokenFile.getAbsolutePath()));
             return Optional.of(accessToken);

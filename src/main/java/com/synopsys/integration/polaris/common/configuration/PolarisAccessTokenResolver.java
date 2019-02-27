@@ -28,6 +28,7 @@ import static com.synopsys.integration.polaris.common.configuration.PolarisServe
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Optional;
 
@@ -98,8 +99,7 @@ public class PolarisAccessTokenResolver {
     private Optional<String> extractAccessToken(File accessTokenFile) {
         try {
             byte[] accessTokenBytes = Files.readAllBytes(accessTokenFile.toPath());
-            // ejk - I think the default system encoding is correct here
-            String accessToken = new String(accessTokenBytes);
+            String accessToken = new String(accessTokenBytes, StandardCharsets.UTF_8);
 
             logger.info(String.format("Using access token from %s file.", accessTokenFile.getAbsolutePath()));
             return Optional.of(accessToken);

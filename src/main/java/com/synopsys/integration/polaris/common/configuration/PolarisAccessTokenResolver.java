@@ -99,7 +99,7 @@ public class PolarisAccessTokenResolver {
 
     private Optional<String> extractAccessToken(File accessTokenFile) {
         try {
-            String accessToken = FileUtils.readFileToString(accessTokenFile, StandardCharsets.UTF_8);
+            String accessToken = StringUtils.trimToEmpty(FileUtils.readFileToString(accessTokenFile, StandardCharsets.UTF_8));
 
             logger.info(String.format("Using access token from %s file.", accessTokenFile.getAbsolutePath()));
             return Optional.of(accessToken);

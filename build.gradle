@@ -8,7 +8,7 @@ buildscript {
 }
 
 group = 'com.synopsys.integration'
-version = '0.7.3'
+version = '0.7.4-SNAPSHOT'
 
 apply plugin: 'com.blackducksoftware.integration.library'
 

@@ -23,20 +23,24 @@
  */
 package com.synopsys.integration.polaris.common.configuration;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.google.gson.Gson;
+import com.synopsys.integration.builder.BuilderProperties;
+import com.synopsys.integration.builder.BuilderPropertyKey;
+import com.synopsys.integration.builder.BuilderStatus;
+import com.synopsys.integration.builder.IntegrationBuilder;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
@@ -45,90 +49,102 @@ import com.synopsys.integration.rest.credentials.CredentialsBuilder;
 import com.synopsys.integration.rest.proxy.ProxyInfo;
 import com.synopsys.integration.rest.proxy.ProxyInfoBuilder;
 import com.synopsys.integration.rest.support.AuthenticationSupport;
-import com.synopsys.integration.util.BuilderStatus;
-import com.synopsys.integration.util.IntegrationBuilder;
 
 public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServerConfig> {
-    public static final String POLARIS_SERVER_CONFIG_ENVIRONMENT_VARIABLE_PREFIX = "POLARIS_";
-    public static final String POLARIS_SERVER_CONFIG_PROPERTY_KEY_PREFIX = "polaris.";
-
-    //Polaris home directory to use. Defaults to $HOME/.swip.
-    public static final String POLARIS_HOME_ENVIRONMENT_VARIABLE = "SWIP_HOME";
-
-    //Access token file to use. Defaults to $SWIP_HOME/.access_token.
-    public static final String POLARIS_ACCESS_TOKEN_FILE_ENVIRONMENT_VARIABLE = "SWIP_ACCESS_TOKEN_FILE";
-
-    public static final String POLARIS_ACCESS_TOKEN_ENVIRONMENT_VARIABLE = "SWIP_ACCESS_TOKEN";
-    public static final String POLARIS_SERVER_URL_ENVIRONMENT_VARIABLE = "SWIP_SERVER_URL";
-
     public static final String POLARIS_CONFIG_DIRECTORY_DEFAULT = ".swip";
     public static final String POLARIS_ACCESS_TOKEN_FILENAME_DEFAULT = ".access_token";
 
-    private String polarisUrl;
-    private int timeoutSeconds;
-    private String accessToken;
-    private boolean trustCert;
+    public static final BuilderPropertyKey URL_KEY = new BuilderPropertyKey("POLARIS_URL");
+    public static final BuilderPropertyKey ACCESS_TOKEN_KEY = new BuilderPropertyKey("POLARIS_ACCESS_TOKEN");
+    public static final BuilderPropertyKey TRUST_CERT_KEY = new BuilderPropertyKey("POLARIS_TRUST_CERT");
+    public static final BuilderPropertyKey TIMEOUT_KEY = new BuilderPropertyKey("POLARIS_TIMEOUT");
+    public static final BuilderPropertyKey POLARIS_HOME_KEY = new BuilderPropertyKey("POLARIS_HOME");
+    public static final BuilderPropertyKey ACCESS_TOKEN_FILE_PATH_KEY = new BuilderPropertyKey("POLARIS_ACCESS_TOKEN_FILE");
+    public static final BuilderPropertyKey USER_HOME_KEY = new BuilderPropertyKey("USER_HOME");
+    public static final BuilderPropertyKey PROXY_HOST_KEY = new BuilderPropertyKey("POLARIS_PROXY_HOST");
+    public static final BuilderPropertyKey PROXY_PORT_KEY = new BuilderPropertyKey("POLARIS_PROXY_PORT");
+    public static final BuilderPropertyKey PROXY_USERNAME_KEY = new BuilderPropertyKey("POLARIS_PROXY_USERNAME");
+    public static final BuilderPropertyKey PROXY_PASSWORD_KEY = new BuilderPropertyKey("POLARIS_PROXY_PASSWORD");
+    public static final BuilderPropertyKey PROXY_NTLM_DOMAIN_KEY = new BuilderPropertyKey("POLARIS_PROXY_NTLM_DOMAIN");
+    public static final BuilderPropertyKey PROXY_NTLM_WORKSTATION_KEY = new BuilderPropertyKey("POLARIS_PROXY_NTLM_WORKSTATION");
 
-    private String proxyHost;
-    private int proxyPort;
-    private String proxyUsername;
-    private String proxyPassword;
-    private String proxyNtlmDomain;
-    private String proxyNtlmWorkstation;
+    public static final BuilderPropertyKey SWIP_URL_KEY = new BuilderPropertyKey("SWIP_SERVER_URL");
+    public static final BuilderPropertyKey SWIP_ACCESS_TOKEN_KEY = new BuilderPropertyKey("SWIP_ACCESS_TOKEN");
+    public static final BuilderPropertyKey SWIP_HOME_KEY = new BuilderPropertyKey("SWIP_HOME");
+    public static final BuilderPropertyKey SWIP_ACCESS_TOKEN_FILE_PATH_KEY = new BuilderPropertyKey("SWIP_ACCESS_TOKEN_FILE");
+    public static final Set<BuilderPropertyKey> ALTERNATE_KEYS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(SWIP_URL_KEY, SWIP_ACCESS_TOKEN_KEY, SWIP_HOME_KEY, SWIP_ACCESS_TOKEN_FILE_PATH_KEY)));
 
-    // these properties are alternative ways to find the access token
-    private String polarisHome;
-    private String accessTokenFilePath;
-    private String userHomePath;
+    public static int DEFAULT_TIMEOUT_SECONDS = 120;
 
+    private final BuilderProperties builderProperties;
+    private final BuilderProperties alternateBuilderProperties;
     private IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
     private Gson gson = new Gson();
     private AuthenticationSupport authenticationSupport = new AuthenticationSupport();
+
+    public PolarisServerConfigBuilder() {
+        Set<BuilderPropertyKey> propertyKeys = new HashSet<>();
+        propertyKeys.add(URL_KEY);
+        propertyKeys.add(ACCESS_TOKEN_KEY);
+        propertyKeys.add(TIMEOUT_KEY);
+        propertyKeys.add(PROXY_HOST_KEY);
+        propertyKeys.add(PROXY_PORT_KEY);
+        propertyKeys.add(PROXY_USERNAME_KEY);
+        propertyKeys.add(PROXY_PASSWORD_KEY);
+        propertyKeys.add(PROXY_NTLM_DOMAIN_KEY);
+        propertyKeys.add(PROXY_NTLM_WORKSTATION_KEY);
+        propertyKeys.add(TRUST_CERT_KEY);
+        builderProperties = new BuilderProperties(propertyKeys);
+
+        builderProperties.set(TIMEOUT_KEY, Integer.toString(PolarisServerConfigBuilder.DEFAULT_TIMEOUT_SECONDS));
+
+        alternateBuilderProperties = new BuilderProperties(ALTERNATE_KEYS);
+    }
 
     @Override
     protected PolarisServerConfig buildWithoutValidation() {
         URL polarisURL = null;
         try {
-            polarisURL = new URL(polarisUrl);
+            polarisURL = new URL(getUrl());
         } catch (MalformedURLException e) {
         }
 
-        return new PolarisServerConfig(polarisURL, timeoutSeconds, accessToken, getProxyInfo(), trustCert, gson, authenticationSupport);
+        return new PolarisServerConfig(polarisURL, getTimeoutInSeconds(), getAccessToken(), getProxyInfo(), isTrustCert(), gson, authenticationSupport);
     }
 
     private ProxyInfo getProxyInfo() {
-        if (StringUtils.isBlank(proxyHost)) {
+        if (StringUtils.isBlank(getProxyHost())) {
             return ProxyInfo.NO_PROXY_INFO;
         }
 
         CredentialsBuilder credentialsBuilder = Credentials.newBuilder();
-        credentialsBuilder.setUsernameAndPassword(proxyUsername, proxyPassword);
+        credentialsBuilder.setUsernameAndPassword(getProxyUsername(), getProxyPassword());
         Credentials proxyCredentials = credentialsBuilder.build();
 
         ProxyInfoBuilder proxyInfoBuilder = ProxyInfo.newBuilder();
-        proxyInfoBuilder.setHost(proxyHost);
-        proxyInfoBuilder.setPort(proxyPort);
+        proxyInfoBuilder.setHost(getProxyHost());
+        proxyInfoBuilder.setPort(getProxyPort());
         proxyInfoBuilder.setCredentials(proxyCredentials);
-        proxyInfoBuilder.setNtlmDomain(proxyNtlmDomain);
-        proxyInfoBuilder.setNtlmWorkstation(proxyNtlmWorkstation);
+        proxyInfoBuilder.setNtlmDomain(getProxyNtlmDomain());
+        proxyInfoBuilder.setNtlmWorkstation(getProxyNtlmWorkstation());
 
         return proxyInfoBuilder.build();
     }
 
     @Override
     protected void validate(BuilderStatus builderStatus) {
-        if (StringUtils.isBlank(polarisUrl)) {
+        if (StringUtils.isBlank(getUrl())) {
             builderStatus.addErrorMessage("The Polaris url must be specified.");
         } else {
             try {
-                URL blackDuckURL = new URL(polarisUrl);
+                URL blackDuckURL = new URL(getUrl());
                 blackDuckURL.toURI();
             } catch (MalformedURLException | URISyntaxException e) {
-                builderStatus.addErrorMessage(String.format("The provided Polaris url (%s) is not a valid URL.", polarisUrl));
+                builderStatus.addErrorMessage(String.format("The provided Polaris url (%s) is not a valid URL.", getUrl()));
             }
         }
 
-        PolarisAccessTokenResolver accessTokenResolver = new PolarisAccessTokenResolver(logger, builderStatus, accessToken, polarisHome, accessTokenFilePath, userHomePath);
+        PolarisAccessTokenResolver accessTokenResolver = new PolarisAccessTokenResolver(logger, builderStatus, getAccessToken(), getPolarisHome(), getAccessTokenFilePath(), getUserHome());
         Optional<String> optionalAccessToken = accessTokenResolver.resolveAccessToken();
         if (!optionalAccessToken.isPresent()) {
             builderStatus.addErrorMessage("An access token must be resolvable from one of the following (this is also the order of precedence):");
@@ -137,16 +153,16 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
             builderStatus.addErrorMessage(" - found in a provided file path (POLARIS_ACCESS_TOKEN_FILE, SWIP_ACCESS_TOKEN_FILE)");
             builderStatus.addErrorMessage(" - found in the '.access_token' file in a Polaris home directory (POLARIS_HOME, SWIP_HOME, or defaults to USER_HOME/.swip)");
         } else {
-            accessToken = optionalAccessToken.get();
+            setAccessToken(optionalAccessToken.get());
         }
 
-        if (timeoutSeconds <= 0) {
+        if (getTimeoutInSeconds() <= 0) {
             builderStatus.addErrorMessage("A timeout (in seconds) greater than zero must be specified.");
         }
 
         CredentialsBuilder proxyCredentialsBuilder = new CredentialsBuilder();
-        proxyCredentialsBuilder.setUsername(proxyUsername);
-        proxyCredentialsBuilder.setPassword(proxyPassword);
+        proxyCredentialsBuilder.setUsername(getProxyUsername());
+        proxyCredentialsBuilder.setPassword(getProxyPassword());
         BuilderStatus proxyCredentialsBuilderStatus = proxyCredentialsBuilder.validateAndGetBuilderStatus();
         if (!proxyCredentialsBuilderStatus.isValid()) {
             builderStatus.addErrorMessage("The proxy credentials were not valid.");
@@ -155,10 +171,10 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
             Credentials proxyCredentials = proxyCredentialsBuilder.build();
             ProxyInfoBuilder proxyInfoBuilder = new ProxyInfoBuilder();
             proxyInfoBuilder.setCredentials(proxyCredentials);
-            proxyInfoBuilder.setHost(proxyHost);
-            proxyInfoBuilder.setPort(proxyPort);
-            proxyInfoBuilder.setNtlmDomain(proxyNtlmDomain);
-            proxyInfoBuilder.setNtlmWorkstation(proxyNtlmWorkstation);
+            proxyInfoBuilder.setHost(getProxyHost());
+            proxyInfoBuilder.setPort(getProxyPort());
+            proxyInfoBuilder.setNtlmDomain(getProxyNtlmDomain());
+            proxyInfoBuilder.setNtlmWorkstation(getProxyNtlmWorkstation());
             BuilderStatus proxyInfoBuilderStatus = proxyInfoBuilder.validateAndGetBuilderStatus();
             if (!proxyInfoBuilderStatus.isValid()) {
                 builderStatus.addAllErrorMessages(proxyInfoBuilderStatus.getErrorMessages());
@@ -166,21 +182,71 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
         }
     }
 
-    public List<String> getAllPropertyKeys() {
-        List<String> allKeys = new ArrayList<>();
-        for (Property property : Property.values()) {
-            allKeys.addAll(property.getKeysInPriorityOrder());
+    private BuilderPropertyKey getStandardKey(BuilderPropertyKey key) {
+        if (SWIP_URL_KEY.equals(key)) {
+            return URL_KEY;
+        } else if (SWIP_ACCESS_TOKEN_KEY.equals(key)) {
+            return ACCESS_TOKEN_KEY;
+        } else if (SWIP_HOME_KEY.equals(key)) {
+            return POLARIS_HOME_KEY;
+        } else if (SWIP_ACCESS_TOKEN_FILE_PATH_KEY.equals(key)) {
+            return ACCESS_TOKEN_FILE_PATH_KEY;
         }
+        return null;
+    }
 
+    private BuilderPropertyKey resolveKey(String key) {
+        String fixedKey = key.toUpperCase().replace(".", "_");
+        BuilderPropertyKey builderPropertyKey = new BuilderPropertyKey(fixedKey);
+        if (ALTERNATE_KEYS.contains(builderPropertyKey)) {
+            return getStandardKey(builderPropertyKey);
+        } else {
+            return builderPropertyKey;
+        }
+    }
+
+    public String get(final BuilderPropertyKey key) {
+        BuilderPropertyKey resolvedKey = resolveKey(key.getKey());
+        return builderProperties.get(resolvedKey);
+    }
+
+    public void set(final BuilderPropertyKey key, final String value) {
+        BuilderPropertyKey resolvedKey = resolveKey(key.getKey());
+        builderProperties.set(resolvedKey, value);
+    }
+
+    public void setProperty(final String key, final String value) {
+        String resolvedKey = resolveKey(key).getKey();
+        builderProperties.setProperty(resolvedKey, value);
+    }
+
+    public Set<BuilderPropertyKey> getKeys() {
+        Set<BuilderPropertyKey> allKeys = new HashSet<>();
+        allKeys.addAll(builderProperties.getKeys());
+        allKeys.addAll(alternateBuilderProperties.getKeys());
         return allKeys;
     }
 
-    public PolarisServerConfigBuilder setFromProperties(Map<String, String> properties) {
-        for (Property property : Property.values()) {
-            property.setField(this, properties);
-        }
+    public Set<String> getPropertyKeys() {
+        Set<String> allPropertyKeys = new HashSet<>();
+        allPropertyKeys.addAll(builderProperties.getPropertyKeys());
+        allPropertyKeys.addAll(alternateBuilderProperties.getPropertyKeys());
+        return allPropertyKeys;
+    }
 
-        return this;
+    public Set<String> getEnvironmentVariableKeys() {
+        Set<String> allEnvironmentVariableKeys = new HashSet<>();
+        allEnvironmentVariableKeys.addAll(builderProperties.getEnvironmentVariableKeys());
+        allEnvironmentVariableKeys.addAll(alternateBuilderProperties.getEnvironmentVariableKeys());
+        return allEnvironmentVariableKeys;
+    }
+
+    public Map<BuilderPropertyKey, String> getProperties() {
+        return builderProperties.getProperties();
+    }
+
+    public void setProperties(final Set<? extends Map.Entry<String, String>> propertyEntries) {
+        propertyEntries.forEach(entry -> setProperty(entry.getKey(), entry.getValue()));
     }
 
     public IntLogger getLogger() {
@@ -216,194 +282,136 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
         return this;
     }
 
-    public enum Property {
-        URL("polarisUrl", "SWIP_SERVER_URL"),
-        ACCESS_TOKEN("accessToken", "SWIP_ACCESS_TOKEN"),
-        TIMEOUT_IN_SECONDS("timeoutSeconds"),
-        PROXY_HOST("proxyHost"),
-        PROXY_PORT("proxyPort"),
-        PROXY_USERNAME("proxyUsername"),
-        PROXY_PASSWORD("proxyPassword"),
-        PROXY_NTLM_DOMAIN("proxyNtlmDomain"),
-        PROXY_NTLM_WORKSTATION("proxyNtlmWorkstation"),
-        TRUST_CERT("trustCert"),
-        HOME("polarisHome", PolarisServerConfigBuilder.POLARIS_HOME_ENVIRONMENT_VARIABLE),
-        ACCESS_TOKEN_FILE("accessTokenFilePath", PolarisServerConfigBuilder.POLARIS_ACCESS_TOKEN_FILE_ENVIRONMENT_VARIABLE),
-        USER_HOME("userHomePath", "USER_HOME");
-
-        private final String fieldName;
-        private String alternateName;
-
-        Property(String fieldName) {
-            this.fieldName = fieldName;
-        }
-
-        Property(String fieldName, String alternateName) {
-            this(fieldName);
-            this.alternateName = alternateName;
-        }
-
-        public List<String> getKeysInPriorityOrder() {
-            String environmentKey = PolarisServerConfigBuilder.POLARIS_SERVER_CONFIG_ENVIRONMENT_VARIABLE_PREFIX + name();
-            String propertyKey = environmentKey.toLowerCase().replace("_", ".");
-
-            List<String> keys = new ArrayList<>();
-            keys.add(propertyKey);
-            keys.add(environmentKey);
-            if (null != alternateName) {
-                keys.add(alternateName.toLowerCase().replace("_", "."));
-                keys.add(alternateName);
-            }
-
-            return keys;
-        }
-
-        public Optional<String> getValue(Map<String, String> properties) {
-            List<String> keys = getKeysInPriorityOrder();
-            return getValueFromKeysInPriorityOrder(keys, properties);
-        }
-
-        public void setField(PolarisServerConfigBuilder builder, Map<String, String> properties) {
-            try {
-                Optional<String> propertyValue = getValue(properties);
-                if (!propertyValue.isPresent() || StringUtils.isBlank(propertyValue.get())) {
-                    return;
-                }
-
-                Field builderField = builder.getClass().getDeclaredField(fieldName);
-                builderField.setAccessible(true);
-                Type builderFieldType = builderField.getType();
-                if (String.class.equals(builderFieldType)) {
-                    builderField.set(builder, propertyValue.get());
-                } else if (Integer.TYPE.equals(builderFieldType)) {
-                    int value = NumberUtils.toInt(propertyValue.get(), 0);
-                    builderField.set(builder, value);
-                } else if (Boolean.TYPE.equals(builderFieldType)) {
-                    boolean value = Boolean.parseBoolean(propertyValue.get());
-                    builderField.set(builder, value);
-                }
-            } catch (Exception ignored) {
-                // ignored
-            }
-        }
-
-        private Optional<String> getValueFromKeysInPriorityOrder(List<String> keysToLookFor, Map<String, String> properties) {
-            for (String key : keysToLookFor) {
-                if (properties.containsKey(key)) {
-                    return Optional.ofNullable(properties.get(key));
-                }
-            }
-
-            return Optional.empty();
-        }
-
-        public String getAlternateName() {
-            return alternateName;
-        }
+    public String getUrl() {
+        return builderProperties.get(URL_KEY);
     }
 
-    public String getPolarisUrl() {
-        return polarisUrl;
-    }
-
-    public void setPolarisUrl(String polarisUrl) {
-        this.polarisUrl = polarisUrl;
-    }
-
-    public int getTimeoutSeconds() {
-        return timeoutSeconds;
-    }
-
-    public void setTimeoutSeconds(int timeoutSeconds) {
-        this.timeoutSeconds = timeoutSeconds;
+    public PolarisServerConfigBuilder setUrl(String url) {
+        builderProperties.set(URL_KEY, url);
+        return this;
     }
 
     public String getAccessToken() {
-        return accessToken;
+        return builderProperties.get(ACCESS_TOKEN_KEY);
     }
 
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
+    public PolarisServerConfigBuilder setAccessToken(String accessToken) {
+        builderProperties.set(ACCESS_TOKEN_KEY, accessToken);
+        return this;
     }
 
-    public boolean isTrustCert() {
-        return trustCert;
+    public int getTimeoutInSeconds() {
+        return NumberUtils.toInt(builderProperties.get(TIMEOUT_KEY), PolarisServerConfigBuilder.DEFAULT_TIMEOUT_SECONDS);
     }
 
-    public void setTrustCert(boolean trustCert) {
-        this.trustCert = trustCert;
+    public PolarisServerConfigBuilder setTimeoutInSeconds(String timeout) {
+        builderProperties.set(TIMEOUT_KEY, timeout);
+        return this;
     }
 
-    public String getProxyHost() {
-        return proxyHost;
-    }
-
-    public void setProxyHost(String proxyHost) {
-        this.proxyHost = proxyHost;
-    }
-
-    public int getProxyPort() {
-        return proxyPort;
-    }
-
-    public void setProxyPort(int proxyPort) {
-        this.proxyPort = proxyPort;
-    }
-
-    public String getProxyUsername() {
-        return proxyUsername;
-    }
-
-    public void setProxyUsername(String proxyUsername) {
-        this.proxyUsername = proxyUsername;
-    }
-
-    public String getProxyPassword() {
-        return proxyPassword;
-    }
-
-    public void setProxyPassword(String proxyPassword) {
-        this.proxyPassword = proxyPassword;
-    }
-
-    public String getProxyNtlmDomain() {
-        return proxyNtlmDomain;
-    }
-
-    public void setProxyNtlmDomain(String proxyNtlmDomain) {
-        this.proxyNtlmDomain = proxyNtlmDomain;
-    }
-
-    public String getProxyNtlmWorkstation() {
-        return proxyNtlmWorkstation;
-    }
-
-    public void setProxyNtlmWorkstation(String proxyNtlmWorkstation) {
-        this.proxyNtlmWorkstation = proxyNtlmWorkstation;
+    public PolarisServerConfigBuilder setTimeoutInSeconds(int timeout) {
+        setTimeoutInSeconds(String.valueOf(timeout));
+        return this;
     }
 
     public String getPolarisHome() {
-        return polarisHome;
+        return builderProperties.get(POLARIS_HOME_KEY);
     }
 
-    public void setPolarisHome(String polarisHome) {
-        this.polarisHome = polarisHome;
+    public PolarisServerConfigBuilder setPolarisHome(String polarisHome) {
+        builderProperties.set(POLARIS_HOME_KEY, polarisHome);
+        return this;
     }
 
     public String getAccessTokenFilePath() {
-        return accessTokenFilePath;
+        return builderProperties.get(ACCESS_TOKEN_FILE_PATH_KEY);
     }
 
-    public void setAccessTokenFilePath(String accessTokenFilePath) {
-        this.accessTokenFilePath = accessTokenFilePath;
+    public PolarisServerConfigBuilder setAccessTokenFilePath(String accessTokenFilePath) {
+        builderProperties.set(ACCESS_TOKEN_FILE_PATH_KEY, accessTokenFilePath);
+        return this;
     }
 
-    public String getUserHomePath() {
-        return userHomePath;
+    public String getUserHome() {
+        return builderProperties.get(USER_HOME_KEY);
     }
 
-    public void setUserHomePath(String userHomePath) {
-        this.userHomePath = userHomePath;
+    public PolarisServerConfigBuilder setUserHome(String userHome) {
+        builderProperties.set(USER_HOME_KEY, userHome);
+        return this;
+    }
+
+    public String getProxyHost() {
+        return builderProperties.get(PROXY_HOST_KEY);
+    }
+
+    public PolarisServerConfigBuilder setProxyHost(String proxyHost) {
+        builderProperties.set(PROXY_HOST_KEY, proxyHost);
+        return this;
+    }
+
+    public int getProxyPort() {
+        return NumberUtils.toInt(builderProperties.get(PROXY_PORT_KEY), 0);
+    }
+
+    public PolarisServerConfigBuilder setProxyPort(String proxyPort) {
+        builderProperties.set(PROXY_PORT_KEY, proxyPort);
+        return this;
+    }
+
+    public PolarisServerConfigBuilder setProxyPort(int proxyPort) {
+        setProxyPort(String.valueOf(proxyPort));
+        return this;
+    }
+
+    public String getProxyUsername() {
+        return builderProperties.get(PROXY_USERNAME_KEY);
+    }
+
+    public PolarisServerConfigBuilder setProxyUsername(String proxyUsername) {
+        builderProperties.set(PROXY_USERNAME_KEY, proxyUsername);
+        return this;
+    }
+
+    public String getProxyPassword() {
+        return builderProperties.get(PROXY_PASSWORD_KEY);
+    }
+
+    public PolarisServerConfigBuilder setProxyPassword(String proxyPassword) {
+        builderProperties.set(PROXY_PASSWORD_KEY, proxyPassword);
+        return this;
+    }
+
+    public String getProxyNtlmDomain() {
+        return builderProperties.get(PROXY_NTLM_DOMAIN_KEY);
+    }
+
+    public PolarisServerConfigBuilder setProxyNtlmDomain(String proxyNtlmDomain) {
+        builderProperties.set(PROXY_NTLM_DOMAIN_KEY, proxyNtlmDomain);
+        return this;
+    }
+
+    public String getProxyNtlmWorkstation() {
+        return builderProperties.get(PROXY_NTLM_WORKSTATION_KEY);
+    }
+
+    public PolarisServerConfigBuilder setProxyNtlmWorkstation(String proxyNtlmWorkstation) {
+        builderProperties.set(PROXY_NTLM_WORKSTATION_KEY, proxyNtlmWorkstation);
+        return this;
+    }
+
+    public boolean isTrustCert() {
+        return Boolean.parseBoolean(builderProperties.get(TRUST_CERT_KEY));
+    }
+
+    public PolarisServerConfigBuilder setTrustCert(String trustCert) {
+        builderProperties.set(TRUST_CERT_KEY, trustCert);
+        return this;
+    }
+
+    public PolarisServerConfigBuilder setTrustCert(boolean trustCert) {
+        setTrustCert(String.valueOf(trustCert));
+        return this;
     }
 
 }

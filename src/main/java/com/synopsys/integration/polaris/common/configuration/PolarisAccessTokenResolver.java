@@ -29,14 +29,13 @@ import static com.synopsys.integration.polaris.common.configuration.PolarisServe
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.synopsys.integration.builder.BuilderStatus;
 import com.synopsys.integration.log.IntLogger;
-import com.synopsys.integration.util.BuilderStatus;
 
 public class PolarisAccessTokenResolver {
     private final IntLogger logger;

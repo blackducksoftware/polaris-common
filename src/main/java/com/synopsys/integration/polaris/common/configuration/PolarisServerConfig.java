@@ -27,13 +27,11 @@ import java.net.URL;
 import java.util.function.BiConsumer;
 
 import com.google.gson.Gson;
+import com.synopsys.integration.builder.Buildable;
 import com.synopsys.integration.log.IntLogger;
-import com.synopsys.integration.log.SilentIntLogger;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 import com.synopsys.integration.rest.proxy.ProxyInfo;
-import com.synopsys.integration.rest.request.Response;
 import com.synopsys.integration.rest.support.AuthenticationSupport;
-import com.synopsys.integration.util.Buildable;
 import com.synopsys.integration.util.Stringable;
 
 public class PolarisServerConfig extends Stringable implements Buildable {
@@ -65,8 +63,8 @@ public class PolarisServerConfig extends Stringable implements Buildable {
     }
 
     public void populateEnvironmentVariables(BiConsumer<String, String> pairsConsumer) {
-        pairsConsumer.accept(PolarisServerConfigBuilder.Property.URL.getAlternateName(), polarisUrl.toString());
-        pairsConsumer.accept(PolarisServerConfigBuilder.Property.ACCESS_TOKEN.getAlternateName(), accessToken);
+        pairsConsumer.accept(PolarisServerConfigBuilder.SWIP_URL_KEY.getKey(), polarisUrl.toString());
+        pairsConsumer.accept(PolarisServerConfigBuilder.SWIP_ACCESS_TOKEN_KEY.getKey(), accessToken);
     }
 
     public URL getPolarisUrl() {

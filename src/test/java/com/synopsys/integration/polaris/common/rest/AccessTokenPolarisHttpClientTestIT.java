@@ -17,6 +17,7 @@ import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
 import com.synopsys.integration.rest.HttpMethod;
 import com.synopsys.integration.rest.RestConstants;
+import com.synopsys.integration.rest.client.ConnectionResult;
 import com.synopsys.integration.rest.proxy.ProxyInfo;
 import com.synopsys.integration.rest.request.Request;
 import com.synopsys.integration.rest.request.Response;
@@ -59,8 +60,28 @@ public class AccessTokenPolarisHttpClientTestIT {
     }
 
     @Test
-    public void unauthorizedTest() throws IntegrationException, IOException {
+    public void testSuccessConnectionResult() {
+        assumeTrue(StringUtils.isNotBlank(baseUrl));
+        assumeTrue(StringUtils.isNotBlank(accessToken));
+
         AccessTokenPolarisHttpClient httpClient = new AccessTokenPolarisHttpClient(new PrintStreamIntLogger(System.out, LogLevel.INFO), 300, true, ProxyInfo.NO_PROXY_INFO, baseUrl, accessToken, gson, authenticationSupport);
+        ConnectionResult connectionResult = httpClient.attemptConnection();
+        assertTrue(connectionResult.isSuccess());
+    }
+
+    @Test
+    public void testFailureConnectionResult() {
+        assumeTrue(StringUtils.isNotBlank(baseUrl));
+        assumeTrue(StringUtils.isNotBlank(accessToken));
+
+        AccessTokenPolarisHttpClient httpClient = new AccessTokenPolarisHttpClient(new PrintStreamIntLogger(System.out, LogLevel.INFO), 300, true, ProxyInfo.NO_PROXY_INFO, baseUrl, accessToken + "make it bad", gson, authenticationSupport);
+        ConnectionResult connectionResult = httpClient.attemptConnection();
+        assertTrue(connectionResult.isFailure());
+    }
+
+    @Test
+    public void unauthorizedTest() throws IntegrationException, IOException {
+        AccessTokenPolarisHttpClient httpClient = new AccessTokenPolarisHttpClient(new PrintStreamIntLogger(System.out, LogLevel.INFO), 300, true, ProxyInfo.NO_PROXY_INFO, baseUrl, "garbage token", gson, authenticationSupport);
 
         String authHeader = "Authorization";
         HttpUriRequest request = Mockito.mock(HttpUriRequest.class);

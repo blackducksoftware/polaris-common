@@ -7,16 +7,20 @@ buildscript {
     dependencies { classpath 'com.blackducksoftware.integration:common-gradle-plugin:0.0.+' }
 }
 
+project.ext.moduleName = 'com.synopsys.integration.polaris-common'
+project.ext.javaUseAutoModuleName = 'true'
+
 group = 'com.synopsys.integration'
-version = '0.4.1-SNAPSHOT'
+version = '0.9.0-SNAPSHOT'
+description = 'A library for using various capabilities of Polaris.'
 
 apply plugin: 'com.blackducksoftware.integration.library'
 
 nexusStaging { packageGroup = 'com.synopsys' }
 
 dependencies {
-    implementation 'com.blackducksoftware.integration:integration-rest:0.7.0'
-    implementation 'com.synopsys.integration:polaris-common-api:0.0.1-SNAPSHOT'
+    api 'com.blackducksoftware.integration:integration-rest:0.10.0'
+    api 'com.synopsys.integration:polaris-common-api:0.0.1'
 
     testImplementation 'org.mockito:mockito-core:2.18.3'
 }

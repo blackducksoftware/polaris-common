@@ -98,4 +98,8 @@ public class AccessTokenPolarisHttpClient extends AuthenticatingIntHttpClient {
         return authenticationSupport.attemptAuthentication(this, baseUrl, AccessTokenPolarisHttpClient.AUTHENTICATION_SPEC, requestBuilder);
     }
 
+    public String getPolarisServerUrl() {
+        return baseUrl;
+    }
+
 }

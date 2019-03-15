@@ -17,6 +17,7 @@ import com.synopsys.integration.polaris.common.api.generated.common.BranchV0;
 import com.synopsys.integration.polaris.common.api.generated.common.ProjectV0;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfig;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfigBuilder;
+import com.synopsys.integration.polaris.common.model.Issue;
 import com.synopsys.integration.polaris.common.model.QueryIssue;
 
 public class FullTest {
@@ -50,11 +51,8 @@ public class FullTest {
         List<String> issueKeys = queryIssues.stream().map(queryIssue -> queryIssue.getAttributes().getIssueKey()).collect(Collectors.toList());
 
         for (String issueKey : issueKeys) {
-            PolarisComponent polarisComponent = issueService.getIssueForProjectBranchAndIssueKey("0816bc95-e1e6-491a-a5b5-f01af25e6983", "f41fcb75-49a5-4b6b-882d-583bd79586b9", issueKey);
-
-            String subTool = JsonPath.read(polarisComponent.getJson().toString(), "$.data.attributes.sub-tool");
-            List<String> pathPieces = JsonPath.read(polarisComponent.getJson().toString(), "$.included[?(@.type == 'path')].attributes.path[*]");
-            System.out.println(subTool + " " + StringUtils.join(pathPieces, "/"));
+            Issue issue = issueService.getIssueForProjectBranchAndIssueKey("0816bc95-e1e6-491a-a5b5-f01af25e6983", "f41fcb75-49a5-4b6b-882d-583bd79586b9", issueKey);
+            System.out.println(issue.getLabel() + " " + issue.getSourcePath());
         }
     }
 

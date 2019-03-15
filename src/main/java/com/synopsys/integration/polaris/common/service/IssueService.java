@@ -29,6 +29,7 @@ import java.util.function.BiFunction;
 import com.google.gson.JsonObject;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.polaris.common.api.PolarisComponent;
+import com.synopsys.integration.polaris.common.model.Issue;
 import com.synopsys.integration.polaris.common.model.QueryIssue;
 import com.synopsys.integration.polaris.common.model.QueryIssues;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestCreator;
@@ -55,11 +56,11 @@ public class IssueService {
         return polarisService.getAllResponses(QueryIssues.class, issuePagedRequestCreator);
     }
 
-    public PolarisComponent getIssueForProjectBranchAndIssueKey(String projectId, String branchId, String issueKey) throws IntegrationException {
+    public Issue getIssueForProjectBranchAndIssueKey(String projectId, String branchId, String issueKey) throws IntegrationException {
         final String uri = polarisHttpClient.getPolarisServerUrl() + PolarisService.GET_ISSUE_API_SPEC(issueKey);
         Request.Builder requestBuilder = createRequestBuilder(uri, projectId, branchId);
         Request request = requestBuilder.build();
-        return polarisService.get(PolarisComponent.class, request);
+        return polarisService.get(Issue.class, request);
     }
 
     public Request createIssuesGetRequest(int limit, int offset, final String projectId, final String branchId) {

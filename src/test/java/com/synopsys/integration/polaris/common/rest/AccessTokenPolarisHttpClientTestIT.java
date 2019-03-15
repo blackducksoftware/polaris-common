@@ -24,7 +24,7 @@ import com.synopsys.integration.rest.request.Response;
 import com.synopsys.integration.rest.support.AuthenticationSupport;
 
 public class AccessTokenPolarisHttpClientTestIT {
-    public static final String ENV_POLARIS_BASE_URL = "POLARIS_BASE_URL";
+    public static final String ENV_POLARIS_URL = "POLARIS_URL";
     public static final String ENV_POLARIS_ACCESS_TOKEN = "POLARIS_ACCESS_TOKEN";
 
     private static final String VALID_SPEC = "/api/common/v0/branches?page[offset]=0&page[limit]=10";
@@ -38,7 +38,7 @@ public class AccessTokenPolarisHttpClientTestIT {
 
     @BeforeEach
     public void setup() {
-        baseUrl = System.getenv(AccessTokenPolarisHttpClientTestIT.ENV_POLARIS_BASE_URL);
+        baseUrl = System.getenv(AccessTokenPolarisHttpClientTestIT.ENV_POLARIS_URL);
         accessToken = System.getenv(AccessTokenPolarisHttpClientTestIT.ENV_POLARIS_ACCESS_TOKEN);
         authenticationSupport = new AuthenticationSupport();
         gson = new Gson();

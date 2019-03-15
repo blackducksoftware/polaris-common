@@ -30,6 +30,7 @@ import com.google.gson.Gson;
 import com.synopsys.integration.builder.Buildable;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
+import com.synopsys.integration.polaris.common.service.PolarisServicesFactory;
 import com.synopsys.integration.rest.proxy.ProxyInfo;
 import com.synopsys.integration.rest.support.AuthenticationSupport;
 import com.synopsys.integration.util.Stringable;
@@ -60,6 +61,10 @@ public class PolarisServerConfig extends Stringable implements Buildable {
 
     public AccessTokenPolarisHttpClient createPolarisHttpClient(IntLogger logger) {
         return new AccessTokenPolarisHttpClient(logger, timeoutSeconds, alwaysTrustServerCertificate, proxyInfo, polarisUrl.toString(), accessToken, gson, authenticationSupport);
+    }
+
+    public PolarisServicesFactory createPolarisServicesFactory(IntLogger logger) {
+        return new PolarisServicesFactory(logger, createPolarisHttpClient(logger), gson);
     }
 
     public void populateEnvironmentVariables(BiConsumer<String, String> pairsConsumer) {

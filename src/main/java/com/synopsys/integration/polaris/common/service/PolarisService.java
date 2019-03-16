@@ -87,7 +87,9 @@ public class PolarisService {
             final W wrappedResponse = gson.fromJson(response.getContentString(), wrapperClass);
             if (wrappedResponse != null) {
                 final List<R> data = polarisContainerResponseExtractor.getGetResponseList().apply(wrappedResponse);
-                return Optional.ofNullable(data.get(0));
+                if (null != data && !data.isEmpty()) {
+                    return Optional.ofNullable(data.get(0));
+                }
             }
             return Optional.empty();
         } catch (final IOException e) {

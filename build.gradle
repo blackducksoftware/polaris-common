@@ -11,7 +11,7 @@ project.ext.moduleName = 'com.synopsys.integration.polaris-common'
 project.ext.javaUseAutoModuleName = 'true'
 
 group = 'com.synopsys.integration'
-version = '0.9.1'
+version = '0.9.2-SNAPSHOT'
 description = 'A library for using various capabilities of Polaris.'
 
 apply plugin: 'com.blackducksoftware.integration.library'

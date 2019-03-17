@@ -4,15 +4,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.gson.JsonObject;
-import com.jayway.jsonpath.JsonPath;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
-import com.synopsys.integration.polaris.common.api.PolarisComponent;
 import com.synopsys.integration.polaris.common.api.generated.common.BranchV0;
 import com.synopsys.integration.polaris.common.api.generated.common.ProjectV0;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfig;
@@ -37,21 +32,18 @@ public class FullTest {
         List<ProjectV0> allProjects = projectService.getAllProjects();
         allProjects.stream().forEach(System.out::println);
 
-        Optional<ProjectV0> project = projectService.getProjectByName("common");
+        Optional<ProjectV0> project = projectService.getProjectByName("integration-common");
         System.out.println(project.get().getId());
 
-        List<BranchV0> allBranches = branchService.getBranchesForProject("0816bc95-e1e6-491a-a5b5-f01af25e6983");
-        allBranches.stream().forEach(System.out::println);
-
-        Optional<BranchV0> branch = branchService.getBranchForProjectByName("0816bc95-e1e6-491a-a5b5-f01af25e6983", "master");
+        Optional<BranchV0> branch = branchService.getBranchForProjectByName(project.get().getId(), "17.0.1-SNAPSHOT");
         System.out.println(branch.get().getId());
 
-        List<QueryIssue> queryIssues = issueService.getIssuesForProjectAndBranch("0816bc95-e1e6-491a-a5b5-f01af25e6983", "f41fcb75-49a5-4b6b-882d-583bd79586b9");
+        List<QueryIssue> queryIssues = issueService.getIssuesForProjectAndBranch(project.get().getId(), branch.get().getId());
         queryIssues.stream().forEach(System.out::println);
         List<String> issueKeys = queryIssues.stream().map(queryIssue -> queryIssue.getAttributes().getIssueKey()).collect(Collectors.toList());
 
         for (String issueKey : issueKeys) {
-            Issue issue = issueService.getIssueForProjectBranchAndIssueKey("0816bc95-e1e6-491a-a5b5-f01af25e6983", "f41fcb75-49a5-4b6b-882d-583bd79586b9", issueKey);
+            Issue issue = issueService.getIssueForProjectBranchAndIssueKey(project.get().getId(), branch.get().getId(), issueKey);
             System.out.println(issue.getLabel() + " " + issue.getSourcePath());
         }
     }

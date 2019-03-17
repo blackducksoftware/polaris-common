@@ -40,8 +40,8 @@ import com.synopsys.integration.rest.request.Request;
 import com.synopsys.integration.rest.request.Response;
 
 public class PolarisService {
-    public static final String FILTER_PROJECT_NAME_CONTAINS = "filter[project][name][$isubstr]";
-    public static final String FILTER_BRANCH_NAME_CONTAINS = "filter[branch][name][$isubstr]";
+    public static final String FILTER_PROJECT_NAME_CONTAINS = "filter[project][name][$eq]";
+    public static final String FILTER_BRANCH_NAME_CONTAINS = "filter[branch][name][$eq]";
     public static final String FILTER_BRANCH_PROJECT_ID_EQUALS = "filter[branch][project][id][$eq]";
 
     public static final String PROJECT_ID = "project-id";

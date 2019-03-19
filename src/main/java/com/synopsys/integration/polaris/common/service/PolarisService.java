@@ -47,6 +47,9 @@ public class PolarisService {
     public static final String PROJECT_ID = "project-id";
     public static final String BRANCH_ID = "branch-id";
 
+    public static final String AUTH_API_SPEC = "/api/auth";
+    public static final String USERS_API_SPEC = AUTH_API_SPEC + "/users";
+
     public static final String COMMON_API_SPEC = "/api/common/v0";
     public static final String PROJECT_API_SPEC = COMMON_API_SPEC + "/projects";
     public static final String BRANCHES_API_SPEC = COMMON_API_SPEC + "/branches";

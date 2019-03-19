@@ -54,4 +54,8 @@ public class PolarisServicesFactory {
         return new IssueService(httpClient, createPolarisService());
     }
 
+    public UserService createUserService() {
+        return new UserService(httpClient, createPolarisService());
+    }
+
 }

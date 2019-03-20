@@ -1,4 +1,4 @@
-package com.synopsys.integration.polaris.common.model;
+package com.synopsys.integration.polaris.common.model.user;
 
 import java.util.List;
 

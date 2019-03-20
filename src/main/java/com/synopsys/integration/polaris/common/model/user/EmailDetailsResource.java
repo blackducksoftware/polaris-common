@@ -24,40 +24,27 @@
 package com.synopsys.integration.polaris.common.model.user;
 
 import com.google.gson.annotations.SerializedName;
-import com.synopsys.integration.polaris.common.api.generated.auth.ObjectContainer;
+import com.synopsys.integration.polaris.common.api.PolarisComponent;
 
-public class EmailDetails extends ObjectContainer {
-    @SerializedName("attributes")
-    private EmailDetailsAttributes attributes;
+public class EmailDetailsResource extends PolarisComponent {
+    @SerializedName("data")
+    private EmailDetails data;
+    @SerializedName("included")
+    private PolarisComponent[] included;
 
-    public EmailDetailsAttributes getAttributes() {
-        return attributes;
+    public EmailDetails getData() {
+        return data;
     }
 
-    public void setAttributes(final EmailDetailsAttributes attributes) {
-        this.attributes = attributes;
+    public void setData(final EmailDetails data) {
+        this.data = data;
     }
 
-    public class EmailDetailsAttributes {
-        @SerializedName("email-verified")
-        private Boolean emailVerified;
-        @SerializedName("email")
-        private String email;
+    public PolarisComponent[] getIncluded() {
+        return included;
+    }
 
-        public Boolean getEmailVerified() {
-            return emailVerified;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmailVerified(final Boolean emailVerified) {
-            this.emailVerified = emailVerified;
-        }
-
-        public void setEmail(final String email) {
-            this.email = email;
-        }
+    public void setIncluded(final PolarisComponent[] included) {
+        this.included = included;
     }
 }

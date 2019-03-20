@@ -55,7 +55,7 @@ public class AccessTokenPolarisHttpClient extends AuthenticatingIntHttpClient {
     private final String accessToken;
 
     public AccessTokenPolarisHttpClient(
-            IntLogger logger, int timeout, boolean alwaysTrustServerCertificate, ProxyInfo proxyInfo, String baseUrl, String accessToken, Gson gson, AuthenticationSupport authenticationSupport) {
+        final IntLogger logger, final int timeout, final boolean alwaysTrustServerCertificate, final ProxyInfo proxyInfo, final String baseUrl, final String accessToken, final Gson gson, final AuthenticationSupport authenticationSupport) {
         super(logger, timeout, alwaysTrustServerCertificate, proxyInfo);
         this.baseUrl = baseUrl;
         this.accessToken = accessToken;
@@ -68,31 +68,31 @@ public class AccessTokenPolarisHttpClient extends AuthenticatingIntHttpClient {
     }
 
     @Override
-    public void handleErrorResponse(HttpUriRequest request, Response response) {
+    public void handleErrorResponse(final HttpUriRequest request, final Response response) {
         super.handleErrorResponse(request, response);
 
         authenticationSupport.handleTokenErrorResponse(this, request, response);
     }
 
     @Override
-    public boolean isAlreadyAuthenticated(HttpUriRequest request) {
+    public boolean isAlreadyAuthenticated(final HttpUriRequest request) {
         return authenticationSupport.isTokenAlreadyAuthenticated(request);
     }
 
     @Override
-    protected void completeAuthenticationRequest(HttpUriRequest request, Response response) {
+    protected void completeAuthenticationRequest(final HttpUriRequest request, final Response response) {
         authenticationSupport.completeTokenAuthenticationRequest(request, response, logger, gson, this, AccessTokenPolarisHttpClient.AUTHENTICATION_RESPONSE_KEY);
     }
 
     @Override
     public final Response attemptAuthentication() throws IntegrationException {
-        Map<String, String> headers = new HashMap<>();
+        final Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", AccessTokenPolarisHttpClient.ACCESS_TOKEN_REQUEST_CONTENT_TYPE);
 
-        String httpBody = String.format("%s=%s", AccessTokenPolarisHttpClient.ACCESS_TOKEN_REQUEST_KEY, accessToken);
-        HttpEntity httpEntity = new StringEntity(httpBody, StandardCharsets.UTF_8);
+        final String httpBody = String.format("%s=%s", AccessTokenPolarisHttpClient.ACCESS_TOKEN_REQUEST_KEY, accessToken);
+        final HttpEntity httpEntity = new StringEntity(httpBody, StandardCharsets.UTF_8);
 
-        RequestBuilder requestBuilder = createRequestBuilder(HttpMethod.POST, headers);
+        final RequestBuilder requestBuilder = createRequestBuilder(HttpMethod.POST, headers);
         requestBuilder.setEntity(httpEntity);
 
         return authenticationSupport.attemptAuthentication(this, baseUrl, AccessTokenPolarisHttpClient.AUTHENTICATION_SPEC, requestBuilder);

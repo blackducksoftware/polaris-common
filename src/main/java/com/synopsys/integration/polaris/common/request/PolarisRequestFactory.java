@@ -45,28 +45,28 @@ public class PolarisRequestFactory {
 
     public static Request createCommonPolarisGetRequest(final String requestUri, final int limit, final int offset) {
         return createDefaultPagedRequestBuilder(limit, offset)
-                       .uri(requestUri)
-                       .build();
+                   .uri(requestUri)
+                   .build();
     }
 
     public static Request.Builder createDefaultRequestBuilder() {
         return populatePagedRequestBuilder(createDefaultBuilder(), DEFAULT_LIMIT, DEFAULT_OFFSET);
     }
 
-    public static Request.Builder createDefaultPagedRequestBuilder(int limit, int offset) {
+    public static Request.Builder createDefaultPagedRequestBuilder(final int limit, final int offset) {
         return populatePagedRequestBuilder(createDefaultBuilder(), limit, offset);
     }
 
-    public static Request.Builder populatePagedRequestBuilder(Request.Builder requestBuilder, int limit, int offset) {
+    public static Request.Builder populatePagedRequestBuilder(final Request.Builder requestBuilder, final int limit, final int offset) {
         return requestBuilder
-                       .addQueryParameter(LIMIT_PARAMETER, Integer.toString(limit))
-                       .addQueryParameter(OFFSET_PARAMETER, Integer.toString(offset));
+                   .addQueryParameter(LIMIT_PARAMETER, Integer.toString(limit))
+                   .addQueryParameter(OFFSET_PARAMETER, Integer.toString(offset));
     }
 
     public static Request.Builder createDefaultBuilder() {
         return new Request.Builder()
-                       .mimeType(DEFAULT_MIME_TYPE)
-                       .method(HttpMethod.GET);
+                   .mimeType(DEFAULT_MIME_TYPE)
+                   .method(HttpMethod.GET);
     }
 
 }

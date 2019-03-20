@@ -47,4 +47,5 @@ public class EmailDetailsResource extends PolarisComponent {
     public void setIncluded(final PolarisComponent[] included) {
         this.included = included;
     }
+
 }

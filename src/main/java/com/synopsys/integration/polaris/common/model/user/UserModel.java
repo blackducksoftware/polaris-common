@@ -84,4 +84,5 @@ public class UserModel extends PolarisComponent {
     public void setType(final String type) {
         this.type = type;
     }
+
 }

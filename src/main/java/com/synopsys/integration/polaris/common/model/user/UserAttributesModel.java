@@ -38,13 +38,10 @@ public class UserAttributesModel extends PolarisComponent {
     private String name;
     @SerializedName("username")
     private String username;
-
     @SerializedName("email")
     private String email;
-
     @SerializedName("enabled")
     private Boolean enabled;
-
     @SerializedName("password-login")
     private SetPassword passwordLogin = null;
 

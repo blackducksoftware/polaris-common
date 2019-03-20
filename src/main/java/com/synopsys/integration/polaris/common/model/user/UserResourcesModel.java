@@ -63,4 +63,5 @@ public class UserResourcesModel extends PolarisComponent {
     public void setMeta(final ResourcesPagination meta) {
         this.meta = meta;
     }
+
 }

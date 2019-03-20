@@ -30,7 +30,6 @@ import java.util.function.BiFunction;
 import org.apache.commons.lang3.StringUtils;
 
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.polaris.common.model.user.EmailDetails;
 import com.synopsys.integration.polaris.common.model.user.EmailDetailsResource;
 import com.synopsys.integration.polaris.common.model.user.UserModel;
 import com.synopsys.integration.polaris.common.model.user.UserResourcesModel;

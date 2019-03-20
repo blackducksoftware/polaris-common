@@ -38,26 +38,4 @@ public class EmailDetails extends ObjectContainer {
         this.attributes = attributes;
     }
 
-    public class EmailDetailsAttributes {
-        @SerializedName("email-verified")
-        private Boolean emailVerified;
-        @SerializedName("email")
-        private String email;
-
-        public Boolean getEmailVerified() {
-            return emailVerified;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmailVerified(final Boolean emailVerified) {
-            this.emailVerified = emailVerified;
-        }
-
-        public void setEmail(final String email) {
-            this.email = email;
-        }
-    }
 }

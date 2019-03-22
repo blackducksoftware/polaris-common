@@ -10,21 +10,21 @@ import org.apache.commons.lang3.StringUtils;
 public class PolarisParamBuilder {
     private static final String OPERATOR_PREFIX = "$";
     private static final String OPERATOR_KEY_INSENSITIVE_PREFIX = "i";
-    private static final String BLANK = "[]";
+    private static final String OPERATOR_BLANK = "[]";
 
-    private String paramType;
-    private String operator;
+    private ParamType paramType;
+    private ParamOperator operator;
     private String value;
     private boolean caseSensitive = false;
     private final List<String> additionalProps = new ArrayList<>();
 
     public PolarisParamBuilder setParamType(final ParamType paramType) {
-        this.paramType = paramType.getKey();
+        this.paramType = paramType;
         return this;
     }
 
     public PolarisParamBuilder setOperator(final ParamOperator operator) {
-        this.operator = operator.getKey();
+        this.operator = operator;
         return this;
     }
 
@@ -38,7 +38,7 @@ public class PolarisParamBuilder {
         return this;
     }
 
-    private PolarisParamBuilder addAdditionalProp(final String additionalProp) {
+    public PolarisParamBuilder addAdditionalProp(final String additionalProp) {
         this.additionalProps.add(additionalProp);
         return this;
     }
@@ -49,7 +49,8 @@ public class PolarisParamBuilder {
         }
 
         final StringBuilder keyBuilder = new StringBuilder();
-        if (StringUtils.isBlank(paramType)) {
+        final String paramTypeKey = paramType.getKey();
+        if (StringUtils.isBlank(paramTypeKey)) {
             throwRequiredException("paramType");
         } else {
             keyBuilder.append(paramType);
@@ -61,9 +62,14 @@ public class PolarisParamBuilder {
             }
         }
 
-        if (StringUtils.isNotBlank(operator)) {
-            final String op = makeCaseInsensitve(operator);
-            keyBuilder.append(getBracketed(op));
+        if (!ParamOperator.NONE.equals(operator)) {
+            if (ParamOperator.BLANK.equals(operator)) {
+                keyBuilder.append(OPERATOR_BLANK);
+            } else {
+                final String op = makeCaseInsensitve(operator.getKey());
+                keyBuilder.append(OPERATOR_PREFIX);
+                keyBuilder.append(getBracketed(op));
+            }
         }
 
         return createEntry(keyBuilder.toString(), value);

@@ -24,6 +24,8 @@
 package com.synopsys.integration.polaris.common.service;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,15 +60,19 @@ public class AuthService {
     }
 
     public <R extends PolarisResource> List<R> getAll(final PolarisRequestSpec polarisRequestSpec, final Type type) throws IntegrationException {
-        return getFiltered(polarisRequestSpec, null, type);
+        return getFiltered(polarisRequestSpec, (PolarisParamBuilder) null, type);
     }
 
     public <R extends PolarisResource> List<R> getFiltered(final PolarisRequestSpec polarisRequestSpec, final PolarisParamBuilder paramBuilder, final Type type) throws IntegrationException {
+        final List<PolarisParamBuilder> paramBuilders = paramBuilder == null ? Arrays.asList() : Arrays.asList(paramBuilder);
+        return getFiltered(polarisRequestSpec, paramBuilders, type);
+    }
+
+    public <R extends PolarisResource> List<R> getFiltered(final PolarisRequestSpec polarisRequestSpec, final Collection<PolarisParamBuilder> paramBuilders, final Type type) throws IntegrationException {
         final String uri = polarisHttpClient.getPolarisServerUrl() + polarisRequestSpec.getSpec();
         final Request.Builder pagedRequestBuilder = PolarisRequestFactory.createDefaultRequestBuilder().uri(uri);
-        if (paramBuilder != null) {
-            final Map.Entry<String, String> params = paramBuilder.build();
-            pagedRequestBuilder.addQueryParameter(params.getKey(), params.getValue());
+        if (paramBuilders != null) {
+            addParams(pagedRequestBuilder, paramBuilders);
         }
 
         final PolarisPagedRequestCreator createPagedRequest = (limit, offset) -> PolarisRequestFactory.populatePagedRequestBuilder(pagedRequestBuilder, offset, limit).build();
@@ -83,6 +89,15 @@ public class AuthService {
         final R resource = response.getData();
         final T attribute = extractAttribute.apply(resource);
         return Optional.ofNullable(attribute);
+    }
+
+    private void addParams(final Request.Builder requestBuilder, final Collection<PolarisParamBuilder> paramBuilders) {
+        for (final PolarisParamBuilder paramBuilder : paramBuilders) {
+            if (paramBuilder != null) {
+                final Map.Entry<String, String> params = paramBuilder.build();
+                requestBuilder.addQueryParameter(params.getKey(), params.getValue());
+            }
+        }
     }
 
 }

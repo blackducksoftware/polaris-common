@@ -26,22 +26,24 @@ package com.synopsys.integration.polaris.common.response;
 import java.util.List;
 import java.util.function.Function;
 
-import com.synopsys.integration.polaris.common.api.generated.common.ResourcesPagination;
+import com.synopsys.integration.polaris.common.api.PolarisResource;
+import com.synopsys.integration.polaris.common.api.PolarisResources;
+import com.synopsys.integration.polaris.common.api.PolarisResourcesPagination;
 
-public class PolarisContainerResponseExtractor<W, R> {
-    private Function<W, List<R>> getResponseList;
-    private Function<W, ResourcesPagination> getMetaFunction;
+public class PolarisContainerResponseExtractor {
+    private final Function<PolarisResources, List<PolarisResource>> getResponseList;
+    private final Function<PolarisResources, PolarisResourcesPagination> getMetaFunction;
 
-    public PolarisContainerResponseExtractor(final Function<W, List<R>> getResponseList, final Function<W, ResourcesPagination> getMetaFunction) {
+    public PolarisContainerResponseExtractor(final Function<PolarisResources, List<PolarisResource>> getResponseList, final Function<PolarisResources, PolarisResourcesPagination> getMetaFunction) {
         this.getResponseList = getResponseList;
         this.getMetaFunction = getMetaFunction;
     }
 
-    public Function<W, List<R>> getGetResponseList() {
+    public Function<PolarisResources, List<PolarisResource>> getGetResponseList() {
         return getResponseList;
     }
 
-    public Function<W, ResourcesPagination> getGetMetaFunction() {
+    public Function<PolarisResources, PolarisResourcesPagination> getGetMetaFunction() {
         return getMetaFunction;
     }
 

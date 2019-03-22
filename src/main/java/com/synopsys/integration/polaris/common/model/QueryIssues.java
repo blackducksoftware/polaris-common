@@ -27,29 +27,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
-import com.synopsys.integration.polaris.common.api.PolarisComponent;
-import com.synopsys.integration.polaris.common.api.generated.common.ResourcesPagination;
+import com.synopsys.integration.polaris.common.api.PolarisResources;
+import com.synopsys.integration.polaris.common.api.PolarisResourcesPagination;
 
-public class QueryIssues extends PolarisComponent {
+public class QueryIssues extends PolarisResources<QueryIssue> {
     @SerializedName("data")
     private List<QueryIssue> data = new ArrayList<>();
 
     @SerializedName("meta")
-    private ResourcesPagination meta = null;
+    private PolarisResourcesPagination meta = null;
 
+    @Override
     public List<QueryIssue> getData() {
         return data;
     }
 
+    @Override
     public void setData(final List<QueryIssue> data) {
         this.data = data;
     }
 
-    public ResourcesPagination getMeta() {
+    @Override
+    public PolarisResourcesPagination getMeta() {
         return meta;
     }
 
-    public void setMeta(final ResourcesPagination meta) {
+    @Override
+    public void setMeta(final PolarisResourcesPagination meta) {
         this.meta = meta;
     }
 

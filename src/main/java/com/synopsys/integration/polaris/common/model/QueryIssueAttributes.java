@@ -24,9 +24,10 @@
 package com.synopsys.integration.polaris.common.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.synopsys.integration.polaris.common.api.PolarisAttributes;
 import com.synopsys.integration.polaris.common.api.PolarisComponent;
 
-public class QueryIssueAttributes extends PolarisComponent {
+public class QueryIssueAttributes extends PolarisAttributes {
     @SerializedName("finding-key")
     private String findingKey;
 

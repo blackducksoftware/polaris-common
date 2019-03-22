@@ -13,9 +13,9 @@ import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
+import com.synopsys.integration.polaris.common.api.auth.model.user.UserResource;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfig;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfigBuilder;
-import com.synopsys.integration.polaris.common.model.user.UserModel;
 
 public class UserServiceTest {
     @Test
@@ -30,13 +30,13 @@ public class UserServiceTest {
         final PolarisServicesFactory polarisServicesFactory = polarisServerConfig.createPolarisServicesFactory(logger);
 
         final UserService userService = polarisServicesFactory.createUserService();
-        final List<UserModel> users = userService.getAllUsers();
+        final List<UserResource> users = userService.getAllUsers();
 
         if (!users.isEmpty()) {
-            final UserModel user = users
-                                       .stream()
-                                       .findAny()
-                                       .orElseThrow(() -> new AssertionError("Missing list element"));
+            final UserResource user = users
+                                          .stream()
+                                          .findAny()
+                                          .orElseThrow(() -> new AssertionError("Missing list element"));
             final Optional<String> optionalEmail = userService.getEmailForUser(user);
             optionalEmail.ifPresent(email -> assertTrue("Expected email not to be blank", StringUtils.isNotBlank(email)));
         }

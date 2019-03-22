@@ -25,51 +25,39 @@ package com.synopsys.integration.polaris.common.service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.gson.reflect.TypeToken;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.polaris.common.model.user.EmailDetailsResource;
-import com.synopsys.integration.polaris.common.model.user.UserModel;
-import com.synopsys.integration.polaris.common.model.user.UserResourcesModel;
-import com.synopsys.integration.polaris.common.request.PolarisPagedRequestCreator;
-import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
-import com.synopsys.integration.polaris.common.response.PolarisContainerResponseExtractor;
-import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
-import com.synopsys.integration.rest.request.Request;
+import com.synopsys.integration.polaris.common.api.PolarisRelationship;
+import com.synopsys.integration.polaris.common.api.auth.model.user.EmailDetailsResource;
+import com.synopsys.integration.polaris.common.api.auth.model.user.EmailDetailsResources;
+import com.synopsys.integration.polaris.common.api.auth.model.user.UserResource;
+import com.synopsys.integration.polaris.common.api.auth.model.user.UserResources;
 
 public class UserService {
-    public static final String EMAIL_DETAILS_LINK = "/email-details";
-    private static final PolarisContainerResponseExtractor<UserResourcesModel, UserModel> USER_EXTRACTOR = new PolarisContainerResponseExtractor<>(UserResourcesModel::getData, UserResourcesModel::getMeta);
+    private static final TypeToken USER_RESOURCES = new TypeToken<UserResources>() {};
+    private static final TypeToken EMAIL_DETAILS_RESOURCE = new TypeToken<EmailDetailsResources>() {};
 
-    private final AccessTokenPolarisHttpClient polarisHttpClient;
-    private final PolarisService polarisService;
+    private final AuthService authService;
 
-    public UserService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisService polarisService) {
-        this.polarisHttpClient = polarisHttpClient;
-        this.polarisService = polarisService;
+    public UserService(final AuthService authService) {
+        this.authService = authService;
     }
 
-    public List<UserModel> getAllUsers() throws IntegrationException {
-        final String uri = polarisHttpClient.getPolarisServerUrl() + PolarisService.USERS_API_SPEC;
-        final BiFunction<Integer, Integer, Request> createPagedRequest = (limit, offset) -> PolarisRequestFactory.createCommonPolarisGetRequest(uri, offset, limit);
-        final PolarisPagedRequestCreator<UserResourcesModel, UserModel> issuePagedRequestCreator = new PolarisPagedRequestCreator<>(createPagedRequest, USER_EXTRACTOR);
-
-        return polarisService.getAllResponses(UserResourcesModel.class, issuePagedRequestCreator);
+    public List<UserResource> getAllUsers() throws IntegrationException {
+        return authService.getAll(AuthService.USERS_API_SPEC, USER_RESOURCES.getType());
     }
 
-    public Optional<String> getEmailForUser(final UserModel user) throws IntegrationException {
-        String email = user.getAttributes().getEmail();
-        if (StringUtils.isBlank(email)) {
-            final String uri = String.format("%s%s/%s%s", polarisHttpClient.getPolarisServerUrl(), polarisService.USERS_API_SPEC, "/", user.getId(), EMAIL_DETAILS_LINK);
-            final Request usersRequest = PolarisRequestFactory.createDefaultPolarisGetRequest(uri);
-
-            final EmailDetailsResource emailDetailsResource = polarisService.get(EmailDetailsResource.class, usersRequest);
-            email = emailDetailsResource.getData().getAttributes().getEmail();
+    public Optional<String> getEmailForUser(final UserResource user) throws IntegrationException {
+        final String email = user.getAttributes().getEmail();
+        if (StringUtils.isNotBlank(email)) {
+            return Optional.of(email);
+        } else {
+            final PolarisRelationship emailDetails = user.getRelationships().getEmailDetails();
+            return authService.getAttributeFromRelationship(emailDetails.getLinks(), (EmailDetailsResource resource) -> resource.getAttributes().getEmail(), EMAIL_DETAILS_RESOURCE.getType());
         }
-
-        return Optional.ofNullable(email);
     }
 
 }

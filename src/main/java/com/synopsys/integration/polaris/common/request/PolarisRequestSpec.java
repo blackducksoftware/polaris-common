@@ -21,21 +21,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.model.user;
+package com.synopsys.integration.polaris.common.request;
 
-import com.google.gson.annotations.SerializedName;
-import com.synopsys.integration.polaris.common.api.generated.auth.ObjectContainer;
+public class PolarisRequestSpec {
+    private final String spec;
 
-public class EmailDetails extends ObjectContainer {
-    @SerializedName("attributes")
-    private EmailDetailsAttributes attributes;
-
-    public EmailDetailsAttributes getAttributes() {
-        return attributes;
+    public static final PolarisRequestSpec of(final String spec) {
+        return new PolarisRequestSpec(spec);
     }
 
-    public void setAttributes(final EmailDetailsAttributes attributes) {
-        this.attributes = attributes;
+    public PolarisRequestSpec(final String spec) {
+        this.spec = spec;
+    }
+
+    public String getSpec() {
+        return spec;
+    }
+
+    @Override
+    public String toString() {
+        return getSpec();
     }
 
 }

@@ -21,31 +21,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.model.user;
+package com.synopsys.integration.polaris.common.request;
 
-import com.google.gson.annotations.SerializedName;
-import com.synopsys.integration.polaris.common.api.PolarisComponent;
+import java.lang.reflect.Type;
 
-public class EmailDetailsResource extends PolarisComponent {
-    @SerializedName("data")
-    private EmailDetails data;
-    @SerializedName("included")
-    private PolarisComponent[] included;
+public class PolarisPagedRequestWrapper {
+    private final PolarisPagedRequestCreator requestCreator;
+    private final Type type;
 
-    public EmailDetails getData() {
-        return data;
+    public PolarisPagedRequestWrapper(final PolarisPagedRequestCreator requestCreator, final Type type) {
+        this.requestCreator = requestCreator;
+        this.type = type;
     }
 
-    public void setData(final EmailDetails data) {
-        this.data = data;
+    public PolarisPagedRequestCreator getRequestCreator() {
+        return requestCreator;
     }
 
-    public PolarisComponent[] getIncluded() {
-        return included;
-    }
-
-    public void setIncluded(final PolarisComponent[] included) {
-        this.included = included;
+    public Type getResponseType() {
+        return type;
     }
 
 }

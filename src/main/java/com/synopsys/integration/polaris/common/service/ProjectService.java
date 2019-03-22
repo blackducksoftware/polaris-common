@@ -26,46 +26,47 @@ package com.synopsys.integration.polaris.common.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.gson.reflect.TypeToken;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.polaris.common.api.generated.common.ProjectV0;
-import com.synopsys.integration.polaris.common.api.generated.common.ProjectV0Resources;
-import com.synopsys.integration.polaris.common.request.PolarisPagedRequestCreator;
+import com.synopsys.integration.polaris.common.api.common.project.ProjectV0Resource;
+import com.synopsys.integration.polaris.common.api.common.project.ProjectV0Resources;
+import com.synopsys.integration.polaris.common.request.PolarisPagedRequestWrapper;
 import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
-import com.synopsys.integration.polaris.common.response.PolarisContainerResponseExtractor;
+import com.synopsys.integration.polaris.common.request.param.FilterConstants;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 import com.synopsys.integration.rest.request.Request;
 
 public class ProjectService {
-    private static final PolarisContainerResponseExtractor<ProjectV0Resources, ProjectV0> PROJECT_EXTRACTOR = new PolarisContainerResponseExtractor<>(ProjectV0Resources::getData, ProjectV0Resources::getMeta);
+    private static final TypeToken PROJECT_RESOURCES = new TypeToken<ProjectV0Resources>() {};
 
-    private AccessTokenPolarisHttpClient polarisHttpClient;
-    private PolarisService polarisService;
+    private final AccessTokenPolarisHttpClient polarisHttpClient;
+    private final PolarisService polarisService;
 
     public ProjectService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisService polarisService) {
         this.polarisHttpClient = polarisHttpClient;
         this.polarisService = polarisService;
     }
 
-    public Optional<ProjectV0> getProjectByName(String projectName) throws IntegrationException {
+    public Optional<ProjectV0Resource> getProjectByName(final String projectName) throws IntegrationException {
         final String uri = polarisHttpClient.getPolarisServerUrl() + PolarisService.PROJECT_API_SPEC;
-        Request request =
-                PolarisRequestFactory.createDefaultRequestBuilder()
-                        .addQueryParameter(PolarisService.FILTER_PROJECT_NAME_CONTAINS, projectName)
-                        .uri(uri)
-                        .build();
-        return polarisService.getFirstResponse(ProjectV0Resources.class, request, PROJECT_EXTRACTOR);
+        final Request request =
+            PolarisRequestFactory.createDefaultRequestBuilder()
+                .addQueryParameter(FilterConstants.FILTER_PROJECT_NAME_CONTAINS, projectName)
+                .uri(uri)
+                .build();
+        return polarisService.getFirstResponse(request, PROJECT_RESOURCES.getType());
     }
 
-    public List<ProjectV0> getAllProjects() throws IntegrationException {
-        PolarisPagedRequestCreator<ProjectV0Resources, ProjectV0> projectPagedRequestCreator = new PolarisPagedRequestCreator<>(this::createProjectGetRequest, PROJECT_EXTRACTOR);
-        return polarisService.getAllResponses(ProjectV0Resources.class, projectPagedRequestCreator);
+    public List<ProjectV0Resource> getAllProjects() throws IntegrationException {
+        final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(this::createProjectGetRequest, PROJECT_RESOURCES.getType());
+        return polarisService.getAllResponses(pagedRequestWrapper);
     }
 
-    public Request createProjectGetRequest(int limit, int offset) {
+    public Request createProjectGetRequest(final int limit, final int offset) {
         final String uri = polarisHttpClient.getPolarisServerUrl() + PolarisService.PROJECT_API_SPEC;
         return PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset)
-                       .uri(uri)
-                       .build();
+                   .uri(uri)
+                   .build();
     }
 
 }

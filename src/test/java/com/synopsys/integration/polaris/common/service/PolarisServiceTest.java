@@ -11,9 +11,10 @@ import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
-import com.synopsys.integration.polaris.common.api.generated.common.BranchV0;
-import com.synopsys.integration.polaris.common.api.generated.common.BranchV0Resources;
-import com.synopsys.integration.polaris.common.api.generated.common.ResourcesPagination;
+import com.synopsys.integration.polaris.common.api.PolarisResources;
+import com.synopsys.integration.polaris.common.api.PolarisResourcesPagination;
+import com.synopsys.integration.polaris.common.api.common.branch.BranchV0Resource;
+import com.synopsys.integration.polaris.common.api.common.branch.BranchV0Resources;
 import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClientTestIT;
@@ -22,7 +23,7 @@ import com.synopsys.integration.rest.request.Request;
 import com.synopsys.integration.rest.support.AuthenticationSupport;
 
 public class PolarisServiceTest {
-    private PolarisRequestFactory polarisRequestFactory = new PolarisRequestFactory();
+    private final PolarisRequestFactory polarisRequestFactory = new PolarisRequestFactory();
 
     @Test
     public void createDefaultPolarisGetRequestTest() {
@@ -32,8 +33,8 @@ public class PolarisServiceTest {
 
     @Test
     public void executeGetRequestTestIT() throws IntegrationException {
-        String baseUrl = System.getenv(AccessTokenPolarisHttpClientTestIT.ENV_POLARIS_URL);
-        String accessToken = System.getenv(AccessTokenPolarisHttpClientTestIT.ENV_POLARIS_ACCESS_TOKEN);
+        final String baseUrl = System.getenv(AccessTokenPolarisHttpClientTestIT.ENV_POLARIS_URL);
+        final String accessToken = System.getenv(AccessTokenPolarisHttpClientTestIT.ENV_POLARIS_ACCESS_TOKEN);
 
         final Gson gson = new Gson();
         final IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
@@ -44,10 +45,10 @@ public class PolarisServiceTest {
         final String requestUri = baseUrl + "/api/common/v0/branches";
         final Request request = polarisRequestFactory.createDefaultPolarisGetRequest(requestUri);
 
-        final BranchV0Resources branchV0Resources = polarisService.get(BranchV0Resources.class, request);
-        final List<BranchV0> branchV0ResourceList = branchV0Resources.getData();
+        final PolarisResources<BranchV0Resource> branchV0Resources = polarisService.get(BranchV0Resources.class, request);
+        final List<BranchV0Resource> branchV0ResourceList = branchV0Resources.getData();
         assertNotNull(branchV0ResourceList);
-        final ResourcesPagination meta = branchV0Resources.getMeta();
+        final PolarisResourcesPagination meta = branchV0Resources.getMeta();
         assertNotNull(meta);
     }
 

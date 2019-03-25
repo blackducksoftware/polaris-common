@@ -70,12 +70,7 @@ public class AuthService {
 
     public <R extends PolarisResource> List<R> getFiltered(final PolarisRequestSpec polarisRequestSpec, final Collection<PolarisParamBuilder> paramBuilders, final Type resourcesType) throws IntegrationException {
         final String uri = polarisHttpClient.getPolarisServerUrl() + polarisRequestSpec.getSpec();
-        final Request.Builder pagedRequestBuilder = PolarisRequestFactory.createDefaultRequestBuilder().uri(uri);
-        if (paramBuilders != null) {
-            addParams(pagedRequestBuilder, paramBuilders);
-        }
-
-        final PolarisPagedRequestCreator createPagedRequest = (limit, offset) -> PolarisRequestFactory.populatePagedRequestBuilder(pagedRequestBuilder, limit, offset).build();
+        final PolarisPagedRequestCreator createPagedRequest = (limit, offset) -> createPagedRequest(uri, paramBuilders, limit, offset);
         final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(createPagedRequest, resourcesType);
         return polarisService.getAllResponses(pagedRequestWrapper);
     }
@@ -87,6 +82,16 @@ public class AuthService {
         final PolarisResourcesSingle<R> response = polarisService.get(resourcesType, resourceRequest);
 
         return response.getData().map(extractAttribute::apply);
+    }
+
+    private Request createPagedRequest(final String uri, final Collection<PolarisParamBuilder> paramBuilders, final int limit, final int offset) {
+        final Request.Builder pagedRequestBuilder = PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset);
+        pagedRequestBuilder.uri(uri);
+        if (paramBuilders != null) {
+            addParams(pagedRequestBuilder, paramBuilders);
+        }
+
+        return pagedRequestBuilder.build();
     }
 
     private void addParams(final Request.Builder requestBuilder, final Collection<PolarisParamBuilder> paramBuilders) {

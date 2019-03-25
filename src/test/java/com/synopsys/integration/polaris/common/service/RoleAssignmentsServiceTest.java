@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,7 @@ import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
+import com.synopsys.integration.polaris.common.api.auth.model.role.RoleResource;
 import com.synopsys.integration.polaris.common.api.auth.model.role.assignments.RoleAssignmentResource;
 import com.synopsys.integration.polaris.common.api.auth.model.role.assignments.RoleAssignmentResources;
 import com.synopsys.integration.polaris.common.api.common.project.ProjectV0Resource;
@@ -65,7 +67,7 @@ public class RoleAssignmentsServiceTest {
         try {
             project = projectService.getAllProjects()
                           .stream()
-                          .findFirst()
+                          .findAny()
                           .orElseThrow(() -> new IntegrationException("No projects found"));
         } catch (final IntegrationException e) {
             assumeTrue(e != null, "Something went wrong while retrieving projects, but this test is not for the project service");
@@ -76,6 +78,13 @@ public class RoleAssignmentsServiceTest {
         final List<RoleAssignmentResource> data = roleAssignmentsForProject.getData();
         if (!data.isEmpty()) {
             assertTrue(!roleAssignmentsForProject.getIncluded().isEmpty(), "Expected resources to be included");
+
+            final RoleAssignmentResource roleAssignment = data
+                                                              .stream()
+                                                              .findAny()
+                                                              .orElseThrow(IntegrationException::new);
+            final Optional<RoleResource> roleResource = roleAssignmentsService.getRoleFromPopulatedRoleAssignments(roleAssignmentsForProject, roleAssignment);
+            assertTrue(roleResource.isPresent(), "Expected a role to be present");
         }
     }
 

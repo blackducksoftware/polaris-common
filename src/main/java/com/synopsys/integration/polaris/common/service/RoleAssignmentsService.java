@@ -35,9 +35,10 @@ import java.util.function.Function;
 
 import com.google.gson.reflect.TypeToken;
 import com.synopsys.integration.exception.IntegrationException;
+import com.synopsys.integration.polaris.common.api.PolarisRelationshipSingle;
 import com.synopsys.integration.polaris.common.api.PolarisResource;
 import com.synopsys.integration.polaris.common.api.PolarisResourceSparse;
-import com.synopsys.integration.polaris.common.api.auth.model.role.assignments.RoleAssignmentRelationship;
+import com.synopsys.integration.polaris.common.api.auth.model.role.RoleResource;
 import com.synopsys.integration.polaris.common.api.auth.model.role.assignments.RoleAssignmentRelationships;
 import com.synopsys.integration.polaris.common.api.auth.model.role.assignments.RoleAssignmentResource;
 import com.synopsys.integration.polaris.common.api.auth.model.role.assignments.RoleAssignmentResources;
@@ -59,11 +60,13 @@ public class RoleAssignmentsService {
     final AccessTokenPolarisHttpClient polarisHttpClient;
     private final PolarisService polarisService;
     private final AuthService authService;
+    private final PolarisJsonTransformer polarisJsonTransformer;
 
-    public RoleAssignmentsService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisService polarisService, final AuthService authService) {
+    public RoleAssignmentsService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisService polarisService, final AuthService authService, final PolarisJsonTransformer polarisJsonTransformer) {
         this.polarisHttpClient = polarisHttpClient;
         this.polarisService = polarisService;
         this.authService = authService;
+        this.polarisJsonTransformer = polarisJsonTransformer;
     }
 
     public List<RoleAssignmentResource> getAll() throws IntegrationException {
@@ -95,13 +98,17 @@ public class RoleAssignmentsService {
         return polarisService.getPopulatedResponse(pagedRequestWrapper);
     }
 
-    public Optional<UserResource> getUserFromPopulatedRoleAssignments(final RoleAssignmentResources populatedResources, final RoleAssignmentResource resourceReferenced) {
-        return getUserFromPopulatedRoleAssignments(populatedResources, resourceReferenced, RoleAssignmentRelationships::getUser, UserResource.class);
+    public Optional<UserResource> getUserFromPopulatedRoleAssignments(final RoleAssignmentResources populatedResources, final RoleAssignmentResource referencedResource) {
+        return getUserFromPopulatedRoleAssignments(populatedResources, referencedResource, RoleAssignmentRelationships::getUser, UserResource.class);
+    }
+
+    public Optional<RoleResource> getRoleFromPopulatedRoleAssignments(final RoleAssignmentResources populatedResources, final RoleAssignmentResource referencedResource) {
+        return getUserFromPopulatedRoleAssignments(populatedResources, referencedResource, RoleAssignmentRelationships::getRole, RoleResource.class);
     }
 
     public PolarisParamBuilder createProjectFilter(final String projectId) {
         return new PolarisParamBuilder()
-                   .setValue("project:" + projectId)
+                   .setValue("projects:" + projectId)
                    .setParamType(ParamType.FILTER)
                    .setOperator(ParamOperator.OPERATOR_SUBSTRING)
                    .addAdditionalProp("role-assignments")
@@ -113,20 +120,25 @@ public class RoleAssignmentsService {
         return new PolarisParamBuilder()
                    .setValue(type)
                    .setParamType(ParamType.INCLUDE)
-                   .setOperator(ParamOperator.BLANK)
+                   .setOperator(ParamOperator.NONE)
                    .addAdditionalProp("role-assignments")
                    .setCaseSensitive(true);
     }
 
     private <R extends PolarisResource> Optional<R> getUserFromPopulatedRoleAssignments(final RoleAssignmentResources populatedResources, final RoleAssignmentResource resourceReferenced,
-        final Function<RoleAssignmentRelationships, RoleAssignmentRelationship> relationshipRetriever, final Class<R> resourceClass) {
+        final Function<RoleAssignmentRelationships, PolarisRelationshipSingle> relationshipRetriever, final Class<R> resourceClass) {
         final Optional<PolarisResourceSparse> optionalUserData = relationshipRetriever.apply(resourceReferenced.getRelationships()).getData();
         if (optionalUserData.isPresent()) {
             final String id = optionalUserData.map(PolarisResourceSparse::getId).orElse("");
             final String type = optionalUserData.map(PolarisResourceSparse::getType).orElse("");
             for (final PolarisResource includedResource : populatedResources.getIncluded()) {
                 if (type.equals(includedResource.getType()) && id.equals(includedResource.getId())) {
-                    return Optional.of(resourceClass.cast(includedResource));
+                    try {
+                        final R fullyTypedResource = polarisJsonTransformer.getResponseAs(includedResource.getJson(), resourceClass);
+                        return Optional.of(fullyTypedResource);
+                    } catch (final IntegrationException e) {
+                        break;
+                    }
                 }
             }
         }

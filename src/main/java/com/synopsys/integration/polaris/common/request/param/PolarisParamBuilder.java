@@ -33,10 +33,9 @@ import org.apache.commons.lang3.StringUtils;
 public class PolarisParamBuilder {
     private static final String OPERATOR_PREFIX = "$";
     private static final String OPERATOR_KEY_INSENSITIVE_PREFIX = "i";
-    private static final String OPERATOR_BLANK = "[]";
 
     private ParamType paramType;
-    private ParamOperator operator;
+    private ParamOperator operator = ParamOperator.NONE;
     private String value;
     private boolean caseSensitive = false;
     private final List<String> additionalProps = new ArrayList<>();
@@ -86,12 +85,8 @@ public class PolarisParamBuilder {
         }
 
         if (!ParamOperator.NONE.equals(operator)) {
-            if (ParamOperator.BLANK.equals(operator)) {
-                keyBuilder.append(OPERATOR_BLANK);
-            } else {
-                final String op = OPERATOR_PREFIX + makeCaseInsensitve(operator.getKey());
-                keyBuilder.append(getBracketed(op));
-            }
+            final String op = OPERATOR_PREFIX + makeCaseInsensitve(operator.getKey());
+            keyBuilder.append(getBracketed(op));
         }
 
         return createEntry(keyBuilder.toString(), value);

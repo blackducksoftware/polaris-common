@@ -29,7 +29,6 @@ public enum ParamOperator implements ParamEnum {
     OPERATOR_ONE_OF("one-of"),
     OPERATOR_GREATER_THAN_OR_EQUAL("gte"),
     OPERATOR_LESS_THAN_OR_EQUAL("lte"),
-    BLANK(""),
     NONE("");
 
     private final String key;

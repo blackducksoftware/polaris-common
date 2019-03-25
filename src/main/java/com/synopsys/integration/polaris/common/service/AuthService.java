@@ -33,7 +33,7 @@ import java.util.function.Function;
 
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.polaris.common.api.PolarisResource;
-import com.synopsys.integration.polaris.common.api.PolarisSingleResource;
+import com.synopsys.integration.polaris.common.api.PolarisResourcesSingle;
 import com.synopsys.integration.polaris.common.api.auth.PolarisRelationshipLinks;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestCreator;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestWrapper;
@@ -59,24 +59,24 @@ public class AuthService {
         this.polarisService = polarisService;
     }
 
-    public <R extends PolarisResource> List<R> getAll(final PolarisRequestSpec polarisRequestSpec, final Type type) throws IntegrationException {
-        return getFiltered(polarisRequestSpec, (PolarisParamBuilder) null, type);
+    public <R extends PolarisResource> List<R> getAll(final PolarisRequestSpec polarisRequestSpec, final Type resourcesType) throws IntegrationException {
+        return getFiltered(polarisRequestSpec, (PolarisParamBuilder) null, resourcesType);
     }
 
-    public <R extends PolarisResource> List<R> getFiltered(final PolarisRequestSpec polarisRequestSpec, final PolarisParamBuilder paramBuilder, final Type type) throws IntegrationException {
+    public <R extends PolarisResource> List<R> getFiltered(final PolarisRequestSpec polarisRequestSpec, final PolarisParamBuilder paramBuilder, final Type resourcesType) throws IntegrationException {
         final List<PolarisParamBuilder> paramBuilders = paramBuilder == null ? Arrays.asList() : Arrays.asList(paramBuilder);
-        return getFiltered(polarisRequestSpec, paramBuilders, type);
+        return getFiltered(polarisRequestSpec, paramBuilders, resourcesType);
     }
 
-    public <R extends PolarisResource> List<R> getFiltered(final PolarisRequestSpec polarisRequestSpec, final Collection<PolarisParamBuilder> paramBuilders, final Type type) throws IntegrationException {
+    public <R extends PolarisResource> List<R> getFiltered(final PolarisRequestSpec polarisRequestSpec, final Collection<PolarisParamBuilder> paramBuilders, final Type resourcesType) throws IntegrationException {
         final String uri = polarisHttpClient.getPolarisServerUrl() + polarisRequestSpec.getSpec();
         final Request.Builder pagedRequestBuilder = PolarisRequestFactory.createDefaultRequestBuilder().uri(uri);
         if (paramBuilders != null) {
             addParams(pagedRequestBuilder, paramBuilders);
         }
 
-        final PolarisPagedRequestCreator createPagedRequest = (limit, offset) -> PolarisRequestFactory.populatePagedRequestBuilder(pagedRequestBuilder, offset, limit).build();
-        final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(createPagedRequest, type);
+        final PolarisPagedRequestCreator createPagedRequest = (limit, offset) -> PolarisRequestFactory.populatePagedRequestBuilder(pagedRequestBuilder, limit, offset).build();
+        final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(createPagedRequest, resourcesType);
         return polarisService.getAllResponses(pagedRequestWrapper);
     }
 
@@ -84,11 +84,9 @@ public class AuthService {
         throws IntegrationException {
         final String uri = relationshipLinks.getRelated();
         final Request resourceRequest = PolarisRequestFactory.createDefaultPolarisGetRequest(uri);
-        final PolarisSingleResource<R> response = polarisService.get(resourcesType, resourceRequest);
+        final PolarisResourcesSingle<R> response = polarisService.get(resourcesType, resourceRequest);
 
-        final R resource = response.getData();
-        final T attribute = extractAttribute.apply(resource);
-        return Optional.ofNullable(attribute);
+        return response.getData().map(extractAttribute::apply);
     }
 
     private void addParams(final Request.Builder requestBuilder, final Collection<PolarisParamBuilder> paramBuilders) {

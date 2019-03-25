@@ -58,6 +58,10 @@ public class PolarisServicesFactory {
         return new AuthService(httpClient, createPolarisService());
     }
 
+    public RoleAssignmentsService createRoleAssignmentsService() {
+        return new RoleAssignmentsService(httpClient, createPolarisService(), createAuthService());
+    }
+
     public UserService createUserService() {
         return new UserService(createAuthService());
     }

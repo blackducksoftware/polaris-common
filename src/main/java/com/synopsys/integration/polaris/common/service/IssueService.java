@@ -24,57 +24,54 @@
 package com.synopsys.integration.polaris.common.service;
 
 import java.util.List;
-import java.util.function.BiFunction;
 
-import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.polaris.common.api.PolarisComponent;
 import com.synopsys.integration.polaris.common.model.Issue;
-import com.synopsys.integration.polaris.common.model.QueryIssue;
-import com.synopsys.integration.polaris.common.model.QueryIssues;
+import com.synopsys.integration.polaris.common.model.QueryIssueResource;
+import com.synopsys.integration.polaris.common.model.QueryIssueResources;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestCreator;
+import com.synopsys.integration.polaris.common.request.PolarisPagedRequestWrapper;
 import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
-import com.synopsys.integration.polaris.common.response.PolarisContainerResponseExtractor;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 import com.synopsys.integration.rest.request.Request;
 
 public class IssueService {
-    private static final PolarisContainerResponseExtractor<QueryIssues, QueryIssue> ISSUE_EXTRACTOR = new PolarisContainerResponseExtractor<>(QueryIssues::getData, QueryIssues::getMeta);
+    private static final TypeToken ISSUE_RESOURCES = new TypeToken<QueryIssueResources>() {};
 
-    private AccessTokenPolarisHttpClient polarisHttpClient;
-    private PolarisService polarisService;
+    private final AccessTokenPolarisHttpClient polarisHttpClient;
+    private final PolarisService polarisService;
 
     public IssueService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisService polarisService) {
         this.polarisHttpClient = polarisHttpClient;
         this.polarisService = polarisService;
     }
 
-    public List<QueryIssue> getIssuesForProjectAndBranch(String projectId, String branchId) throws IntegrationException {
-        BiFunction<Integer, Integer, Request> createPagedRequest = (limit, offset) -> createIssuesGetRequest(limit, offset, projectId, branchId);
-        PolarisPagedRequestCreator<QueryIssues, QueryIssue> issuePagedRequestCreator = new PolarisPagedRequestCreator<>(createPagedRequest, ISSUE_EXTRACTOR);
-
-        return polarisService.getAllResponses(QueryIssues.class, issuePagedRequestCreator);
+    public List<QueryIssueResource> getIssuesForProjectAndBranch(final String projectId, final String branchId) throws IntegrationException {
+        final PolarisPagedRequestCreator createPagedRequest = (limit, offset) -> createIssuesGetRequest(limit, offset, projectId, branchId);
+        final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(createPagedRequest, ISSUE_RESOURCES.getType());
+        return polarisService.getAllResponses(pagedRequestWrapper);
     }
 
-    public Issue getIssueForProjectBranchAndIssueKey(String projectId, String branchId, String issueKey) throws IntegrationException {
+    public Issue getIssueForProjectBranchAndIssueKey(final String projectId, final String branchId, final String issueKey) throws IntegrationException {
         final String uri = polarisHttpClient.getPolarisServerUrl() + PolarisService.GET_ISSUE_API_SPEC(issueKey);
-        Request.Builder requestBuilder = createRequestBuilder(uri, projectId, branchId);
-        Request request = requestBuilder.build();
+        final Request.Builder requestBuilder = createRequestBuilder(uri, projectId, branchId);
+        final Request request = requestBuilder.build();
         return polarisService.get(Issue.class, request);
     }
 
-    public Request createIssuesGetRequest(int limit, int offset, final String projectId, final String branchId) {
+    public Request createIssuesGetRequest(final int limit, final int offset, final String projectId, final String branchId) {
         final String uri = polarisHttpClient.getPolarisServerUrl() + PolarisService.ISSUES_API_SPEC;
-        Request.Builder requestBuilder = createRequestBuilder(uri, projectId, branchId);
+        final Request.Builder requestBuilder = createRequestBuilder(uri, projectId, branchId);
         PolarisRequestFactory.populatePagedRequestBuilder(requestBuilder, limit, offset);
         return requestBuilder.build();
     }
 
-    private Request.Builder createRequestBuilder(String uri, String projectId, String branchId) {
+    private Request.Builder createRequestBuilder(final String uri, final String projectId, final String branchId) {
         return PolarisRequestFactory.createDefaultRequestBuilder()
-                       .addQueryParameter(PolarisService.PROJECT_ID, projectId)
-                       .addQueryParameter(PolarisService.BRANCH_ID, branchId)
-                       .uri(uri);
+                   .addQueryParameter(PolarisService.PROJECT_ID, projectId)
+                   .addQueryParameter(PolarisService.BRANCH_ID, branchId)
+                   .uri(uri);
     }
 
 }

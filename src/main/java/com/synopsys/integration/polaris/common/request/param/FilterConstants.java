@@ -21,36 +21,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.model;
+package com.synopsys.integration.polaris.common.request.param;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.google.gson.annotations.SerializedName;
-import com.synopsys.integration.polaris.common.api.PolarisComponent;
-import com.synopsys.integration.polaris.common.api.generated.common.ResourcesPagination;
-
-public class QueryIssues extends PolarisComponent {
-    @SerializedName("data")
-    private List<QueryIssue> data = new ArrayList<>();
-
-    @SerializedName("meta")
-    private ResourcesPagination meta = null;
-
-    public List<QueryIssue> getData() {
-        return data;
-    }
-
-    public void setData(final List<QueryIssue> data) {
-        this.data = data;
-    }
-
-    public ResourcesPagination getMeta() {
-        return meta;
-    }
-
-    public void setMeta(final ResourcesPagination meta) {
-        this.meta = meta;
-    }
-
+public class FilterConstants {
+    public static final String FILTER_PROJECT_NAME_CONTAINS = "filter[project][name][$eq]";
+    public static final String FILTER_BRANCH_NAME_CONTAINS = "filter[branch][name][$eq]";
+    public static final String FILTER_BRANCH_PROJECT_ID_EQUALS = "filter[branch][project][id][$eq]";
 }

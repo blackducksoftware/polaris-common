@@ -31,15 +31,17 @@ public class PolarisServicesFactory {
     private final IntLogger logger;
     private final AccessTokenPolarisHttpClient httpClient;
     private final Gson gson;
+    private final PolarisJsonTransformer polarisJsonTransformer;
 
     public PolarisServicesFactory(final IntLogger logger, final AccessTokenPolarisHttpClient httpClient, final Gson gson) {
         this.logger = logger;
         this.httpClient = httpClient;
         this.gson = gson;
+        this.polarisJsonTransformer = new PolarisJsonTransformer(gson, logger);
     }
 
     public PolarisService createPolarisService() {
-        return new PolarisService(httpClient, gson);
+        return new PolarisService(httpClient, polarisJsonTransformer);
     }
 
     public ProjectService createProjectService() {
@@ -52,6 +54,18 @@ public class PolarisServicesFactory {
 
     public IssueService createIssueService() {
         return new IssueService(httpClient, createPolarisService());
+    }
+
+    public AuthService createAuthService() {
+        return new AuthService(httpClient, createPolarisService());
+    }
+
+    public RoleAssignmentsService createRoleAssignmentsService() {
+        return new RoleAssignmentsService(httpClient, createPolarisService(), createAuthService(), polarisJsonTransformer);
+    }
+
+    public UserService createUserService() {
+        return new UserService(createAuthService());
     }
 
 }

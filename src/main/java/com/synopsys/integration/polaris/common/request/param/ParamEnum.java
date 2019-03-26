@@ -21,24 +21,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.model;
+package com.synopsys.integration.polaris.common.request.param;
 
-import java.util.List;
+public interface ParamEnum {
+    String getKey();
 
-import org.apache.commons.lang3.StringUtils;
-
-import com.jayway.jsonpath.JsonPath;
-import com.synopsys.integration.polaris.common.api.PolarisResource;
-import com.synopsys.integration.polaris.common.api.auth.empty.PolarisRelationshipsEmpty;
-
-public class Issue extends PolarisResource<QueryIssueAttributes, PolarisRelationshipsEmpty> {
-    public String getLabel() {
-        return JsonPath.read(getJson(), "$.data.attributes.sub-tool");
-    }
-
-    public String getSourcePath() {
-        final List<String> pathPieces = JsonPath.read(getJson(), "$.included[?(@.type == 'path')].attributes.path[*]");
-        return StringUtils.join(pathPieces, "/");
+    default boolean equalsKey(final String candidate) {
+        return getKey().equals(candidate);
     }
 
 }

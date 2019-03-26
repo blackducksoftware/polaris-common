@@ -21,24 +21,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.model;
+package com.synopsys.integration.polaris.common.request.param;
 
-import java.util.List;
+public enum ParamOperator implements ParamEnum {
+    OPERATOR_EQUALS("eq"),
+    OPERATOR_SUBSTRING("substr"),
+    OPERATOR_ONE_OF("one-of"),
+    OPERATOR_GREATER_THAN_OR_EQUAL("gte"),
+    OPERATOR_LESS_THAN_OR_EQUAL("lte"),
+    NONE("");
 
-import org.apache.commons.lang3.StringUtils;
+    private final String key;
 
-import com.jayway.jsonpath.JsonPath;
-import com.synopsys.integration.polaris.common.api.PolarisResource;
-import com.synopsys.integration.polaris.common.api.auth.empty.PolarisRelationshipsEmpty;
-
-public class Issue extends PolarisResource<QueryIssueAttributes, PolarisRelationshipsEmpty> {
-    public String getLabel() {
-        return JsonPath.read(getJson(), "$.data.attributes.sub-tool");
+    ParamOperator(final String key) {
+        this.key = key;
     }
 
-    public String getSourcePath() {
-        final List<String> pathPieces = JsonPath.read(getJson(), "$.included[?(@.type == 'path')].attributes.path[*]");
-        return StringUtils.join(pathPieces, "/");
+    @Override
+    public String getKey() {
+        return key;
     }
 
 }

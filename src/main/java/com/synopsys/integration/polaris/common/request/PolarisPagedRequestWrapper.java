@@ -21,24 +21,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.model;
+package com.synopsys.integration.polaris.common.request;
 
-import java.util.List;
+import java.lang.reflect.Type;
 
-import org.apache.commons.lang3.StringUtils;
+public class PolarisPagedRequestWrapper {
+    private final PolarisPagedRequestCreator requestCreator;
+    private final Type type;
 
-import com.jayway.jsonpath.JsonPath;
-import com.synopsys.integration.polaris.common.api.PolarisResource;
-import com.synopsys.integration.polaris.common.api.auth.empty.PolarisRelationshipsEmpty;
-
-public class Issue extends PolarisResource<QueryIssueAttributes, PolarisRelationshipsEmpty> {
-    public String getLabel() {
-        return JsonPath.read(getJson(), "$.data.attributes.sub-tool");
+    public PolarisPagedRequestWrapper(final PolarisPagedRequestCreator requestCreator, final Type type) {
+        this.requestCreator = requestCreator;
+        this.type = type;
     }
 
-    public String getSourcePath() {
-        final List<String> pathPieces = JsonPath.read(getJson(), "$.included[?(@.type == 'path')].attributes.path[*]");
-        return StringUtils.join(pathPieces, "/");
+    public PolarisPagedRequestCreator getRequestCreator() {
+        return requestCreator;
+    }
+
+    public Type getResponseType() {
+        return type;
     }
 
 }

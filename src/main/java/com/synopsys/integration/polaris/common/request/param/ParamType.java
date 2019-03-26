@@ -21,21 +21,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.model;
+package com.synopsys.integration.polaris.common.request.param;
 
-import com.google.gson.annotations.SerializedName;
-import com.synopsys.integration.polaris.common.api.PolarisComponent;
+public enum ParamType implements ParamEnum {
+    FILTER("filter"),
+    INCLUDE("include"),
+    PAGE("page");
 
-public class QueryIssue extends PolarisComponent {
-    @SerializedName("attributes")
-    private QueryIssueAttributes attributes;
+    private final String key;
 
-    public QueryIssueAttributes getAttributes() {
-        return attributes;
+    ParamType(final String key) {
+        this.key = key;
     }
 
-    public void setAttributes(final QueryIssueAttributes attributes) {
-        this.attributes = attributes;
+    @Override
+    public String getKey() {
+        return key;
     }
 
 }

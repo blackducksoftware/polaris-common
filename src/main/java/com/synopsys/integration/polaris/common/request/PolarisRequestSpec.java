@@ -21,24 +21,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.model;
+package com.synopsys.integration.polaris.common.request;
 
-import java.util.List;
+public class PolarisRequestSpec {
+    private final String spec;
 
-import org.apache.commons.lang3.StringUtils;
-
-import com.jayway.jsonpath.JsonPath;
-import com.synopsys.integration.polaris.common.api.PolarisResource;
-import com.synopsys.integration.polaris.common.api.auth.empty.PolarisRelationshipsEmpty;
-
-public class Issue extends PolarisResource<QueryIssueAttributes, PolarisRelationshipsEmpty> {
-    public String getLabel() {
-        return JsonPath.read(getJson(), "$.data.attributes.sub-tool");
+    public static final PolarisRequestSpec of(final String spec) {
+        return new PolarisRequestSpec(spec);
     }
 
-    public String getSourcePath() {
-        final List<String> pathPieces = JsonPath.read(getJson(), "$.included[?(@.type == 'path')].attributes.path[*]");
-        return StringUtils.join(pathPieces, "/");
+    public PolarisRequestSpec(final String spec) {
+        this.spec = spec;
+    }
+
+    public String getSpec() {
+        return spec;
+    }
+
+    @Override
+    public String toString() {
+        return getSpec();
     }
 
 }

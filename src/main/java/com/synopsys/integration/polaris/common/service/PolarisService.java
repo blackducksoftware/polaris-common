@@ -24,26 +24,26 @@
 package com.synopsys.integration.polaris.common.service;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-import com.google.gson.Gson;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.polaris.common.api.PolarisComponent;
-import com.synopsys.integration.polaris.common.api.generated.common.ResourcesPagination;
-import com.synopsys.integration.polaris.common.request.PolarisPagedRequestCreator;
+import com.synopsys.integration.polaris.common.api.PolarisResource;
+import com.synopsys.integration.polaris.common.api.PolarisResourceSparse;
+import com.synopsys.integration.polaris.common.api.PolarisResources;
+import com.synopsys.integration.polaris.common.api.PolarisResourcesPagination;
+import com.synopsys.integration.polaris.common.request.PolarisPagedRequestWrapper;
 import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
-import com.synopsys.integration.polaris.common.response.PolarisContainerResponseExtractor;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 import com.synopsys.integration.rest.request.Request;
 import com.synopsys.integration.rest.request.Response;
 
 public class PolarisService {
-    public static final String FILTER_PROJECT_NAME_CONTAINS = "filter[project][name][$eq]";
-    public static final String FILTER_BRANCH_NAME_CONTAINS = "filter[branch][name][$eq]";
-    public static final String FILTER_BRANCH_PROJECT_ID_EQUALS = "filter[branch][project][id][$eq]";
-
     public static final String PROJECT_ID = "project-id";
     public static final String BRANCH_ID = "branch-id";
 
@@ -54,39 +54,34 @@ public class PolarisService {
     public static final String QUERY_API_SPEC = "/api/query/v0";
     public static final String ISSUES_API_SPEC = QUERY_API_SPEC + "/issues";
 
-    public static final String GET_ISSUE_API_SPEC(String issueKey) {
+    public static final String GET_ISSUE_API_SPEC(final String issueKey) {
         return ISSUES_API_SPEC + "/" + issueKey;
     }
 
     private final AccessTokenPolarisHttpClient polarisHttpClient;
-    private final Gson gson;
+    private final PolarisJsonTransformer polarisJsonTransformer;
 
-    public PolarisService(AccessTokenPolarisHttpClient polarisHttpClient, Gson gson) {
+    public PolarisService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisJsonTransformer polarisJsonTransformer) {
         this.polarisHttpClient = polarisHttpClient;
-        this.gson = gson;
+        this.polarisJsonTransformer = polarisJsonTransformer;
     }
 
-    public <R extends PolarisComponent> R get(Class<R> returnClass, Request request) throws IntegrationException {
+    public <R extends PolarisComponent> R get(final Type returnType, final Request request) throws IntegrationException {
         try (final Response response = polarisHttpClient.execute(request)) {
             response.throwExceptionForError();
 
-            final String content = response.getContentString();
-            R returnObject = gson.fromJson(content, returnClass);
-            returnObject.setJson(content);
-
-            return returnObject;
+            return polarisJsonTransformer.getResponse(response, returnType);
         } catch (final IOException e) {
             throw new IntegrationException(e);
         }
     }
 
-    public <W extends PolarisComponent, R extends PolarisComponent> Optional<R> getFirstResponse(Class<W> wrapperClass, Request request, PolarisContainerResponseExtractor<W, R> polarisContainerResponseExtractor)
-            throws IntegrationException {
+    public <R extends PolarisResource> Optional<R> getFirstResponse(final Request request, final Type resourcesType) throws IntegrationException {
         try (final Response response = polarisHttpClient.execute(request)) {
             response.throwExceptionForError();
-            final W wrappedResponse = gson.fromJson(response.getContentString(), wrapperClass);
+            final PolarisResources wrappedResponse = polarisJsonTransformer.getResponse(response, resourcesType);
             if (wrappedResponse != null) {
-                final List<R> data = polarisContainerResponseExtractor.getGetResponseList().apply(wrappedResponse);
+                final List<R> data = (List<R>) wrappedResponse.getData();
                 if (null != data && !data.isEmpty()) {
                     return Optional.ofNullable(data.get(0));
                 }
@@ -97,37 +92,58 @@ public class PolarisService {
         }
     }
 
-    public <W extends PolarisComponent, R extends PolarisComponent> List<R> getAllResponses(Class<W> wrapperClass, PolarisPagedRequestCreator<W, R> polarisPagedRequestCreator) throws IntegrationException {
-        return getAllResponses(wrapperClass, polarisPagedRequestCreator, PolarisRequestFactory.DEFAULT_LIMIT);
+    public <R extends PolarisResource> List<R> getAllResponses(final PolarisPagedRequestWrapper polarisPagedRequestWrapper) throws IntegrationException {
+        return getAllResponses(polarisPagedRequestWrapper, PolarisRequestFactory.DEFAULT_LIMIT);
     }
 
-    public <W extends PolarisComponent, R extends PolarisComponent> List<R> getAllResponses(Class<W> wrapperClass, PolarisPagedRequestCreator<W, R> polarisPagedRequestCreator, int pageSize) throws IntegrationException {
-        final List<R> allResults = new ArrayList<>();
+    public <R extends PolarisResource> List<R> getAllResponses(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int pageSize) throws IntegrationException {
+        return (List<R>) getPopulatedResponse(polarisPagedRequestWrapper, pageSize).getData();
+    }
+
+    public <R extends PolarisResource, W extends PolarisResources<R>> W getPopulatedResponse(final PolarisPagedRequestWrapper polarisPagedRequestWrapper) throws IntegrationException {
+        return getPopulatedResponse(polarisPagedRequestWrapper, PolarisRequestFactory.DEFAULT_LIMIT);
+    }
+
+    public <R extends PolarisResource, W extends PolarisResources<R>> W getPopulatedResponse(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int pageSize) throws IntegrationException {
+        PolarisResources<R> populatedResources = null;
+        final Set<R> allData = new HashSet<>();
+        final Set<PolarisResourceSparse> allIncluded = new HashSet<>();
 
         int totalExpected = 0;
-        int limit = pageSize;
+        final int limit = pageSize;
         int offset = 0;
         do {
-            final Request pagedRequest = polarisPagedRequestCreator.getCreatePagedRequest().apply(limit, offset);
-            try (final Response response = polarisHttpClient.execute(pagedRequest)) {
-                response.throwExceptionForError();
-                final W wrappedResponse = gson.fromJson(response.getContentString(), wrapperClass);
-
-                if (wrappedResponse != null) {
-                    PolarisContainerResponseExtractor<W, R> polarisContainerResponseExtractor = polarisPagedRequestCreator.getPolarisContainerResponseExtractor();
-                    final ResourcesPagination meta = polarisContainerResponseExtractor.getGetMetaFunction().apply(wrappedResponse);
-                    totalExpected = meta.getTotal().intValue();
-
-                    final List<R> data = polarisContainerResponseExtractor.getGetResponseList().apply(wrappedResponse);
-                    allResults.addAll(data);
-                    offset += limit;
-                }
-            } catch (final IOException e) {
-                throw new IntegrationException("Problem handling request", e);
+            final PolarisResources<R> wrappedResponse = executePagedRequest(polarisPagedRequestWrapper, offset, limit);
+            if (null == populatedResources) {
+                populatedResources = wrappedResponse;
             }
-        } while (totalExpected > allResults.size());
+            if (wrappedResponse != null) {
+                final PolarisResourcesPagination meta = wrappedResponse.getMeta();
+                totalExpected = meta.getTotal().intValue();
 
-        return allResults;
+                final List<R> data = wrappedResponse.getData();
+                allData.addAll(data);
+
+                final List<PolarisResourceSparse> included = wrappedResponse.getIncluded();
+                allIncluded.addAll(included);
+
+                offset += limit;
+            }
+        } while (totalExpected > allData.size());
+
+        populatedResources.setData(new ArrayList<>(allData));
+        populatedResources.setIncluded(new ArrayList<>(allIncluded));
+        return (W) populatedResources;
+    }
+
+    private <R extends PolarisResource> PolarisResources<R> executePagedRequest(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int offset, final int limit) throws IntegrationException {
+        final Request pagedRequest = polarisPagedRequestWrapper.getRequestCreator().apply(limit, offset);
+        try (final Response response = polarisHttpClient.execute(pagedRequest)) {
+            response.throwExceptionForError();
+            return polarisJsonTransformer.getResponse(response, polarisPagedRequestWrapper.getResponseType());
+        } catch (final IOException e) {
+            throw new IntegrationException("Problem handling request", e);
+        }
     }
 
 }

@@ -13,7 +13,7 @@ import com.synopsys.integration.polaris.common.api.common.project.ProjectV0Resou
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfig;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfigBuilder;
 import com.synopsys.integration.polaris.common.model.Issue;
-import com.synopsys.integration.polaris.common.model.QueryIssue;
+import com.synopsys.integration.polaris.common.model.QueryIssueResource;
 
 public class FullTest {
     public static void main(final String[] args) throws IntegrationException {
@@ -38,7 +38,7 @@ public class FullTest {
         final Optional<BranchV0Resource> branch = branchService.getBranchForProjectByName(project.get().getId(), "17.0.1-SNAPSHOT");
         System.out.println(branch.get().getId());
 
-        final List<QueryIssue> queryIssues = issueService.getIssuesForProjectAndBranch(project.get().getId(), branch.get().getId());
+        final List<QueryIssueResource> queryIssues = issueService.getIssuesForProjectAndBranch(project.get().getId(), branch.get().getId());
         queryIssues.stream().forEach(System.out::println);
         final List<String> issueKeys = queryIssues.stream().map(queryIssue -> queryIssue.getAttributes().getIssueKey()).collect(Collectors.toList());
 

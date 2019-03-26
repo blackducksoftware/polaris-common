@@ -23,38 +23,8 @@
  */
 package com.synopsys.integration.polaris.common.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.synopsys.integration.polaris.common.api.PolarisResource;
+import com.synopsys.integration.polaris.common.api.auth.empty.PolarisRelationshipsEmpty;
 
-import com.google.gson.annotations.SerializedName;
-import com.synopsys.integration.polaris.common.api.PolarisResources;
-import com.synopsys.integration.polaris.common.api.PolarisResourcesPagination;
-
-public class QueryIssues extends PolarisResources<QueryIssue> {
-    @SerializedName("data")
-    private List<QueryIssue> data = new ArrayList<>();
-
-    @SerializedName("meta")
-    private PolarisResourcesPagination meta = null;
-
-    @Override
-    public List<QueryIssue> getData() {
-        return data;
-    }
-
-    @Override
-    public void setData(final List<QueryIssue> data) {
-        this.data = data;
-    }
-
-    @Override
-    public PolarisResourcesPagination getMeta() {
-        return meta;
-    }
-
-    @Override
-    public void setMeta(final PolarisResourcesPagination meta) {
-        this.meta = meta;
-    }
-
+public class QueryIssueResource extends PolarisResource<QueryIssueAttributes, PolarisRelationshipsEmpty> {
 }

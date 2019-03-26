@@ -23,11 +23,7 @@
  */
 package com.synopsys.integration.polaris.common.model;
 
-import com.google.gson.annotations.SerializedName;
-import com.synopsys.integration.polaris.common.api.PolarisComponent;
-import com.synopsys.integration.polaris.common.api.PolarisResource;
-import com.synopsys.integration.polaris.common.api.auth.empty.PolarisRelationshipsEmpty;
+import com.synopsys.integration.polaris.common.api.PolarisResources;
 
-public class QueryIssue extends PolarisResource<QueryIssueAttributes, PolarisRelationshipsEmpty> {
-
+public class QueryIssueResources extends PolarisResources<QueryIssueResource> {
 }

@@ -28,8 +28,8 @@ import java.util.List;
 import com.google.gson.reflect.TypeToken;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.polaris.common.model.Issue;
-import com.synopsys.integration.polaris.common.model.QueryIssue;
-import com.synopsys.integration.polaris.common.model.QueryIssues;
+import com.synopsys.integration.polaris.common.model.QueryIssueResource;
+import com.synopsys.integration.polaris.common.model.QueryIssueResources;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestCreator;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestWrapper;
 import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
@@ -37,7 +37,7 @@ import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient
 import com.synopsys.integration.rest.request.Request;
 
 public class IssueService {
-    private static final TypeToken ISSUE_RESOURCES = new TypeToken<QueryIssues>() {};
+    private static final TypeToken ISSUE_RESOURCES = new TypeToken<QueryIssueResources>() {};
 
     private final AccessTokenPolarisHttpClient polarisHttpClient;
     private final PolarisService polarisService;
@@ -47,7 +47,7 @@ public class IssueService {
         this.polarisService = polarisService;
     }
 
-    public List<QueryIssue> getIssuesForProjectAndBranch(final String projectId, final String branchId) throws IntegrationException {
+    public List<QueryIssueResource> getIssuesForProjectAndBranch(final String projectId, final String branchId) throws IntegrationException {
         final PolarisPagedRequestCreator createPagedRequest = (limit, offset) -> createIssuesGetRequest(limit, offset, projectId, branchId);
         final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(createPagedRequest, ISSUE_RESOURCES.getType());
         return polarisService.getAllResponses(pagedRequestWrapper);

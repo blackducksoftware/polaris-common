@@ -79,9 +79,9 @@ public class PolarisService {
     public <R extends PolarisResource> Optional<R> getFirstResponse(final Request request, final Type resourcesType) throws IntegrationException {
         try (final Response response = polarisHttpClient.execute(request)) {
             response.throwExceptionForError();
-            final PolarisResources wrappedResponse = polarisJsonTransformer.getResponse(response, resourcesType);
+            final PolarisResources<R> wrappedResponse = polarisJsonTransformer.getResponse(response, resourcesType);
             if (wrappedResponse != null) {
-                final List<R> data = (List<R>) wrappedResponse.getData();
+                final List<R> data = wrappedResponse.getData();
                 if (null != data && !data.isEmpty()) {
                     return Optional.ofNullable(data.get(0));
                 }
@@ -96,8 +96,9 @@ public class PolarisService {
         return getAllResponses(polarisPagedRequestWrapper, PolarisRequestFactory.DEFAULT_LIMIT);
     }
 
-    public <R extends PolarisResource> List<R> getAllResponses(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int pageSize) throws IntegrationException {
-        return (List<R>) getPopulatedResponse(polarisPagedRequestWrapper, pageSize).getData();
+    public <R extends PolarisResource, W extends PolarisResources<R>> List<R> getAllResponses(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int pageSize) throws IntegrationException {
+        final W populatedResponse = getPopulatedResponse(polarisPagedRequestWrapper, pageSize);
+        return populatedResponse.getData();
     }
 
     public <R extends PolarisResource, W extends PolarisResources<R>> W getPopulatedResponse(final PolarisPagedRequestWrapper polarisPagedRequestWrapper) throws IntegrationException {
@@ -105,15 +106,14 @@ public class PolarisService {
     }
 
     public <R extends PolarisResource, W extends PolarisResources<R>> W getPopulatedResponse(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int pageSize) throws IntegrationException {
-        PolarisResources<R> populatedResources = null;
+        W populatedResources = null;
         final Set<R> allData = new HashSet<>();
         final Set<PolarisResourceSparse> allIncluded = new HashSet<>();
 
         int totalExpected = 0;
-        final int limit = pageSize;
         int offset = 0;
         do {
-            final PolarisResources<R> wrappedResponse = executePagedRequest(polarisPagedRequestWrapper, offset, limit);
+            final W wrappedResponse = executePagedRequest(polarisPagedRequestWrapper, offset, pageSize);
             if (null == populatedResources) {
                 populatedResources = wrappedResponse;
             }
@@ -127,16 +127,16 @@ public class PolarisService {
                 final List<PolarisResourceSparse> included = wrappedResponse.getIncluded();
                 allIncluded.addAll(included);
 
-                offset += limit;
+                offset += pageSize;
             }
         } while (totalExpected > allData.size());
 
         populatedResources.setData(new ArrayList<>(allData));
         populatedResources.setIncluded(new ArrayList<>(allIncluded));
-        return (W) populatedResources;
+        return populatedResources;
     }
 
-    private <R extends PolarisResource> PolarisResources<R> executePagedRequest(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int offset, final int limit) throws IntegrationException {
+    private <R extends PolarisResource, W extends PolarisResources<R>> W executePagedRequest(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int offset, final int limit) throws IntegrationException {
         final Request pagedRequest = polarisPagedRequestWrapper.getRequestCreator().apply(limit, offset);
         try (final Response response = polarisHttpClient.execute(pagedRequest)) {
             response.throwExceptionForError();

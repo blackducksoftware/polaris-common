@@ -57,15 +57,23 @@ public class PolarisServicesFactory {
     }
 
     public AuthService createAuthService() {
-        return new AuthService(httpClient, createPolarisService());
+        return new AuthService(httpClient, polarisJsonTransformer, createPolarisService());
     }
 
     public RoleAssignmentsService createRoleAssignmentsService() {
-        return new RoleAssignmentsService(httpClient, createPolarisService(), createAuthService(), polarisJsonTransformer);
+        return new RoleAssignmentsService(httpClient, createPolarisService(), createAuthService());
     }
 
     public UserService createUserService() {
         return new UserService(createAuthService());
+    }
+
+    public GroupService createGroupService() {
+        return new GroupService(createAuthService());
+    }
+
+    public IntLogger getLogger() {
+        return logger;
     }
 
 }

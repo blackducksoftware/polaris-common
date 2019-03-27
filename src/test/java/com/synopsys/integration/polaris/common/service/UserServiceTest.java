@@ -1,6 +1,7 @@
 package com.synopsys.integration.polaris.common.service;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
+import com.synopsys.integration.polaris.common.api.auth.model.group.GroupResource;
 import com.synopsys.integration.polaris.common.api.auth.model.user.UserResource;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfig;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfigBuilder;
@@ -40,6 +42,39 @@ public class UserServiceTest {
             final Optional<String> optionalEmail = userService.getEmailForUser(user);
             optionalEmail.ifPresent(email -> assertTrue("Expected email not to be blank", StringUtils.isNotBlank(email)));
         }
+    }
+
+    @Test
+    public void callGetUsersForGroupTest() throws IntegrationException {
+        final PolarisServerConfigBuilder polarisServerConfigBuilder = PolarisServerConfig.newBuilder();
+        polarisServerConfigBuilder.setUrl(System.getenv("POLARIS_URL"));
+        polarisServerConfigBuilder.setAccessToken(System.getenv("POLARIS_ACCESS_TOKEN"));
+        polarisServerConfigBuilder.setGson(new Gson());
+
+        final PolarisServerConfig polarisServerConfig = polarisServerConfigBuilder.build();
+        final IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
+        final PolarisServicesFactory polarisServicesFactory = polarisServerConfig.createPolarisServicesFactory(logger);
+
+        final GroupService groupService = polarisServicesFactory.createGroupService();
+
+        final GroupResource groupResource;
+        try {
+            final Optional<GroupResource> optionalGroupResource = groupService.getGroupByName("IntegrationsTeam");
+            if (optionalGroupResource.isPresent()) {
+                groupResource = optionalGroupResource.get();
+            } else {
+                groupResource = groupService.getAllGroups()
+                                    .stream()
+                                    .findAny()
+                                    .orElseThrow(() -> new IntegrationException());
+            }
+        } catch (final IntegrationException e) {
+            assumeTrue(e != null, "Something went wrong while retrieving projects, but this test is not for the project service");
+            return;
+        }
+
+        final UserService userService = polarisServicesFactory.createUserService();
+        userService.getUsersForGroup(groupResource);
     }
 
 }

@@ -74,7 +74,8 @@ public class RoleAssignmentsServiceTest {
             return;
         }
 
-        final RoleAssignmentResources roleAssignmentsForProject = roleAssignmentsService.getRoleAssignmentsForProjectWithIncluded(project.getId(), RoleAssignmentsService.INCLUDE_USERS, RoleAssignmentsService.INCLUDE_ROLES);
+        final RoleAssignmentResources roleAssignmentsForProject = roleAssignmentsService.getRoleAssignmentsForProjectWithIncluded(project.getId(),
+            RoleAssignmentsService.INCLUDE_USERS, RoleAssignmentsService.INCLUDE_ROLES, RoleAssignmentsService.INCLUDE_GROUPS);
         final List<RoleAssignmentResource> data = roleAssignmentsForProject.getData();
         if (!data.isEmpty()) {
             assertTrue(!roleAssignmentsForProject.getIncluded().isEmpty(), "Expected resources to be included");

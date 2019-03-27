@@ -26,19 +26,28 @@ package com.synopsys.integration.polaris.common.service;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.polaris.common.api.PolarisResource;
+import com.synopsys.integration.polaris.common.api.PolarisResourceSparse;
 import com.synopsys.integration.polaris.common.api.PolarisResourcesSingle;
+import com.synopsys.integration.polaris.common.api.PolarisResponse;
 import com.synopsys.integration.polaris.common.api.auth.PolarisRelationshipLinks;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestCreator;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestWrapper;
 import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
 import com.synopsys.integration.polaris.common.request.PolarisRequestSpec;
+import com.synopsys.integration.polaris.common.request.param.ParamOperator;
+import com.synopsys.integration.polaris.common.request.param.ParamType;
 import com.synopsys.integration.polaris.common.request.param.PolarisParamBuilder;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 import com.synopsys.integration.rest.request.Request;
@@ -46,16 +55,20 @@ import com.synopsys.integration.rest.request.Request;
 public class AuthService {
     private static final String AUTH_API_SPEC_STRING = "/api/auth";
     private static final String USERS_API_SPEC_STRING = AUTH_API_SPEC_STRING + "/users";
+    private static final String GROUPS_API_SPEC_STRING = AUTH_API_SPEC_STRING + "/groups";
     private static final String ROLE_ASSIGNMENTS_API_SPEC_STRING = AUTH_API_SPEC_STRING + "/role-assignments";
 
     public static final PolarisRequestSpec USERS_API_SPEC = PolarisRequestSpec.of(USERS_API_SPEC_STRING);
+    public static final PolarisRequestSpec GROUPS_API_SPEC = PolarisRequestSpec.of(GROUPS_API_SPEC_STRING);
     public static final PolarisRequestSpec ROLE_ASSIGNMENTS_API_SPEC = PolarisRequestSpec.of(ROLE_ASSIGNMENTS_API_SPEC_STRING);
 
     private final AccessTokenPolarisHttpClient polarisHttpClient;
+    private final PolarisJsonTransformer polarisJsonTransformer;
     private final PolarisService polarisService;
 
-    public AuthService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisService polarisService) {
+    public AuthService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisJsonTransformer polarisJsonTransformer, final PolarisService polarisService) {
         this.polarisHttpClient = polarisHttpClient;
+        this.polarisJsonTransformer = polarisJsonTransformer;
         this.polarisService = polarisService;
     }
 
@@ -75,16 +88,65 @@ public class AuthService {
         return polarisService.getAllResponses(pagedRequestWrapper);
     }
 
+    public <R extends PolarisResource> Optional<R> getResourceFromPopulated(final PolarisResponse populatedResources, final PolarisResourceSparse sparseResourceData, final Class<R> resourceClass) {
+        final String id = StringUtils.defaultString(sparseResourceData.getId());
+        final String type = StringUtils.defaultString(sparseResourceData.getType());
+        for (final PolarisResource includedResource : populatedResources.getIncluded()) {
+            if (type.equals(includedResource.getType()) && id.equals(includedResource.getId())) {
+                try {
+                    final R fullyTypedResource = polarisJsonTransformer.getResponseAs(includedResource.getJson(), resourceClass);
+                    return Optional.of(fullyTypedResource);
+                } catch (final IntegrationException e) {
+                    break;
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
     public <R extends PolarisResource, T> Optional<T> getAttributeFromRelationship(final PolarisRelationshipLinks relationshipLinks, final Function<R, T> extractAttribute, final Type resourcesType)
         throws IntegrationException {
         final String uri = relationshipLinks.getRelated();
         final Request resourceRequest = PolarisRequestFactory.createDefaultPolarisGetRequest(uri);
         final PolarisResourcesSingle<R> response = polarisService.get(resourcesType, resourceRequest);
 
-        return response.getData().map(extractAttribute::apply);
+        return response.getData().map(extractAttribute);
     }
 
-    private Request createPagedRequest(final String uri, final Collection<PolarisParamBuilder> paramBuilders, final int limit, final int offset) {
+    public PolarisPagedRequestCreator generatePagedRequestCreatorWithInclude(final PolarisRequestSpec polarisRequestSpec, final String... included) {
+        return generatePagedRequestCreatorWithInclude(polarisRequestSpec, Arrays.asList(), included);
+    }
+
+    public PolarisPagedRequestCreator generatePagedRequestCreatorWithInclude(final PolarisRequestSpec polarisRequestSpec, final PolarisParamBuilder paramBuilder, final String... included) {
+        return generatePagedRequestCreatorWithInclude(polarisRequestSpec, Arrays.asList(paramBuilder), included);
+    }
+
+    public PolarisPagedRequestCreator generatePagedRequestCreatorWithInclude(final PolarisRequestSpec polarisRequestSpec, final Collection<PolarisParamBuilder> paramBuilders, final String... included) {
+        final Set<PolarisParamBuilder> allParamBuilders = new HashSet<>(paramBuilders);
+        final Map<String, Set<String>> queryParameters = new HashMap<>();
+        for (final String include : included) {
+            final PolarisParamBuilder includeFilter = createIncludeFilter(polarisRequestSpec.getType(), include);
+            allParamBuilders.add(includeFilter);
+        }
+        for (final PolarisParamBuilder paramBuilder : allParamBuilders) {
+            final Map.Entry<String, String> queryParam = paramBuilder.build();
+            queryParameters.computeIfAbsent(queryParam.getKey(), k -> new HashSet<>()).add(queryParam.getValue());
+        }
+
+        final String uri = polarisHttpClient.getPolarisServerUrl() + polarisRequestSpec.getSpec();
+        return (limit, offset) -> PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset).uri(uri).queryParameters(queryParameters).build();
+    }
+
+    public PolarisParamBuilder createIncludeFilter(final String baseType, final String typeToInclude) {
+        return new PolarisParamBuilder()
+                   .setValue(typeToInclude)
+                   .setParamType(ParamType.INCLUDE)
+                   .setOperator(ParamOperator.NONE)
+                   .addAdditionalProp(baseType)
+                   .setCaseSensitive(true);
+    }
+
+    public Request createPagedRequest(final String uri, final Collection<PolarisParamBuilder> paramBuilders, final int limit, final int offset) {
         final Request.Builder pagedRequestBuilder = PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset);
         pagedRequestBuilder.uri(uri);
         if (paramBuilders != null) {

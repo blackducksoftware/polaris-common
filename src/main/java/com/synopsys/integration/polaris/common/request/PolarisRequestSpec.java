@@ -23,6 +23,8 @@
  */
 package com.synopsys.integration.polaris.common.request;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class PolarisRequestSpec {
     private final String spec;
 
@@ -36,6 +38,11 @@ public class PolarisRequestSpec {
 
     public String getSpec() {
         return spec;
+    }
+
+    public String getType() {
+        final String[] pieces = StringUtils.splitByWholeSeparator(spec, "/");
+        return pieces[pieces.length - 1];
     }
 
     @Override

@@ -25,12 +25,8 @@ package com.synopsys.integration.polaris.common.service;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 import com.google.gson.reflect.TypeToken;
@@ -38,6 +34,7 @@ import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.polaris.common.api.PolarisRelationshipSingle;
 import com.synopsys.integration.polaris.common.api.PolarisResource;
 import com.synopsys.integration.polaris.common.api.PolarisResourceSparse;
+import com.synopsys.integration.polaris.common.api.auth.model.group.GroupResource;
 import com.synopsys.integration.polaris.common.api.auth.model.role.RoleResource;
 import com.synopsys.integration.polaris.common.api.auth.model.role.assignments.RoleAssignmentRelationships;
 import com.synopsys.integration.polaris.common.api.auth.model.role.assignments.RoleAssignmentResource;
@@ -45,28 +42,27 @@ import com.synopsys.integration.polaris.common.api.auth.model.role.assignments.R
 import com.synopsys.integration.polaris.common.api.auth.model.user.UserResource;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestCreator;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestWrapper;
-import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
 import com.synopsys.integration.polaris.common.request.param.ParamOperator;
 import com.synopsys.integration.polaris.common.request.param.ParamType;
 import com.synopsys.integration.polaris.common.request.param.PolarisParamBuilder;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 
+// TODO rename to RoleAssignmentService in next major release
 public class RoleAssignmentsService {
-    public static final String INCLUDE_USERS = "user";
+    public static final String INCLUDE_GROUPS = "group";
     public static final String INCLUDE_ROLES = "role";
+    public static final String INCLUDE_USERS = "user";
 
     private static final TypeToken ROLE_ASSIGNMENT_RESOURCES = new TypeToken<RoleAssignmentResources>() {};
 
     final AccessTokenPolarisHttpClient polarisHttpClient;
     private final PolarisService polarisService;
     private final AuthService authService;
-    private final PolarisJsonTransformer polarisJsonTransformer;
 
-    public RoleAssignmentsService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisService polarisService, final AuthService authService, final PolarisJsonTransformer polarisJsonTransformer) {
+    public RoleAssignmentsService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisService polarisService, final AuthService authService) {
         this.polarisHttpClient = polarisHttpClient;
         this.polarisService = polarisService;
         this.authService = authService;
-        this.polarisJsonTransformer = polarisJsonTransformer;
     }
 
     public List<RoleAssignmentResource> getAll() throws IntegrationException {
@@ -82,28 +78,22 @@ public class RoleAssignmentsService {
     }
 
     public RoleAssignmentResources getRoleAssignmentsForProjectWithIncluded(final String projectId, final String... included) throws IntegrationException {
-        final Map<String, Set<String>> queryParameters = new HashMap<>();
-        for (final String include : included) {
-            final PolarisParamBuilder includeFilter = createIncludeFilter(include);
-            final Map.Entry<String, String> queryParam = includeFilter.build();
-            queryParameters.computeIfAbsent(queryParam.getKey(), k -> new HashSet<>()).add(queryParam.getValue());
-        }
-
-        final Map.Entry<String, String> projectParam = createProjectFilter(projectId).build();
-        queryParameters.computeIfAbsent(projectParam.getKey(), k -> new HashSet<>()).add(projectParam.getValue());
-
-        final String uri = polarisHttpClient.getPolarisServerUrl() + AuthService.ROLE_ASSIGNMENTS_API_SPEC;
-        final PolarisPagedRequestCreator requestCreator = (limit, offset) -> PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset).uri(uri).queryParameters(queryParameters).build();
+        final PolarisParamBuilder projectFilter = createProjectFilter(projectId);
+        final PolarisPagedRequestCreator requestCreator = authService.generatePagedRequestCreatorWithInclude(AuthService.ROLE_ASSIGNMENTS_API_SPEC, projectFilter, included);
         final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(requestCreator, ROLE_ASSIGNMENT_RESOURCES.getType());
         return polarisService.getPopulatedResponse(pagedRequestWrapper);
     }
 
+    public Optional<GroupResource> getGroupFromPopulatedRoleAssignments(final RoleAssignmentResources populatedResources, final RoleAssignmentResource referencedResource) {
+        return getResourceFromPopulatedRoleAssignments(populatedResources, referencedResource, RoleAssignmentRelationships::getGroup, GroupResource.class);
+    }
+
     public Optional<UserResource> getUserFromPopulatedRoleAssignments(final RoleAssignmentResources populatedResources, final RoleAssignmentResource referencedResource) {
-        return getUserFromPopulatedRoleAssignments(populatedResources, referencedResource, RoleAssignmentRelationships::getUser, UserResource.class);
+        return getResourceFromPopulatedRoleAssignments(populatedResources, referencedResource, RoleAssignmentRelationships::getUser, UserResource.class);
     }
 
     public Optional<RoleResource> getRoleFromPopulatedRoleAssignments(final RoleAssignmentResources populatedResources, final RoleAssignmentResource referencedResource) {
-        return getUserFromPopulatedRoleAssignments(populatedResources, referencedResource, RoleAssignmentRelationships::getRole, RoleResource.class);
+        return getResourceFromPopulatedRoleAssignments(populatedResources, referencedResource, RoleAssignmentRelationships::getRole, RoleResource.class);
     }
 
     public PolarisParamBuilder createProjectFilter(final String projectId) {
@@ -116,31 +106,11 @@ public class RoleAssignmentsService {
                    .setCaseSensitive(false);
     }
 
-    public PolarisParamBuilder createIncludeFilter(final String type) {
-        return new PolarisParamBuilder()
-                   .setValue(type)
-                   .setParamType(ParamType.INCLUDE)
-                   .setOperator(ParamOperator.NONE)
-                   .addAdditionalProp("role-assignments")
-                   .setCaseSensitive(true);
-    }
-
-    private <R extends PolarisResource> Optional<R> getUserFromPopulatedRoleAssignments(final RoleAssignmentResources populatedResources, final RoleAssignmentResource resourceReferenced,
+    private <R extends PolarisResource> Optional<R> getResourceFromPopulatedRoleAssignments(final RoleAssignmentResources populatedResources, final RoleAssignmentResource resourceReferenced,
         final Function<RoleAssignmentRelationships, PolarisRelationshipSingle> relationshipRetriever, final Class<R> resourceClass) {
-        final Optional<PolarisResourceSparse> optionalUserData = relationshipRetriever.apply(resourceReferenced.getRelationships()).getData();
-        if (optionalUserData.isPresent()) {
-            final String id = optionalUserData.map(PolarisResourceSparse::getId).orElse("");
-            final String type = optionalUserData.map(PolarisResourceSparse::getType).orElse("");
-            for (final PolarisResource includedResource : populatedResources.getIncluded()) {
-                if (type.equals(includedResource.getType()) && id.equals(includedResource.getId())) {
-                    try {
-                        final R fullyTypedResource = polarisJsonTransformer.getResponseAs(includedResource.getJson(), resourceClass);
-                        return Optional.of(fullyTypedResource);
-                    } catch (final IntegrationException e) {
-                        break;
-                    }
-                }
-            }
+        final Optional<PolarisResourceSparse> optionalResourceData = relationshipRetriever.apply(resourceReferenced.getRelationships()).getData();
+        if (optionalResourceData.isPresent()) {
+            return authService.getResourceFromPopulated(populatedResources, optionalResourceData.get(), resourceClass);
         }
         return Optional.empty();
     }

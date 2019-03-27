@@ -69,7 +69,7 @@ public class UserServiceTest {
                                     .orElseThrow(() -> new IntegrationException());
             }
         } catch (final IntegrationException e) {
-            assumeTrue(e != null, "Something went wrong while retrieving projects, but this test is not for the project service");
+            assumeTrue(e != null, "Something went wrong while retrieving groups, but this test is not for the group service");
             return;
         }
 

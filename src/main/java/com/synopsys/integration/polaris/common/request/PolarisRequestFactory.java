@@ -23,6 +23,11 @@
  */
 package com.synopsys.integration.polaris.common.request;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import com.synopsys.integration.rest.HttpMethod;
 import com.synopsys.integration.rest.request.Request;
 
@@ -58,9 +63,14 @@ public class PolarisRequestFactory {
     }
 
     public static Request.Builder populatePagedRequestBuilder(final Request.Builder requestBuilder, final int limit, final int offset) {
-        return requestBuilder
-                   .addQueryParameter(LIMIT_PARAMETER, Integer.toString(limit))
-                   .addQueryParameter(OFFSET_PARAMETER, Integer.toString(offset));
+        Map<String, Set<String>> queryParameters = requestBuilder.getQueryParameters();
+        if (null == queryParameters) {
+            requestBuilder.queryParameters(new HashMap<>());
+            queryParameters = requestBuilder.getQueryParameters();
+        }
+        queryParameters.put(LIMIT_PARAMETER, Collections.singleton(Integer.toString(limit)));
+        queryParameters.put(OFFSET_PARAMETER, Collections.singleton(Integer.toString(offset)));
+        return requestBuilder;
     }
 
     public static Request.Builder createDefaultBuilder() {

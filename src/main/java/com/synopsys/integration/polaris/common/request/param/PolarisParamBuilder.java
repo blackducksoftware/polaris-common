@@ -1,8 +1,7 @@
 /**
  * polaris-common
  *
- * Copyright (C) 2019 Black Duck Software, Inc.
- * http://www.blackducksoftware.com/
+ * Copyright (c) 2019 Synopsys, Inc.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -39,6 +38,15 @@ public class PolarisParamBuilder {
     private String value;
     private boolean caseSensitive = false;
     private final List<String> additionalProps = new ArrayList<>();
+
+    public static PolarisParamBuilder createIncludeFilter(final String baseType, final String typeToInclude) {
+        return new PolarisParamBuilder()
+                   .setValue(typeToInclude)
+                   .setParamType(ParamType.INCLUDE)
+                   .setOperator(ParamOperator.NONE)
+                   .addAdditionalProp(baseType)
+                   .setCaseSensitive(true);
+    }
 
     public PolarisParamBuilder setParamType(final ParamType paramType) {
         this.paramType = paramType;

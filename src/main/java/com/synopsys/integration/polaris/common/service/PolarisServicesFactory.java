@@ -1,8 +1,7 @@
 /**
  * polaris-common
  *
- * Copyright (C) 2019 Black Duck Software, Inc.
- * http://www.blackducksoftware.com/
+ * Copyright (c) 2019 Synopsys, Inc.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -57,11 +56,11 @@ public class PolarisServicesFactory {
     }
 
     public AuthService createAuthService() {
-        return new AuthService(httpClient, polarisJsonTransformer, createPolarisService());
+        return new AuthService(httpClient, createPolarisService());
     }
 
-    public RoleAssignmentsService createRoleAssignmentsService() {
-        return new RoleAssignmentsService(httpClient, createPolarisService(), createAuthService());
+    public RoleAssignmentService createRoleAssignmentService() {
+        return new RoleAssignmentService(httpClient, createPolarisService(), createAuthService());
     }
 
     public UserService createUserService() {

@@ -1,8 +1,7 @@
 /**
  * polaris-common
  *
- * Copyright (C) 2019 Black Duck Software, Inc.
- * http://www.blackducksoftware.com/
+ * Copyright (c) 2019 Synopsys, Inc.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -31,12 +30,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.polaris.common.api.PolarisComponent;
 import com.synopsys.integration.polaris.common.api.PolarisResource;
 import com.synopsys.integration.polaris.common.api.PolarisResourceSparse;
 import com.synopsys.integration.polaris.common.api.PolarisResources;
 import com.synopsys.integration.polaris.common.api.PolarisResourcesPagination;
+import com.synopsys.integration.polaris.common.api.PolarisResponse;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestWrapper;
 import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
@@ -64,6 +66,22 @@ public class PolarisService {
     public PolarisService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisJsonTransformer polarisJsonTransformer) {
         this.polarisHttpClient = polarisHttpClient;
         this.polarisJsonTransformer = polarisJsonTransformer;
+    }
+
+    public <R extends PolarisResource> Optional<R> getResourceFromPopulated(final PolarisResponse populatedResources, final PolarisResourceSparse sparseResourceData, final Class<R> resourceClass) {
+        final String id = StringUtils.defaultString(sparseResourceData.getId());
+        final String type = StringUtils.defaultString(sparseResourceData.getType());
+        for (final PolarisResource includedResource : populatedResources.getIncluded()) {
+            if (type.equals(includedResource.getType()) && id.equals(includedResource.getId())) {
+                try {
+                    final R fullyTypedResource = polarisJsonTransformer.getResponseAs(includedResource.getJson(), resourceClass);
+                    return Optional.of(fullyTypedResource);
+                } catch (final IntegrationException e) {
+                    break;
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     public <R extends PolarisComponent> R get(final Type returnType, final Request request) throws IntegrationException {

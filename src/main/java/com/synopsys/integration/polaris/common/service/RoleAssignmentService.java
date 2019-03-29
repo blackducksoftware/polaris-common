@@ -1,8 +1,7 @@
 /**
  * polaris-common
  *
- * Copyright (C) 2019 Black Duck Software, Inc.
- * http://www.blackducksoftware.com/
+ * Copyright (c) 2019 Synopsys, Inc.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -47,8 +46,7 @@ import com.synopsys.integration.polaris.common.request.param.ParamType;
 import com.synopsys.integration.polaris.common.request.param.PolarisParamBuilder;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 
-// TODO rename to RoleAssignmentService in next major release
-public class RoleAssignmentsService {
+public class RoleAssignmentService {
     public static final String INCLUDE_GROUPS = "group";
     public static final String INCLUDE_ROLES = "role";
     public static final String INCLUDE_USERS = "user";
@@ -59,7 +57,7 @@ public class RoleAssignmentsService {
     private final PolarisService polarisService;
     private final AuthService authService;
 
-    public RoleAssignmentsService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisService polarisService, final AuthService authService) {
+    public RoleAssignmentService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisService polarisService, final AuthService authService) {
         this.polarisHttpClient = polarisHttpClient;
         this.polarisService = polarisService;
         this.authService = authService;
@@ -110,7 +108,7 @@ public class RoleAssignmentsService {
         final Function<RoleAssignmentRelationships, PolarisRelationshipSingle> relationshipRetriever, final Class<R> resourceClass) {
         final Optional<PolarisResourceSparse> optionalResourceData = relationshipRetriever.apply(resourceReferenced.getRelationships()).getData();
         if (optionalResourceData.isPresent()) {
-            return authService.getResourceFromPopulated(populatedResources, optionalResourceData.get(), resourceClass);
+            return polarisService.getResourceFromPopulated(populatedResources, optionalResourceData.get(), resourceClass);
         }
         return Optional.empty();
     }

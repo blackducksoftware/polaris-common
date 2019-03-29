@@ -16,7 +16,7 @@ import com.synopsys.integration.log.PrintStreamIntLogger;
 import com.synopsys.integration.polaris.common.api.auth.model.role.RoleResource;
 import com.synopsys.integration.polaris.common.api.auth.model.role.assignments.RoleAssignmentResource;
 import com.synopsys.integration.polaris.common.api.auth.model.role.assignments.RoleAssignmentResources;
-import com.synopsys.integration.polaris.common.api.common.project.ProjectV0Resource;
+import com.synopsys.integration.polaris.common.api.common.model.project.ProjectV0Resource;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfig;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfigBuilder;
 import com.synopsys.integration.polaris.common.request.param.ParamOperator;
@@ -31,7 +31,7 @@ public class RoleAssignmentsServiceTest {
     public void callGetAllTest() throws IntegrationException {
         final PolarisServerConfig polarisServerConfig = createPolarisServerConfig();
         final PolarisServicesFactory polarisServicesFactory = polarisServerConfig.createPolarisServicesFactory(logger);
-        final RoleAssignmentsService roleAssignmentsService = polarisServicesFactory.createRoleAssignmentsService();
+        final RoleAssignmentService roleAssignmentsService = polarisServicesFactory.createRoleAssignmentService();
 
         final List<RoleAssignmentResource> roleAssignments = roleAssignmentsService.getAll();
         assertTrue(!roleAssignments.isEmpty(), "Expected role assignments to exist");
@@ -41,7 +41,7 @@ public class RoleAssignmentsServiceTest {
     public void callGetFilteredTest() throws IntegrationException {
         final PolarisServerConfig polarisServerConfig = createPolarisServerConfig();
         final PolarisServicesFactory polarisServicesFactory = polarisServerConfig.createPolarisServicesFactory(logger);
-        final RoleAssignmentsService roleAssignmentsService = polarisServicesFactory.createRoleAssignmentsService();
+        final RoleAssignmentService roleAssignmentsService = polarisServicesFactory.createRoleAssignmentService();
 
         final PolarisParamBuilder paramBuilder = new PolarisParamBuilder();
         paramBuilder.setParamType(ParamType.FILTER);
@@ -61,7 +61,7 @@ public class RoleAssignmentsServiceTest {
         final PolarisServicesFactory polarisServicesFactory = polarisServerConfig.createPolarisServicesFactory(logger);
 
         final ProjectService projectService = polarisServicesFactory.createProjectService();
-        final RoleAssignmentsService roleAssignmentsService = polarisServicesFactory.createRoleAssignmentsService();
+        final RoleAssignmentService roleAssignmentsService = polarisServicesFactory.createRoleAssignmentService();
 
         final ProjectV0Resource project;
         try {
@@ -75,7 +75,7 @@ public class RoleAssignmentsServiceTest {
         }
 
         final RoleAssignmentResources roleAssignmentsForProject = roleAssignmentsService.getRoleAssignmentsForProjectWithIncluded(project.getId(),
-            RoleAssignmentsService.INCLUDE_USERS, RoleAssignmentsService.INCLUDE_ROLES, RoleAssignmentsService.INCLUDE_GROUPS);
+            RoleAssignmentService.INCLUDE_USERS, RoleAssignmentService.INCLUDE_ROLES, RoleAssignmentService.INCLUDE_GROUPS);
         final List<RoleAssignmentResource> data = roleAssignmentsForProject.getData();
         if (!data.isEmpty()) {
             assertTrue(!roleAssignmentsForProject.getIncluded().isEmpty(), "Expected resources to be included");

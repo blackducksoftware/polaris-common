@@ -1,8 +1,7 @@
 /**
  * polaris-common
  *
- * Copyright (C) 2019 Black Duck Software, Inc.
- * http://www.blackducksoftware.com/
+ * Copyright (c) 2019 Synopsys, Inc.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -23,8 +22,18 @@
  */
 package com.synopsys.integration.polaris.common.model;
 
-import com.synopsys.integration.polaris.common.api.PolarisResource;
-import com.synopsys.integration.polaris.common.api.auth.empty.PolarisRelationshipsEmpty;
+import java.util.List;
 
-public class QueryIssueResource extends PolarisResource<QueryIssueAttributes, PolarisRelationshipsEmpty> {
+import org.apache.commons.lang3.StringUtils;
+
+import com.jayway.jsonpath.JsonPath;
+import com.synopsys.integration.polaris.common.api.PolarisResourcesSingle;
+import com.synopsys.integration.polaris.common.api.query.model.issue.IssueV0Resource;
+
+public class IssueResourcesSingle extends PolarisResourcesSingle<IssueV0Resource> {
+    public String getSourcePath() {
+        final List<String> pathPieces = JsonPath.read(getJson(), "$.included[?(@.type == 'path')].attributes.path[*]");
+        return StringUtils.join(pathPieces, "/");
+    }
+
 }

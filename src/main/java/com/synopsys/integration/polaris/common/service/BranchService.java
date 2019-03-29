@@ -1,8 +1,7 @@
 /**
  * polaris-common
  *
- * Copyright (C) 2019 Black Duck Software, Inc.
- * http://www.blackducksoftware.com/
+ * Copyright (c) 2019 Synopsys, Inc.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -28,8 +27,8 @@ import java.util.Optional;
 
 import com.google.gson.reflect.TypeToken;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.polaris.common.api.common.branch.BranchV0Resource;
-import com.synopsys.integration.polaris.common.api.common.branch.BranchV0Resources;
+import com.synopsys.integration.polaris.common.api.common.model.branch.BranchV0Resource;
+import com.synopsys.integration.polaris.common.api.common.model.branch.BranchV0Resources;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestCreator;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestWrapper;
 import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;

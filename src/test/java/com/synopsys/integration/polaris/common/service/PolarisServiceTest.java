@@ -40,7 +40,7 @@ public class PolarisServiceTest {
         final IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
         final AccessTokenPolarisHttpClient httpClient = new AccessTokenPolarisHttpClient(logger, 100, true, ProxyInfo.NO_PROXY_INFO, baseUrl, accessToken, gson, new AuthenticationSupport());
 
-        final PolarisService polarisService = new PolarisService(httpClient, new PolarisJsonTransformer(gson, logger));
+        final PolarisService polarisService = new PolarisService(httpClient, new PolarisJsonTransformer(gson, logger), PolarisRequestFactory.DEFAULT_LIMIT);
 
         final String requestUri = baseUrl + "/api/common/v0/branches";
         final Request request = polarisRequestFactory.createDefaultPolarisGetRequest(requestUri);

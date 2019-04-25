@@ -36,7 +36,7 @@ public class PolarisRequestFactory {
     public static final String LIMIT_PARAMETER = "page[limit]";
     public static final String OFFSET_PARAMETER = "page[offset]";
 
-    public static final int DEFAULT_LIMIT = 10;
+    public static final int DEFAULT_LIMIT = 25;
     public static final int DEFAULT_OFFSET = 0;
 
     public static Request createDefaultPolarisGetRequest(final String requestUri) {

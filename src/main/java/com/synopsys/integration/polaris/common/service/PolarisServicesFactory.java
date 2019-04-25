@@ -24,6 +24,7 @@ package com.synopsys.integration.polaris.common.service;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.log.IntLogger;
+import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 
 public class PolarisServicesFactory {
@@ -32,15 +33,18 @@ public class PolarisServicesFactory {
     private final Gson gson;
     private final PolarisJsonTransformer polarisJsonTransformer;
 
+    private int defaultPageSize;
+
     public PolarisServicesFactory(final IntLogger logger, final AccessTokenPolarisHttpClient httpClient, final Gson gson) {
         this.logger = logger;
         this.httpClient = httpClient;
         this.gson = gson;
         this.polarisJsonTransformer = new PolarisJsonTransformer(gson, logger);
+        this.defaultPageSize = PolarisRequestFactory.DEFAULT_LIMIT;
     }
 
     public PolarisService createPolarisService() {
-        return new PolarisService(httpClient, polarisJsonTransformer);
+        return new PolarisService(httpClient, polarisJsonTransformer, defaultPageSize);
     }
 
     public ProjectService createProjectService() {
@@ -73,6 +77,16 @@ public class PolarisServicesFactory {
 
     public IntLogger getLogger() {
         return logger;
+    }
+
+    public Gson getGson() {
+        return gson;
+    }
+
+    public void setDefaultPageSize(final int defaultPageSize) {
+        if (defaultPageSize >= 0) {
+            this.defaultPageSize = defaultPageSize;
+        }
     }
 
 }

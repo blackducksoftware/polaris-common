@@ -40,7 +40,6 @@ import com.synopsys.integration.polaris.common.api.PolarisResources;
 import com.synopsys.integration.polaris.common.api.PolarisResourcesPagination;
 import com.synopsys.integration.polaris.common.api.PolarisResponse;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestWrapper;
-import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 import com.synopsys.integration.rest.request.Request;
 import com.synopsys.integration.rest.request.Response;
@@ -62,10 +61,12 @@ public class PolarisService {
 
     private final AccessTokenPolarisHttpClient polarisHttpClient;
     private final PolarisJsonTransformer polarisJsonTransformer;
+    private final int defaultPageSize;
 
-    public PolarisService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisJsonTransformer polarisJsonTransformer) {
+    public PolarisService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisJsonTransformer polarisJsonTransformer, final int defaultPageSize) {
         this.polarisHttpClient = polarisHttpClient;
         this.polarisJsonTransformer = polarisJsonTransformer;
+        this.defaultPageSize = defaultPageSize;
     }
 
     public <R extends PolarisResource> Optional<R> getResourceFromPopulated(final PolarisResponse populatedResources, final PolarisResourceSparse sparseResourceData, final Class<R> resourceClass) {
@@ -111,7 +112,7 @@ public class PolarisService {
     }
 
     public <R extends PolarisResource> List<R> getAllResponses(final PolarisPagedRequestWrapper polarisPagedRequestWrapper) throws IntegrationException {
-        return getAllResponses(polarisPagedRequestWrapper, PolarisRequestFactory.DEFAULT_LIMIT);
+        return getAllResponses(polarisPagedRequestWrapper, defaultPageSize);
     }
 
     public <R extends PolarisResource, W extends PolarisResources<R>> List<R> getAllResponses(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int pageSize) throws IntegrationException {
@@ -120,7 +121,7 @@ public class PolarisService {
     }
 
     public <R extends PolarisResource, W extends PolarisResources<R>> W getPopulatedResponse(final PolarisPagedRequestWrapper polarisPagedRequestWrapper) throws IntegrationException {
-        return getPopulatedResponse(polarisPagedRequestWrapper, PolarisRequestFactory.DEFAULT_LIMIT);
+        return getPopulatedResponse(polarisPagedRequestWrapper, defaultPageSize);
     }
 
     public <R extends PolarisResource, W extends PolarisResources<R>> W getPopulatedResponse(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int pageSize) throws IntegrationException {

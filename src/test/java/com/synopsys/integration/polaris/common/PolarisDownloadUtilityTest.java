@@ -10,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
+import com.synopsys.integration.polaris.common.cli.PolarisDownloadUtility;
+import com.synopsys.integration.util.OperatingSystemType;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -28,7 +30,7 @@ public class PolarisDownloadUtilityTest {
 
     @Test
     public void testActualDownload() {
-        String polarisCLIDownloadUrl = System.getenv("POLARIS_CLI_DOWNLOAD_URL");
+        String polarisCLIDownloadUrl = System.getenv("POLARIS_SERVER_URL");
         String polarisCLIDownloadPath = System.getenv("POLARIS_CLI_DOWNLOAD_PATH");
         assumeTrue(StringUtils.isNotBlank(polarisCLIDownloadUrl));
         assumeTrue(StringUtils.isNotBlank(polarisCLIDownloadPath));
@@ -58,7 +60,7 @@ public class PolarisDownloadUtilityTest {
         downloadTarget.deleteOnExit();
 
         CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(intLogger);
-        PolarisDownloadUtility polarisDownloadUtility = new PolarisDownloadUtility(intLogger, mockIntHttpClient, cleanupZipExpander, PolarisDownloadUtilityTest.FAKE_BUT_VALID_DOWNLOAD_URL, downloadTarget);
+        PolarisDownloadUtility polarisDownloadUtility = new PolarisDownloadUtility(intLogger, OperatingSystemType.LINUX, mockIntHttpClient, cleanupZipExpander, PolarisDownloadUtilityTest.FAKE_BUT_VALID_DOWNLOAD_URL, downloadTarget);
         Optional<String> polarisCliPath = polarisDownloadUtility.retrievePolarisCliExecutablePath();
 
         assertTrue(polarisCliPath.isPresent());
@@ -80,7 +82,7 @@ public class PolarisDownloadUtilityTest {
         downloadTarget.deleteOnExit();
 
         CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(intLogger);
-        PolarisDownloadUtility polarisDownloadUtility = new PolarisDownloadUtility(intLogger, mockIntHttpClient, cleanupZipExpander, PolarisDownloadUtilityTest.FAKE_BUT_VALID_DOWNLOAD_URL, downloadTarget);
+        PolarisDownloadUtility polarisDownloadUtility = new PolarisDownloadUtility(intLogger, OperatingSystemType.LINUX, mockIntHttpClient, cleanupZipExpander, PolarisDownloadUtilityTest.FAKE_BUT_VALID_DOWNLOAD_URL, downloadTarget);
         Optional<String> polarisCliPath = polarisDownloadUtility.retrievePolarisCliExecutablePath();
 
         assertFalse(polarisCliPath.isPresent());
@@ -114,7 +116,7 @@ public class PolarisDownloadUtilityTest {
         assertTrue(directoryOfPreviousExtraction.exists());
 
         CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(intLogger);
-        PolarisDownloadUtility polarisDownloadUtility = new PolarisDownloadUtility(intLogger, mockIntHttpClient, cleanupZipExpander, PolarisDownloadUtilityTest.FAKE_BUT_VALID_DOWNLOAD_URL, downloadTarget);
+        PolarisDownloadUtility polarisDownloadUtility = new PolarisDownloadUtility(intLogger, OperatingSystemType.LINUX, mockIntHttpClient, cleanupZipExpander, PolarisDownloadUtilityTest.FAKE_BUT_VALID_DOWNLOAD_URL, downloadTarget);
         Optional<String> polarisCliPath = polarisDownloadUtility.retrievePolarisCliExecutablePath();
 
         assertTrue(polarisCliPath.isPresent());

@@ -50,10 +50,11 @@ import com.synopsys.integration.rest.proxy.ProxyInfoBuilder;
 import com.synopsys.integration.rest.support.AuthenticationSupport;
 
 public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServerConfig> {
-    public static final String POLARIS_CONFIG_DIRECTORY_DEFAULT = ".swip";
+    public static final String SWIP_CONFIG_DIRECTORY_DEFAULT = ".swip";
+    public static final String POLARIS_CONFIG_DIRECTORY_DEFAULT = ".polaris";
     public static final String POLARIS_ACCESS_TOKEN_FILENAME_DEFAULT = ".access_token";
 
-    public static final BuilderPropertyKey URL_KEY = new BuilderPropertyKey("POLARIS_URL");
+    public static final BuilderPropertyKey URL_KEY = new BuilderPropertyKey("POLARIS_SERVER_URL");
     public static final BuilderPropertyKey ACCESS_TOKEN_KEY = new BuilderPropertyKey("POLARIS_ACCESS_TOKEN");
     public static final BuilderPropertyKey TRUST_CERT_KEY = new BuilderPropertyKey("POLARIS_TRUST_CERT");
     public static final BuilderPropertyKey TIMEOUT_KEY = new BuilderPropertyKey("POLARIS_TIMEOUT");
@@ -68,10 +69,11 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
     public static final BuilderPropertyKey PROXY_NTLM_WORKSTATION_KEY = new BuilderPropertyKey("POLARIS_PROXY_NTLM_WORKSTATION");
 
     public static final BuilderPropertyKey SWIP_URL_KEY = new BuilderPropertyKey("SWIP_SERVER_URL");
+    public static final BuilderPropertyKey POLARIS_URL_KEY = new BuilderPropertyKey("POLARIS_URL");
     public static final BuilderPropertyKey SWIP_ACCESS_TOKEN_KEY = new BuilderPropertyKey("SWIP_ACCESS_TOKEN");
     public static final BuilderPropertyKey SWIP_HOME_KEY = new BuilderPropertyKey("SWIP_HOME");
     public static final BuilderPropertyKey SWIP_ACCESS_TOKEN_FILE_PATH_KEY = new BuilderPropertyKey("SWIP_ACCESS_TOKEN_FILE");
-    public static final Set<BuilderPropertyKey> ALTERNATE_KEYS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(SWIP_URL_KEY, SWIP_ACCESS_TOKEN_KEY, SWIP_HOME_KEY, SWIP_ACCESS_TOKEN_FILE_PATH_KEY)));
+    public static final Set<BuilderPropertyKey> ALTERNATE_KEYS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(SWIP_URL_KEY, POLARIS_URL_KEY, SWIP_ACCESS_TOKEN_KEY, SWIP_HOME_KEY, SWIP_ACCESS_TOKEN_FILE_PATH_KEY)));
 
     public static int DEFAULT_TIMEOUT_SECONDS = 120;
 
@@ -150,7 +152,7 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
             builderStatus.addErrorMessage(" - set explicitly");
             builderStatus.addErrorMessage(" - set from property (POLARIS_ACCESS_TOKEN, SWIP_ACCESS_TOKEN)");
             builderStatus.addErrorMessage(" - found in a provided file path (POLARIS_ACCESS_TOKEN_FILE, SWIP_ACCESS_TOKEN_FILE)");
-            builderStatus.addErrorMessage(" - found in the '.access_token' file in a Polaris home directory (POLARIS_HOME, SWIP_HOME, or defaults to USER_HOME/.swip)");
+            builderStatus.addErrorMessage(" - found in the '.access_token' file in a Polaris home directory (POLARIS_HOME, SWIP_HOME, or defaults to USER_HOME/.swip or USER_HOME/.polaris, depending on your Polaris version.)");
         } else {
             setAccessToken(optionalAccessToken.get());
         }
@@ -182,7 +184,7 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
     }
 
     private BuilderPropertyKey getStandardKey(BuilderPropertyKey key) {
-        if (SWIP_URL_KEY.equals(key)) {
+        if (SWIP_URL_KEY.equals(key) || POLARIS_URL_KEY.equals(key)) {
             return URL_KEY;
         } else if (SWIP_ACCESS_TOKEN_KEY.equals(key)) {
             return ACCESS_TOKEN_KEY;

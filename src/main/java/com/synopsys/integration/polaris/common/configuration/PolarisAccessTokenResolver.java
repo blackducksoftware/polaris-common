@@ -22,9 +22,6 @@
  */
 package com.synopsys.integration.polaris.common.configuration;
 
-import static com.synopsys.integration.polaris.common.configuration.PolarisServerConfigBuilder.POLARIS_ACCESS_TOKEN_FILENAME_DEFAULT;
-import static com.synopsys.integration.polaris.common.configuration.PolarisServerConfigBuilder.POLARIS_CONFIG_DIRECTORY_DEFAULT;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -35,6 +32,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.synopsys.integration.builder.BuilderStatus;
 import com.synopsys.integration.log.IntLogger;
+
+import static com.synopsys.integration.polaris.common.configuration.PolarisServerConfigBuilder.*;
 
 public class PolarisAccessTokenResolver {
     private final IntLogger logger;
@@ -73,6 +72,9 @@ public class PolarisAccessTokenResolver {
         } else if (StringUtils.isNotBlank(userHomePath)) {
             File userHomeDirectory = new File(userHomePath);
             polarisHomeDirectory = new File(userHomeDirectory, POLARIS_CONFIG_DIRECTORY_DEFAULT);
+            if (!polarisHomeDirectory.exists()) {
+                polarisHomeDirectory = new File(userHomeDirectory, SWIP_CONFIG_DIRECTORY_DEFAULT);
+            }
         }
 
         if (null == polarisHomeDirectory || !polarisHomeDirectory.exists() || !polarisHomeDirectory.isDirectory()) {

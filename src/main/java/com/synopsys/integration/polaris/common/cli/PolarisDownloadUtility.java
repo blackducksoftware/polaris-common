@@ -73,8 +73,9 @@ public class PolarisDownloadUtility {
 
     public static PolarisDownloadUtility fromPolaris(IntLogger logger, AccessTokenPolarisHttpClient polarisHttpClient, File downloadTargetDirectory) {
         OperatingSystemType operatingSystemType = OperatingSystemType.determineFromSystem();
+        IntHttpClient intHttpClient = new IntHttpClient(logger, polarisHttpClient.getTimeoutInSeconds(), polarisHttpClient.isAlwaysTrustServerCertificate(), polarisHttpClient.getProxyInfo());
         CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(logger);
-        return new PolarisDownloadUtility(logger, operatingSystemType, polarisHttpClient, cleanupZipExpander, polarisHttpClient.getPolarisServerUrl(), downloadTargetDirectory);
+        return new PolarisDownloadUtility(logger, operatingSystemType, intHttpClient, cleanupZipExpander, polarisHttpClient.getPolarisServerUrl(), downloadTargetDirectory);
     }
 
     public PolarisDownloadUtility(IntLogger logger, OperatingSystemType operatingSystemType, IntHttpClient intHttpClient, CleanupZipExpander cleanupZipExpander, String polarisServerUrl, File downloadTargetDirectory) {

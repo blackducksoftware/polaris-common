@@ -67,8 +67,13 @@ public class PolarisServerConfig extends Stringable implements Buildable {
     }
 
     public void populateEnvironmentVariables(BiConsumer<String, String> pairsConsumer) {
+        // old swip values (ekerwin - can likely remove)
         pairsConsumer.accept(PolarisServerConfigBuilder.SWIP_URL_KEY.getKey(), polarisUrl.toString());
         pairsConsumer.accept(PolarisServerConfigBuilder.SWIP_ACCESS_TOKEN_KEY.getKey(), accessToken);
+
+        // new polaris values
+        pairsConsumer.accept(PolarisServerConfigBuilder.URL_KEY.getKey(), polarisUrl.toString());
+        pairsConsumer.accept(PolarisServerConfigBuilder.ACCESS_TOKEN_KEY.getKey(), accessToken);
     }
 
     public URL getPolarisUrl() {

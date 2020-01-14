@@ -1,5 +1,16 @@
 package com.synopsys.integration.polaris.common.integration;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
+
 import com.synopsys.integration.executable.ExecutableOutput;
 import com.synopsys.integration.executable.ExecutableRunnerException;
 import com.synopsys.integration.executable.ProcessBuilderRunner;
@@ -12,16 +23,6 @@ import com.synopsys.integration.polaris.common.cli.PolarisDownloadUtility;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfig;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfigBuilder;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.util.Collections;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DownloadAndRunSetupTest {
     @Test
@@ -46,7 +47,7 @@ public class DownloadAndRunSetupTest {
         AccessTokenPolarisHttpClient httpClient = polarisServerConfig.createPolarisHttpClient(logger);
 
         PolarisDownloadUtility polarisDownloadUtility = PolarisDownloadUtility.fromPolaris(logger, httpClient, downloadTarget);
-        Optional<String> polarisCliPath = polarisDownloadUtility.retrievePolarisCliExecutablePath();
+        Optional<String> polarisCliPath = polarisDownloadUtility.getOrDownloadPolarisCliExecutable();
         assertTrue(polarisCliPath.isPresent());
 
         PolarisCliRunner polarisCliRunner = new PolarisCliRunner(new ProcessBuilderRunner());

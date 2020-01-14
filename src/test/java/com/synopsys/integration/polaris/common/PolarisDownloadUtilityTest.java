@@ -10,8 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import com.synopsys.integration.polaris.common.cli.PolarisDownloadUtility;
-import com.synopsys.integration.util.OperatingSystemType;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,10 +18,12 @@ import com.synopsys.integration.log.BufferedIntLogger;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.SilentIntLogger;
+import com.synopsys.integration.polaris.common.cli.PolarisDownloadUtility;
 import com.synopsys.integration.rest.client.IntHttpClient;
 import com.synopsys.integration.rest.request.Request;
 import com.synopsys.integration.rest.request.Response;
 import com.synopsys.integration.util.CleanupZipExpander;
+import com.synopsys.integration.util.OperatingSystemType;
 
 public class PolarisDownloadUtilityTest {
     private static final String FAKE_BUT_VALID_DOWNLOAD_URL = "http://www.google.com";
@@ -39,7 +39,7 @@ public class PolarisDownloadUtilityTest {
         IntLogger intLogger = new SilentIntLogger();
         PolarisDownloadUtility polarisDownloadUtility = PolarisDownloadUtility.defaultUtilityNoProxy(intLogger, polarisCLIDownloadUrl, downloadTarget);
 
-        Optional<String> polarisCliPath = polarisDownloadUtility.retrievePolarisCliExecutablePath();
+        Optional<String> polarisCliPath = polarisDownloadUtility.getOrDownloadPolarisCliExecutable();
         assertTrue(polarisCliPath.isPresent());
         assertTrue(polarisCliPath.get().length() > 0);
     }
@@ -61,7 +61,7 @@ public class PolarisDownloadUtilityTest {
 
         CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(intLogger);
         PolarisDownloadUtility polarisDownloadUtility = new PolarisDownloadUtility(intLogger, OperatingSystemType.LINUX, mockIntHttpClient, cleanupZipExpander, PolarisDownloadUtilityTest.FAKE_BUT_VALID_DOWNLOAD_URL, downloadTarget);
-        Optional<String> polarisCliPath = polarisDownloadUtility.retrievePolarisCliExecutablePath();
+        Optional<String> polarisCliPath = polarisDownloadUtility.getOrDownloadPolarisCliExecutable();
 
         assertTrue(polarisCliPath.isPresent());
         assertTrue(polarisCliPath.get().length() > 0);
@@ -83,7 +83,7 @@ public class PolarisDownloadUtilityTest {
 
         CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(intLogger);
         PolarisDownloadUtility polarisDownloadUtility = new PolarisDownloadUtility(intLogger, OperatingSystemType.LINUX, mockIntHttpClient, cleanupZipExpander, PolarisDownloadUtilityTest.FAKE_BUT_VALID_DOWNLOAD_URL, downloadTarget);
-        Optional<String> polarisCliPath = polarisDownloadUtility.retrievePolarisCliExecutablePath();
+        Optional<String> polarisCliPath = polarisDownloadUtility.getOrDownloadPolarisCliExecutable();
 
         assertFalse(polarisCliPath.isPresent());
         assertTrue(intLogger.getOutputString(LogLevel.DEBUG).contains("skipping download"));
@@ -117,7 +117,7 @@ public class PolarisDownloadUtilityTest {
 
         CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(intLogger);
         PolarisDownloadUtility polarisDownloadUtility = new PolarisDownloadUtility(intLogger, OperatingSystemType.LINUX, mockIntHttpClient, cleanupZipExpander, PolarisDownloadUtilityTest.FAKE_BUT_VALID_DOWNLOAD_URL, downloadTarget);
-        Optional<String> polarisCliPath = polarisDownloadUtility.retrievePolarisCliExecutablePath();
+        Optional<String> polarisCliPath = polarisDownloadUtility.getOrDownloadPolarisCliExecutable();
 
         assertTrue(polarisCliPath.isPresent());
         assertTrue(polarisCliPath.get().length() > 0);

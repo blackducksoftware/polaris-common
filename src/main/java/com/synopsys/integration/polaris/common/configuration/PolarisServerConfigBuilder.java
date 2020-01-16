@@ -65,7 +65,6 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
     public static final BuilderPropertyKey PROXY_PASSWORD_KEY = new BuilderPropertyKey("POLARIS_PROXY_PASSWORD");
     public static final BuilderPropertyKey PROXY_NTLM_DOMAIN_KEY = new BuilderPropertyKey("POLARIS_PROXY_NTLM_DOMAIN");
     public static final BuilderPropertyKey PROXY_NTLM_WORKSTATION_KEY = new BuilderPropertyKey("POLARIS_PROXY_NTLM_WORKSTATION");
-    public static final BuilderPropertyKey POLARIS_URL_KEY = new BuilderPropertyKey("POLARIS_URL");
 
     public static int DEFAULT_TIMEOUT_SECONDS = 120;
 

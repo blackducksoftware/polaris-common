@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,7 +34,7 @@ public class PolarisServerConfigBuilderTest {
 
         Map<String, String> fakeEnvironment = new HashMap<>();
         fakeEnvironment.put("polaris.access.token", "fake but valid (not blank) access token");
-        fakeEnvironment.put("polaris.url", "http://www.google.com/fake_but_valid_not_blank_url");
+        fakeEnvironment.put("polaris.server.url", "http://www.google.com/fake_but_valid_not_blank_url");
         fakeEnvironment.put("polaris.timeout.in.seconds", "120");
         polarisServerConfigBuilder.setProperties(fakeEnvironment.entrySet());
 
@@ -68,7 +67,7 @@ public class PolarisServerConfigBuilderTest {
         polarisServerConfigBuilder.setProperties(fakeEnvironment.entrySet());
         assertFalse(polarisServerConfigBuilder.isValid());
 
-        fakeEnvironment.put("POLARIS_URL", "http://www.google.com/fake_but_valid_not_blank_url");
+        fakeEnvironment.put("POLARIS_SERVER_URL", "http://www.google.com/fake_but_valid_not_blank_url");
         polarisServerConfigBuilder.setProperties(fakeEnvironment.entrySet());
         assertTrue(polarisServerConfigBuilder.isValid());
 
@@ -77,16 +76,7 @@ public class PolarisServerConfigBuilderTest {
         polarisServerConfigBuilder.setTimeoutInSeconds(120);
 
         fakeEnvironment = new HashMap<>();
-        fakeEnvironment.put("polaris.url", "http://www.google.com/fake_but_valid_not_blank_url");
-        polarisServerConfigBuilder.setProperties(fakeEnvironment.entrySet());
-        assertTrue(polarisServerConfigBuilder.isValid());
-
-        polarisServerConfigBuilder = PolarisServerConfig.newBuilder();
-        polarisServerConfigBuilder.setAccessToken("fake but valid (not blank) access token");
-        polarisServerConfigBuilder.setTimeoutInSeconds(120);
-
-        fakeEnvironment = new HashMap<>();
-        fakeEnvironment.put("swip.server.url", "http://www.google.com/fake_but_valid_not_blank_url");
+        fakeEnvironment.put("polaris.server.url", "http://www.google.com/fake_but_valid_not_blank_url");
         polarisServerConfigBuilder.setProperties(fakeEnvironment.entrySet());
         assertTrue(polarisServerConfigBuilder.isValid());
     }
@@ -157,8 +147,8 @@ public class PolarisServerConfigBuilderTest {
     @Test
     public void testCommonSwipConfig() {
         Map<String, String> commonSwipUserEnvironment = new HashMap<>();
-        commonSwipUserEnvironment.put("SWIP_SERVER_URL", "http://www.google.com");
-        commonSwipUserEnvironment.put("SWIP_ACCESS_TOKEN", "fake but valid not blank access token");
+        commonSwipUserEnvironment.put("POLARIS_SERVER_URL", "http://www.google.com");
+        commonSwipUserEnvironment.put("POLARIS_ACCESS_TOKEN", "fake but valid not blank access token");
         commonSwipUserEnvironment.put("BLACKDUCK_URL", "http://www.blackducksoftware.com");
         commonSwipUserEnvironment.put("BLACKDUCK_USERNAME", "username");
         commonSwipUserEnvironment.put("BLACKDUCK_PASSWORD", "password");

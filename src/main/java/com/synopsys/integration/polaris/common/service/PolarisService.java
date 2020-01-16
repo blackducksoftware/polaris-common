@@ -33,7 +33,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sun.istack.internal.Nullable;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.polaris.common.api.PolarisComponent;
 import com.synopsys.integration.polaris.common.api.PolarisResource;
@@ -126,12 +125,10 @@ public class PolarisService {
         return populatedResponse.getData();
     }
 
-    @Nullable
     public <R extends PolarisResource, W extends PolarisResources<R>> W getPopulatedResponse(final PolarisPagedRequestWrapper polarisPagedRequestWrapper) throws IntegrationException {
         return getPopulatedResponse(polarisPagedRequestWrapper, defaultPageSize);
     }
 
-    @Nullable
     public <R extends PolarisResource, W extends PolarisResources<R>> W getPopulatedResponse(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int pageSize) throws IntegrationException {
         W populatedResources = null;
         final Set<R> allData = new HashSet<>();

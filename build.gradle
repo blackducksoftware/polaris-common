@@ -11,12 +11,15 @@ project.ext.moduleName = 'com.synopsys.integration.polaris-common'
 project.ext.javaUseAutoModuleName = 'true'
 
 group = 'com.synopsys.integration'
-version = '0.14.0'
+version = '0.14.1-SNAPSHOT'
 description = 'A library for using various capabilities of Polaris.'
 
 apply plugin: 'com.blackducksoftware.integration.library'
 
-nexusStaging { packageGroup = 'com.synopsys' }
+nexusStaging {
+    packageGroup = 'com.synopsys'
+    stagingProfileId = '4af8bea8300633'
+}
 
 dependencies {
     api 'com.synopsys.integration:polaris-common-api:0.0.9'

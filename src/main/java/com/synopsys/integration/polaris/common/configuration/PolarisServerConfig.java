@@ -35,10 +35,6 @@ import com.synopsys.integration.rest.support.AuthenticationSupport;
 import com.synopsys.integration.util.Stringable;
 
 public class PolarisServerConfig extends Stringable implements Buildable {
-    public static PolarisServerConfigBuilder newBuilder() {
-        return new PolarisServerConfigBuilder();
-    }
-
     private final URL polarisUrl;
     private final int timeoutSeconds;
     private final String accessToken;
@@ -48,7 +44,7 @@ public class PolarisServerConfig extends Stringable implements Buildable {
     private final AuthenticationSupport authenticationSupport;
 
     public PolarisServerConfig(URL polarisUrl, int timeoutSeconds, String accessToken, ProxyInfo proxyInfo, boolean alwaysTrustServerCertificate, Gson gson,
-            AuthenticationSupport authenticationSupport) {
+        AuthenticationSupport authenticationSupport) {
         this.polarisUrl = polarisUrl;
         this.timeoutSeconds = timeoutSeconds;
         this.accessToken = accessToken;
@@ -56,6 +52,10 @@ public class PolarisServerConfig extends Stringable implements Buildable {
         this.alwaysTrustServerCertificate = alwaysTrustServerCertificate;
         this.gson = gson;
         this.authenticationSupport = authenticationSupport;
+    }
+
+    public static PolarisServerConfigBuilder newBuilder() {
+        return new PolarisServerConfigBuilder();
     }
 
     public AccessTokenPolarisHttpClient createPolarisHttpClient(IntLogger logger) {
@@ -67,11 +67,6 @@ public class PolarisServerConfig extends Stringable implements Buildable {
     }
 
     public void populateEnvironmentVariables(BiConsumer<String, String> pairsConsumer) {
-        // old swip values (ekerwin - can likely remove)
-        pairsConsumer.accept(PolarisServerConfigBuilder.SWIP_URL_KEY.getKey(), polarisUrl.toString());
-        pairsConsumer.accept(PolarisServerConfigBuilder.SWIP_ACCESS_TOKEN_KEY.getKey(), accessToken);
-
-        // new polaris values
         pairsConsumer.accept(PolarisServerConfigBuilder.URL_KEY.getKey(), polarisUrl.toString());
         pairsConsumer.accept(PolarisServerConfigBuilder.ACCESS_TOKEN_KEY.getKey(), accessToken);
     }

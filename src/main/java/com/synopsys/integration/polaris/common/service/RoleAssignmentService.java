@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import com.google.gson.reflect.TypeToken;
+import com.sun.istack.internal.Nullable;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.polaris.common.api.PolarisRelationshipSingle;
 import com.synopsys.integration.polaris.common.api.PolarisResource;
@@ -75,6 +76,7 @@ public class RoleAssignmentService {
         return authService.getFiltered(AuthService.ROLE_ASSIGNMENTS_API_SPEC, polarisParamBuilders, ROLE_ASSIGNMENT_RESOURCES.getType());
     }
 
+    @Nullable
     public RoleAssignmentResources getRoleAssignmentsForProjectWithIncluded(final String projectId, final String... included) throws IntegrationException {
         final PolarisParamBuilder projectFilter = createProjectFilter(projectId);
         final PolarisPagedRequestCreator requestCreator = authService.generatePagedRequestCreatorWithInclude(AuthService.ROLE_ASSIGNMENTS_API_SPEC, projectFilter, included);

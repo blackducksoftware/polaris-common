@@ -25,6 +25,7 @@ package com.synopsys.integration.polaris.common.service;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +33,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.sun.istack.internal.Nullable;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.polaris.common.api.PolarisComponent;
 import com.synopsys.integration.polaris.common.api.PolarisResource;
@@ -54,11 +56,6 @@ public class PolarisService {
 
     public static final String QUERY_API_SPEC = "/api/query/v0";
     public static final String ISSUES_API_SPEC = QUERY_API_SPEC + "/issues";
-
-    public static final String GET_ISSUE_API_SPEC(final String issueKey) {
-        return ISSUES_API_SPEC + "/" + issueKey;
-    }
-
     private final AccessTokenPolarisHttpClient polarisHttpClient;
     private final PolarisJsonTransformer polarisJsonTransformer;
     private final int defaultPageSize;
@@ -67,6 +64,10 @@ public class PolarisService {
         this.polarisHttpClient = polarisHttpClient;
         this.polarisJsonTransformer = polarisJsonTransformer;
         this.defaultPageSize = defaultPageSize;
+    }
+
+    public static final String GET_ISSUE_API_SPEC(final String issueKey) {
+        return ISSUES_API_SPEC + "/" + issueKey;
     }
 
     public <R extends PolarisResource> Optional<R> getResourceFromPopulated(final PolarisResponse populatedResources, final PolarisResourceSparse sparseResourceData, final Class<R> resourceClass) {
@@ -117,13 +118,20 @@ public class PolarisService {
 
     public <R extends PolarisResource, W extends PolarisResources<R>> List<R> getAllResponses(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int pageSize) throws IntegrationException {
         final W populatedResponse = getPopulatedResponse(polarisPagedRequestWrapper, pageSize);
+
+        if (populatedResponse == null) {
+            return Collections.emptyList();
+        }
+
         return populatedResponse.getData();
     }
 
+    @Nullable
     public <R extends PolarisResource, W extends PolarisResources<R>> W getPopulatedResponse(final PolarisPagedRequestWrapper polarisPagedRequestWrapper) throws IntegrationException {
         return getPopulatedResponse(polarisPagedRequestWrapper, defaultPageSize);
     }
 
+    @Nullable
     public <R extends PolarisResource, W extends PolarisResources<R>> W getPopulatedResponse(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int pageSize) throws IntegrationException {
         W populatedResources = null;
         final Set<R> allData = new HashSet<>();
@@ -150,8 +158,11 @@ public class PolarisService {
             }
         } while (totalExpected > allData.size());
 
-        populatedResources.setData(new ArrayList<>(allData));
-        populatedResources.setIncluded(new ArrayList<>(allIncluded));
+        // Happens if all of the content strings serialized from allData are null -- rotte
+        if (populatedResources != null) {
+            populatedResources.setData(new ArrayList<>(allData));
+            populatedResources.setIncluded(new ArrayList<>(allIncluded));
+        }
         return populatedResources;
     }
 

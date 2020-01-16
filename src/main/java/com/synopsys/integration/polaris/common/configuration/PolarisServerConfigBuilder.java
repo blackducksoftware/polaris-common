@@ -25,8 +25,6 @@ package com.synopsys.integration.polaris.common.configuration;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -67,18 +65,11 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
     public static final BuilderPropertyKey PROXY_PASSWORD_KEY = new BuilderPropertyKey("POLARIS_PROXY_PASSWORD");
     public static final BuilderPropertyKey PROXY_NTLM_DOMAIN_KEY = new BuilderPropertyKey("POLARIS_PROXY_NTLM_DOMAIN");
     public static final BuilderPropertyKey PROXY_NTLM_WORKSTATION_KEY = new BuilderPropertyKey("POLARIS_PROXY_NTLM_WORKSTATION");
-
-    public static final BuilderPropertyKey SWIP_URL_KEY = new BuilderPropertyKey("SWIP_SERVER_URL");
     public static final BuilderPropertyKey POLARIS_URL_KEY = new BuilderPropertyKey("POLARIS_URL");
-    public static final BuilderPropertyKey SWIP_ACCESS_TOKEN_KEY = new BuilderPropertyKey("SWIP_ACCESS_TOKEN");
-    public static final BuilderPropertyKey SWIP_HOME_KEY = new BuilderPropertyKey("SWIP_HOME");
-    public static final BuilderPropertyKey SWIP_ACCESS_TOKEN_FILE_PATH_KEY = new BuilderPropertyKey("SWIP_ACCESS_TOKEN_FILE");
-    public static final Set<BuilderPropertyKey> ALTERNATE_KEYS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(SWIP_URL_KEY, POLARIS_URL_KEY, SWIP_ACCESS_TOKEN_KEY, SWIP_HOME_KEY, SWIP_ACCESS_TOKEN_FILE_PATH_KEY)));
 
     public static int DEFAULT_TIMEOUT_SECONDS = 120;
 
     private final BuilderProperties builderProperties;
-    private final BuilderProperties alternateBuilderProperties;
     private IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
     private Gson gson = new Gson();
     private AuthenticationSupport authenticationSupport = new AuthenticationSupport();
@@ -98,8 +89,6 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
         builderProperties = new BuilderProperties(propertyKeys);
 
         builderProperties.set(TIMEOUT_KEY, Integer.toString(PolarisServerConfigBuilder.DEFAULT_TIMEOUT_SECONDS));
-
-        alternateBuilderProperties = new BuilderProperties(ALTERNATE_KEYS);
     }
 
     @Override
@@ -183,27 +172,9 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
         }
     }
 
-    private BuilderPropertyKey getStandardKey(BuilderPropertyKey key) {
-        if (SWIP_URL_KEY.equals(key) || POLARIS_URL_KEY.equals(key)) {
-            return URL_KEY;
-        } else if (SWIP_ACCESS_TOKEN_KEY.equals(key)) {
-            return ACCESS_TOKEN_KEY;
-        } else if (SWIP_HOME_KEY.equals(key)) {
-            return POLARIS_HOME_KEY;
-        } else if (SWIP_ACCESS_TOKEN_FILE_PATH_KEY.equals(key)) {
-            return ACCESS_TOKEN_FILE_PATH_KEY;
-        }
-        return null;
-    }
-
     private BuilderPropertyKey resolveKey(String key) {
         String fixedKey = key.toUpperCase().replace(".", "_");
-        BuilderPropertyKey builderPropertyKey = new BuilderPropertyKey(fixedKey);
-        if (ALTERNATE_KEYS.contains(builderPropertyKey)) {
-            return getStandardKey(builderPropertyKey);
-        } else {
-            return builderPropertyKey;
-        }
+        return new BuilderPropertyKey(fixedKey);
     }
 
     public String get(final BuilderPropertyKey key) {
@@ -222,24 +193,15 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
     }
 
     public Set<BuilderPropertyKey> getKeys() {
-        Set<BuilderPropertyKey> allKeys = new HashSet<>();
-        allKeys.addAll(builderProperties.getKeys());
-        allKeys.addAll(alternateBuilderProperties.getKeys());
-        return allKeys;
+        return new HashSet<>(builderProperties.getKeys());
     }
 
     public Set<String> getPropertyKeys() {
-        Set<String> allPropertyKeys = new HashSet<>();
-        allPropertyKeys.addAll(builderProperties.getPropertyKeys());
-        allPropertyKeys.addAll(alternateBuilderProperties.getPropertyKeys());
-        return allPropertyKeys;
+        return new HashSet<>(builderProperties.getPropertyKeys());
     }
 
     public Set<String> getEnvironmentVariableKeys() {
-        Set<String> allEnvironmentVariableKeys = new HashSet<>();
-        allEnvironmentVariableKeys.addAll(builderProperties.getEnvironmentVariableKeys());
-        allEnvironmentVariableKeys.addAll(alternateBuilderProperties.getEnvironmentVariableKeys());
-        return allEnvironmentVariableKeys;
+        return new HashSet<>(builderProperties.getEnvironmentVariableKeys());
     }
 
     public Map<BuilderPropertyKey, String> getProperties() {

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.util.StringUtils;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.exception.IntegrationException;
@@ -94,6 +95,9 @@ public class RoleAssignmentsServiceTest {
         polarisServerConfigBuilder.setUrl(System.getenv("POLARIS_URL"));
         polarisServerConfigBuilder.setAccessToken(System.getenv("POLARIS_ACCESS_TOKEN"));
         polarisServerConfigBuilder.setGson(gson);
+
+        assumeTrue(StringUtils.isNotBlank(polarisServerConfigBuilder.getUrl()));
+        assumeTrue(StringUtils.isNotBlank(polarisServerConfigBuilder.getAccessToken()));
 
         return polarisServerConfigBuilder.build();
     }

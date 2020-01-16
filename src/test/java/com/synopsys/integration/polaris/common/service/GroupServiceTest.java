@@ -2,11 +2,13 @@ package com.synopsys.integration.polaris.common.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.util.StringUtils;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.exception.IntegrationException;
@@ -24,6 +26,9 @@ public class GroupServiceTest {
         polarisServerConfigBuilder.setUrl(System.getenv("POLARIS_URL"));
         polarisServerConfigBuilder.setAccessToken(System.getenv("POLARIS_ACCESS_TOKEN"));
         polarisServerConfigBuilder.setGson(new Gson());
+
+        assumeTrue(StringUtils.isNotBlank(polarisServerConfigBuilder.getUrl()));
+        assumeTrue(StringUtils.isNotBlank(polarisServerConfigBuilder.getAccessToken()));
 
         final PolarisServerConfig polarisServerConfig = polarisServerConfigBuilder.build();
         final IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);

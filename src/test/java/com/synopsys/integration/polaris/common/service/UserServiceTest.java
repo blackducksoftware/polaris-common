@@ -27,6 +27,9 @@ public class UserServiceTest {
         polarisServerConfigBuilder.setAccessToken(System.getenv("POLARIS_ACCESS_TOKEN"));
         polarisServerConfigBuilder.setGson(new Gson());
 
+        assumeTrue(StringUtils.isNotBlank(polarisServerConfigBuilder.getUrl()));
+        assumeTrue(StringUtils.isNotBlank(polarisServerConfigBuilder.getAccessToken()));
+
         final PolarisServerConfig polarisServerConfig = polarisServerConfigBuilder.build();
         final IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
         final PolarisServicesFactory polarisServicesFactory = polarisServerConfig.createPolarisServicesFactory(logger);
@@ -50,6 +53,9 @@ public class UserServiceTest {
         polarisServerConfigBuilder.setUrl(System.getenv("POLARIS_URL"));
         polarisServerConfigBuilder.setAccessToken(System.getenv("POLARIS_ACCESS_TOKEN"));
         polarisServerConfigBuilder.setGson(new Gson());
+
+        assumeTrue(StringUtils.isNotBlank(polarisServerConfigBuilder.getUrl()));
+        assumeTrue(StringUtils.isNotBlank(polarisServerConfigBuilder.getAccessToken()));
 
         final PolarisServerConfig polarisServerConfig = polarisServerConfigBuilder.build();
         final IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);

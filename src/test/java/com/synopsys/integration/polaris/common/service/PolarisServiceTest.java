@@ -1,10 +1,12 @@
 package com.synopsys.integration.polaris.common.service;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.util.StringUtils;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.exception.IntegrationException;
@@ -35,6 +37,9 @@ public class PolarisServiceTest {
     public void executeGetRequestTestIT() throws IntegrationException {
         final String baseUrl = System.getenv(AccessTokenPolarisHttpClientTestIT.ENV_POLARIS_URL);
         final String accessToken = System.getenv(AccessTokenPolarisHttpClientTestIT.ENV_POLARIS_ACCESS_TOKEN);
+
+        assumeTrue(StringUtils.isNotBlank(baseUrl));
+        assumeTrue(StringUtils.isNotBlank(accessToken));
 
         final Gson gson = new Gson();
         final IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);

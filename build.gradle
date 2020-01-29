@@ -16,11 +16,6 @@ description = 'A library for using various capabilities of Polaris.'
 
 apply plugin: 'com.synopsys.integration.library'
 
-nexusStaging {
-    packageGroup = 'com.synopsys'
-    stagingProfileId = '4af8bea8300633'
-}
-
 dependencies {
     api 'com.synopsys.integration:polaris-common-api:0.0.9'
 

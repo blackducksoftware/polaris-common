@@ -28,18 +28,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.google.gson.Gson;
+import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.polaris.common.cli.model.PolarisCliScanModel;
 import com.synopsys.integration.polaris.common.exception.PolarisIntegrationException;
 
 public class PolarisCliJsonUtility {
-    private Gson gson;
+    private final IntLogger logger;
+    private final Gson gson;
 
-    public PolarisCliJsonUtility(final Gson gson) {
+    public PolarisCliJsonUtility(final IntLogger logger, final Gson gson) {
+        this.logger = logger;
         this.gson = gson;
     }
 
-    public static PolarisCliJsonUtility defaultUtility() {
-        return new PolarisCliJsonUtility(new Gson());
+    public static PolarisCliJsonUtility defaultUtility(final IntLogger logger) {
+        return new PolarisCliJsonUtility(logger, new Gson());
     }
 
     public PolarisCliScanModel getPolarisCliScanModelFromDefaultLocation(final String projectRootDirectory) throws PolarisIntegrationException {
@@ -57,6 +60,7 @@ public class PolarisCliJsonUtility {
 
     public PolarisCliScanModel getPolarisCliScanModelFromJson(final Path pathToJson) throws PolarisIntegrationException {
         try {
+            logger.debug("Attempting to retrieve PolarisCliScanModel from " + pathToJson.toString());
             return gson.fromJson(Files.newBufferedReader(pathToJson), PolarisCliScanModel.class);
         } catch (final IOException e) {
             throw new PolarisIntegrationException("There was a problem parsing Polaris CLI response json at " + pathToJson.toString(), e);

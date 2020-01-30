@@ -28,8 +28,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.polaris.common.cli.model.PolarisCliScanModel;
+import com.synopsys.integration.polaris.common.exception.PolarisIntegrationException;
 
 public class PolarisCliJsonUtility {
     private Gson gson;
@@ -42,7 +42,7 @@ public class PolarisCliJsonUtility {
         return new PolarisCliJsonUtility(new Gson());
     }
 
-    public PolarisCliScanModel getPolarisCliScanModelFromDefaultLocation(final String projectRootDirectory) throws IntegrationException {
+    public PolarisCliScanModel getPolarisCliScanModelFromDefaultLocation(final String projectRootDirectory) throws PolarisIntegrationException {
         final Path pathToJson = Paths.get(projectRootDirectory)
                                     .resolve(".synopsys")
                                     .resolve("polaris")
@@ -50,16 +50,16 @@ public class PolarisCliJsonUtility {
         return getPolarisCliScanModelFromJson(pathToJson);
     }
 
-    public PolarisCliScanModel getPolarisCliScanModelFromJson(final String pathToJson) throws IntegrationException {
+    public PolarisCliScanModel getPolarisCliScanModelFromJson(final String pathToJson) throws PolarisIntegrationException {
         final Path actualPathToJson = Paths.get(pathToJson);
         return getPolarisCliScanModelFromJson(actualPathToJson);
     }
 
-    public PolarisCliScanModel getPolarisCliScanModelFromJson(final Path pathToJson) throws IntegrationException {
+    public PolarisCliScanModel getPolarisCliScanModelFromJson(final Path pathToJson) throws PolarisIntegrationException {
         try {
             return gson.fromJson(Files.newBufferedReader(pathToJson), PolarisCliScanModel.class);
         } catch (final IOException e) {
-            throw new IntegrationException("There was a problem parsing Polaris CLI response json at " + pathToJson.toString(), e);
+            throw new PolarisIntegrationException("There was a problem parsing Polaris CLI response json at " + pathToJson.toString(), e);
         }
     }
 

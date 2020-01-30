@@ -24,7 +24,7 @@ package com.synopsys.integration.polaris.common.cli.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class PolarisCliScanModel {
+public class PolarisCliResponseModel {
     private String version;
     private ScanInfo scanInfo;
     private ProjectInfo projectInfo;

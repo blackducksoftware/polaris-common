@@ -29,41 +29,41 @@ import java.nio.file.Paths;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.log.IntLogger;
-import com.synopsys.integration.polaris.common.cli.model.PolarisCliScanModel;
+import com.synopsys.integration.polaris.common.cli.model.PolarisCliResponseModel;
 import com.synopsys.integration.polaris.common.exception.PolarisIntegrationException;
 
-public class PolarisCliJsonUtility {
+public class PolarisCliResponseUtility {
     private final IntLogger logger;
     private final Gson gson;
 
-    public PolarisCliJsonUtility(final IntLogger logger, final Gson gson) {
+    public PolarisCliResponseUtility(final IntLogger logger, final Gson gson) {
         this.logger = logger;
         this.gson = gson;
     }
 
-    public static PolarisCliJsonUtility defaultUtility(final IntLogger logger) {
-        return new PolarisCliJsonUtility(logger, new Gson());
+    public static PolarisCliResponseUtility defaultUtility(final IntLogger logger) {
+        return new PolarisCliResponseUtility(logger, new Gson());
     }
 
-    public PolarisCliScanModel getPolarisCliScanModelFromDefaultLocation(final String projectRootDirectory) throws PolarisIntegrationException {
+    public PolarisCliResponseModel getPolarisCliResponseModelFromDefaultLocation(final String projectRootDirectory) throws PolarisIntegrationException {
         final Path pathToJson = Paths.get(projectRootDirectory)
                                     .resolve(".synopsys")
                                     .resolve("polaris")
                                     .resolve("cli-scan.json");
-        return getPolarisCliScanModelFromJson(pathToJson);
+        return getPolarisCliResponseModel(pathToJson);
     }
 
-    public PolarisCliScanModel getPolarisCliScanModelFromJson(final String pathToJson) throws PolarisIntegrationException {
+    public PolarisCliResponseModel getPolarisCliResponseModel(final String pathToJson) throws PolarisIntegrationException {
         final Path actualPathToJson = Paths.get(pathToJson);
-        return getPolarisCliScanModelFromJson(actualPathToJson);
+        return getPolarisCliResponseModel(actualPathToJson);
     }
 
-    public PolarisCliScanModel getPolarisCliScanModelFromJson(final Path pathToJson) throws PolarisIntegrationException {
+    public PolarisCliResponseModel getPolarisCliResponseModel(final Path pathToJson) throws PolarisIntegrationException {
         try {
-            logger.debug("Attempting to retrieve PolarisCliScanModel from " + pathToJson.toString());
-            return gson.fromJson(Files.newBufferedReader(pathToJson), PolarisCliScanModel.class);
+            logger.debug("Attempting to retrieve PolarisCliResponseModel from " + pathToJson.toString());
+            return gson.fromJson(Files.newBufferedReader(pathToJson), PolarisCliResponseModel.class);
         } catch (final IOException e) {
-            throw new PolarisIntegrationException("There was a problem parsing Polaris CLI response json at " + pathToJson.toString(), e);
+            throw new PolarisIntegrationException("There was a problem parsing the Polaris CLI response json at " + pathToJson.toString(), e);
         }
     }
 

@@ -45,11 +45,19 @@ public class PolarisCliResponseUtility {
         return new PolarisCliResponseUtility(logger, new Gson());
     }
 
+    public static Path getDefaultPathToJson(final String projectRootDirectory) {
+        return Paths.get(projectRootDirectory)
+                   .resolve(".synopsys")
+                   .resolve("polaris")
+                   .resolve("cli-scan.json");
+    }
+
+    public Gson getGson() {
+        return gson;
+    }
+
     public PolarisCliResponseModel getPolarisCliResponseModelFromDefaultLocation(final String projectRootDirectory) throws PolarisIntegrationException {
-        final Path pathToJson = Paths.get(projectRootDirectory)
-                                    .resolve(".synopsys")
-                                    .resolve("polaris")
-                                    .resolve("cli-scan.json");
+        final Path pathToJson = getDefaultPathToJson(projectRootDirectory);
         return getPolarisCliResponseModel(pathToJson);
     }
 
@@ -65,6 +73,24 @@ public class PolarisCliResponseUtility {
         } catch (final IOException e) {
             throw new PolarisIntegrationException("There was a problem parsing the Polaris CLI response json at " + pathToJson.toString(), e);
         }
+    }
+
+    public PolarisCliResponseModel getPolarisCliResponseModelFromString(final String rawPolarisCliResponse) {
+        return gson.fromJson(rawPolarisCliResponse, PolarisCliResponseModel.class);
+    }
+
+    public String getRawPolarisCliResponseFromDefaultLocation(final String projectRootDirectory) throws IOException {
+        final Path pathToJson = getDefaultPathToJson(projectRootDirectory);
+        return getRawPolarisCliResponse(pathToJson);
+    }
+
+    public String getRawPolarisCliResponse(final String pathToJson) throws IOException {
+        final Path actualPathToJson = Paths.get(pathToJson);
+        return getRawPolarisCliResponse(actualPathToJson);
+    }
+
+    public String getRawPolarisCliResponse(final Path pathToJson) throws IOException {
+        return new String(Files.readAllBytes(pathToJson));
     }
 
 }

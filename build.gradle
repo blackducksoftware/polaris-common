@@ -10,8 +10,7 @@ buildscript {
 project.ext.moduleName = 'com.synopsys.integration.polaris-common'
 project.ext.javaUseAutoModuleName = 'true'
 
-group = 'com.synopsys.integration'
-version = '0.14.2-SNAPSHOT'
+version = '0.15.0-SNAPSHOT'
 description = 'A library for using various capabilities of Polaris.'
 
 apply plugin: 'com.synopsys.integration.library'

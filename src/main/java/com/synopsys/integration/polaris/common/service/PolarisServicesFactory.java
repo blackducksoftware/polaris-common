@@ -47,16 +47,20 @@ public class PolarisServicesFactory {
         return new PolarisService(httpClient, polarisJsonTransformer, defaultPageSize);
     }
 
-    public ProjectService createProjectService() {
-        return new ProjectService(httpClient, createPolarisService());
-    }
-
     public BranchService createBranchService() {
         return new BranchService(httpClient, createPolarisService());
     }
 
     public IssueService createIssueService() {
         return new IssueService(httpClient, createPolarisService());
+    }
+
+    public JobService createJobService() {
+        return new JobService(httpClient, createPolarisService());
+    }
+
+    public ProjectService createProjectService() {
+        return new ProjectService(httpClient, createPolarisService());
     }
 
     public AuthService createAuthService() {

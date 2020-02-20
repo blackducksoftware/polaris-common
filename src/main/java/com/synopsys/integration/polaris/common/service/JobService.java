@@ -37,6 +37,8 @@ import com.synopsys.integration.rest.request.Request;
 import com.synopsys.integration.wait.WaitJob;
 
 public class JobService {
+    public static final int DEFAULT_TIME_INTERVAL_IN_SECONDS = 5;
+
     private static final String JOB_SERVICE_API_SPEC = "/api/jobs";
     private static final String JOBS_API_SPEC = JOB_SERVICE_API_SPEC + "/jobs";
     private static final TypeToken JOB_RESOURCE = new TypeToken<JobResource>() {};
@@ -61,20 +63,20 @@ public class JobService {
     }
 
     public boolean waitForJobToCompleteById(final String jobId) throws IntegrationException, InterruptedException {
-        return waitForJobToCompleteById(jobId, polarisHttpClient.getTimeoutInSeconds());
+        return waitForJobToCompleteById(jobId, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_TIME_INTERVAL_IN_SECONDS);
     }
 
-    public boolean waitForJobToCompleteById(final String jobId, final int timeoutInSeconds) throws IntegrationException, InterruptedException {
+    public boolean waitForJobToCompleteById(final String jobId, final int timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
         final String uri = polarisHttpClient.getPolarisServerUrl() + JOBS_API_SPEC + "/" + jobId;
-        return waitForJobToCompleteByUrl(uri, timeoutInSeconds);
+        return waitForJobToCompleteByUrl(uri, timeoutInSeconds, waitIntervalInSeconds);
     }
 
     public boolean waitForJobToCompleteByUrl(final String jobApiUrl) throws IntegrationException, InterruptedException {
-        return waitForJobToCompleteByUrl(jobApiUrl, polarisHttpClient.getTimeoutInSeconds());
+        return waitForJobToCompleteByUrl(jobApiUrl, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_TIME_INTERVAL_IN_SECONDS);
     }
 
-    public boolean waitForJobToCompleteByUrl(final String jobApiUrl, final int timeoutInSeconds) throws IntegrationException, InterruptedException {
-        WaitJob waitJob = WaitJob.createUsingSystemTimeWhenInvoked(logger, timeoutInSeconds, 2, () -> hasJobCompleted(jobApiUrl));
+    public boolean waitForJobToCompleteByUrl(final String jobApiUrl, final int timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
+        WaitJob waitJob = WaitJob.createUsingSystemTimeWhenInvoked(logger, timeoutInSeconds, waitIntervalInSeconds, () -> hasJobCompleted(jobApiUrl));
         return waitJob.waitFor();
     }
 

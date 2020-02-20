@@ -37,7 +37,7 @@ import com.synopsys.integration.rest.request.Request;
 import com.synopsys.integration.wait.WaitJob;
 
 public class JobService {
-    public static final int DEFAULT_TIME_INTERVAL_IN_SECONDS = 5;
+    public static final int DEFAULT_WAIT_INTERVAL_IN_SECONDS = 5;
 
     private static final String JOB_SERVICE_API_SPEC = "/api/jobs";
     private static final String JOBS_API_SPEC = JOB_SERVICE_API_SPEC + "/jobs";
@@ -63,7 +63,7 @@ public class JobService {
     }
 
     public boolean waitForJobToCompleteById(final String jobId) throws IntegrationException, InterruptedException {
-        return waitForJobToCompleteById(jobId, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_TIME_INTERVAL_IN_SECONDS);
+        return waitForJobToCompleteById(jobId, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_WAIT_INTERVAL_IN_SECONDS);
     }
 
     public boolean waitForJobToCompleteById(final String jobId, final int timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
@@ -72,7 +72,7 @@ public class JobService {
     }
 
     public boolean waitForJobToCompleteByUrl(final String jobApiUrl) throws IntegrationException, InterruptedException {
-        return waitForJobToCompleteByUrl(jobApiUrl, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_TIME_INTERVAL_IN_SECONDS);
+        return waitForJobToCompleteByUrl(jobApiUrl, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_WAIT_INTERVAL_IN_SECONDS);
     }
 
     public boolean waitForJobToCompleteByUrl(final String jobApiUrl, final int timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {

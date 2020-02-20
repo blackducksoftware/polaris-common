@@ -66,7 +66,7 @@ public class JobService {
         return waitForJobToCompleteById(jobId, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_WAIT_INTERVAL_IN_SECONDS);
     }
 
-    public boolean waitForJobToCompleteById(final String jobId, final int timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
+    public boolean waitForJobToCompleteById(final String jobId, final long timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
         final String uri = polarisHttpClient.getPolarisServerUrl() + JOBS_API_SPEC + "/" + jobId;
         return waitForJobToCompleteByUrl(uri, timeoutInSeconds, waitIntervalInSeconds);
     }
@@ -75,7 +75,7 @@ public class JobService {
         return waitForJobToCompleteByUrl(jobApiUrl, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_WAIT_INTERVAL_IN_SECONDS);
     }
 
-    public boolean waitForJobToCompleteByUrl(final String jobApiUrl, final int timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
+    public boolean waitForJobToCompleteByUrl(final String jobApiUrl, final long timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
         WaitJob waitJob = WaitJob.createUsingSystemTimeWhenInvoked(logger, timeoutInSeconds, waitIntervalInSeconds, () -> hasJobCompleted(jobApiUrl));
         return waitJob.waitFor();
     }

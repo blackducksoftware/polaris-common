@@ -37,6 +37,7 @@ import com.synopsys.integration.rest.request.Request;
 import com.synopsys.integration.wait.WaitJob;
 
 public class JobService {
+    public static final int DEFAULT_JOB_TIMEOUT_IN_MINUTES = 30;
     public static final int DEFAULT_WAIT_INTERVAL_IN_SECONDS = 5;
 
     private static final String JOB_SERVICE_API_SPEC = "/api/jobs";
@@ -66,21 +67,23 @@ public class JobService {
         return waitForJobToCompleteById(jobId, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_WAIT_INTERVAL_IN_SECONDS);
     }
 
-    public boolean waitForJobToCompleteById(final String jobId, final long timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
+    public boolean waitForJobToCompleteById(final String jobId, final int timeoutInMinutes, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
         final String uri = polarisHttpClient.getPolarisServerUrl() + JOBS_API_SPEC + "/" + jobId;
-        return waitForJobToCompleteByUrl(uri, timeoutInSeconds, waitIntervalInSeconds);
+        return waitForJobToCompleteByUrl(uri, timeoutInMinutes, waitIntervalInSeconds);
     }
 
     public boolean waitForJobToCompleteByUrl(final String jobApiUrl) throws IntegrationException, InterruptedException {
         return waitForJobToCompleteByUrl(jobApiUrl, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_WAIT_INTERVAL_IN_SECONDS);
     }
 
-    public boolean waitForJobToCompleteByUrl(final String jobApiUrl, final long timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
-        WaitJob waitJob = WaitJob.createUsingSystemTimeWhenInvoked(logger, timeoutInSeconds, waitIntervalInSeconds, () -> hasJobCompleted(jobApiUrl));
+    public boolean waitForJobToCompleteByUrl(final String jobApiUrl, final int timeoutInMinutes, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
+        WaitJob waitJob = WaitJob.createUsingSystemTimeWhenInvoked(logger, timeoutInMinutes * 60, waitIntervalInSeconds, () -> hasJobCompleted(jobApiUrl));
         return waitJob.waitFor();
     }
 
     private boolean hasJobCompleted(final String jobApiUrl) throws IntegrationException {
+        final String jobStatusPrefix = "Job at url " + jobApiUrl;
+
         try {
             final JobStatus jobStatus = Optional.ofNullable(getJobByUrl(jobApiUrl))
                                             .map(JobResource::getData)
@@ -89,19 +92,19 @@ public class JobService {
                                             .orElse(null);
 
             if (jobStatus == null) {
-                logger.alwaysLog("Job at url " + jobApiUrl + " exists but no status could be determined.");
+                logger.info(jobStatusPrefix + " was found but no status could be determined.");
                 return false;
             }
 
             final JobStatus.StateEnum stateEnum = jobStatus.getState();
             if (JobStatus.StateEnum.QUEUED.equals(stateEnum) || JobStatus.StateEnum.RUNNING.equals(stateEnum) || JobStatus.StateEnum.DISPATCHED.equals(stateEnum)) {
-                logger.alwaysLog("Job at url " + jobApiUrl + " exists with status " + stateEnum.toString() + ". Progress: " + jobStatus.getProgress());
+                logger.info(jobStatusPrefix + " was found with status " + stateEnum.toString() + ". Progress: " + jobStatus.getProgress());
                 return false;
             }
 
         } catch (final IntegrationException e) {
             if (e.getMessage().contains("404")) {
-                logger.debug("Job at url " + jobApiUrl + " could not be found. Retrying...");
+                logger.info(jobStatusPrefix + " could not be found.");
             } else {
                 throw e;
             }

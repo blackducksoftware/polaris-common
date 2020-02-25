@@ -77,7 +77,7 @@ public class JobService {
     }
 
     public boolean waitForJobToCompleteByUrl(final String jobApiUrl, final int timeoutInMinutes, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
-        WaitJob waitJob = WaitJob.createUsingSystemTimeWhenInvoked(logger, timeoutInMinutes * 60, waitIntervalInSeconds, () -> hasJobCompleted(jobApiUrl));
+        WaitJob waitJob = WaitJob.createUsingSystemTimeWhenInvoked(logger, timeoutInMinutes * 60L, waitIntervalInSeconds, () -> hasJobCompleted(jobApiUrl));
         return waitJob.waitFor();
     }
 

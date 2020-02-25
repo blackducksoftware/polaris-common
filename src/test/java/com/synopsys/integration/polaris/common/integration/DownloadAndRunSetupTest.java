@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import com.synopsys.integration.executable.ExecutableOutput;
 import com.synopsys.integration.executable.ExecutableRunnerException;
-import com.synopsys.integration.executable.ProcessBuilderRunner;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
@@ -50,7 +49,7 @@ public class DownloadAndRunSetupTest {
         Optional<String> polarisCliPath = polarisDownloadUtility.getOrDownloadPolarisCliExecutable();
         assertTrue(polarisCliPath.isPresent());
 
-        PolarisCliRunner polarisCliRunner = new PolarisCliRunner(new ProcessBuilderRunner());
+        PolarisCliRunner polarisCliRunner = new PolarisCliRunner(logger);
         PolarisCliExecutable setupCli = PolarisCliExecutable.createAnalyze(new File(polarisCliPath.get()), new File(polarisAnalyzeTargetPath), Collections.emptyMap());
         ExecutableOutput executableOutput = polarisCliRunner.execute(setupCli);
 

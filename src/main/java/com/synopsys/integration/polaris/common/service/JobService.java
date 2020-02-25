@@ -42,7 +42,7 @@ public class JobService {
 
     private static final String JOB_SERVICE_API_SPEC = "/api/jobs";
     private static final String JOBS_API_SPEC = JOB_SERVICE_API_SPEC + "/jobs";
-    private static final TypeToken JOB_RESOURCE = new TypeToken<JobResource>() {};
+    private static final TypeToken<JobResource> JOB_RESOURCE = new TypeToken<JobResource>() {};
     private final IntLogger logger;
     private final AccessTokenPolarisHttpClient polarisHttpClient;
     private final PolarisService polarisService;
@@ -103,7 +103,7 @@ public class JobService {
             }
 
         } catch (final IntegrationException e) {
-            if (e.getMessage().contains("404")) {
+            if (e.getMessage() != null && e.getMessage().contains("404")) {
                 logger.info(jobStatusPrefix + " could not be found.");
             } else {
                 throw e;

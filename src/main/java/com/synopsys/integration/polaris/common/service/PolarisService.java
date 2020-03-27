@@ -43,7 +43,7 @@ import com.synopsys.integration.polaris.common.api.PolarisResponse;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestWrapper;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 import com.synopsys.integration.rest.request.Request;
-import com.synopsys.integration.rest.request.Response;
+import com.synopsys.integration.rest.response.Response;
 
 public class PolarisService {
     public static final String PROJECT_ID = "project-id";

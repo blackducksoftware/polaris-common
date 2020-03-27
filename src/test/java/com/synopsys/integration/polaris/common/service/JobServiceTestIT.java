@@ -50,7 +50,9 @@ public class JobServiceTestIT {
         logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
 
         final AccessTokenPolarisHttpClient accessTokenPolarisHttpClient = polarisServerConfig.createPolarisHttpClient(logger);
-        final PolarisDownloadUtility polarisDownloadUtility = PolarisDownloadUtility.fromPolaris(logger, polarisServerConfig.createPolarisHttpClient(logger), null);
+        final File emptyInstallLocation = new File("/tmp/polaris_installation");
+        emptyInstallLocation.deleteOnExit();
+        final PolarisDownloadUtility polarisDownloadUtility = PolarisDownloadUtility.fromPolaris(logger, polarisServerConfig.createPolarisHttpClient(logger), emptyInstallLocation);
         final Optional<String> potentialPolarisCLiExecutablePath = polarisDownloadUtility.getOrDownloadPolarisCliExecutable();
 
         assumeTrue(potentialPolarisCLiExecutablePath.isPresent(), "The Polaris CLI could not be downloaded");

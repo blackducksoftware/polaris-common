@@ -20,7 +20,7 @@ import com.synopsys.integration.rest.RestConstants;
 import com.synopsys.integration.rest.client.ConnectionResult;
 import com.synopsys.integration.rest.proxy.ProxyInfo;
 import com.synopsys.integration.rest.request.Request;
-import com.synopsys.integration.rest.request.Response;
+import com.synopsys.integration.rest.response.Response;
 import com.synopsys.integration.rest.support.AuthenticationSupport;
 
 public class AccessTokenPolarisHttpClientTestIT {
@@ -54,7 +54,7 @@ public class AccessTokenPolarisHttpClientTestIT {
         String requestUrl = baseUrl + AccessTokenPolarisHttpClientTestIT.VALID_SPEC;
         Request request = new Request.Builder().method(HttpMethod.GET).uri(requestUrl).mimeType(AccessTokenPolarisHttpClientTestIT.VALID_MIME_TYPE).build();
         try (Response response = httpClient.execute(request)) {
-            assertTrue(response.isStatusCodeOkay(), "Status code was not OK");
+            assertTrue(response.isStatusCodeSuccess(), "Status code was not in the SUCCESS range");
             System.out.println(response.getContentString());
         }
     }

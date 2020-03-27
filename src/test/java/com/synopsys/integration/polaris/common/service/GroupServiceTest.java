@@ -45,7 +45,7 @@ public class GroupServiceTest {
                 final String groupName = randomGroup.getAttributes().getGroupname();
                 final Optional<GroupResource> optionalGroupByName = groupService.getGroupByName(groupName);
                 assertTrue(optionalGroupByName::isPresent);
-                assertEquals(randomGroup, optionalGroupByName.get());
+                assertEquals(randomGroup.getId(), optionalGroupByName.map(GroupResource::getId).get());
             }
         }
     }

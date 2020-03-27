@@ -32,7 +32,7 @@ import com.google.gson.JsonSyntaxException;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.polaris.common.api.PolarisComponent;
-import com.synopsys.integration.rest.request.Response;
+import com.synopsys.integration.rest.response.Response;
 
 public class PolarisJsonTransformer {
     private static final String FIELD_NAME_POLARIS_COMPONENT_JSON = "json";

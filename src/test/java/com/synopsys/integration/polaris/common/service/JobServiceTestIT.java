@@ -1,6 +1,5 @@
 package com.synopsys.integration.polaris.common.service;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.File;
@@ -89,7 +88,7 @@ public class JobServiceTestIT {
 
         logger.info("Waiting for job at URL: " + jobStatusUrl);
 
-        assertTrue(jobService.waitForJobToCompleteByUrl(jobStatusUrl));
+        jobService.waitForJobStateIsCompletedOrDieByUrl(jobStatusUrl, 1, JobService.DEFAULT_WAIT_INTERVAL_IN_SECONDS);
     }
 
     @Test
@@ -103,7 +102,7 @@ public class JobServiceTestIT {
 
         logger.info("Waiting for job at URL: " + jobStatusId);
 
-        assertTrue(jobService.waitForJobToCompleteById(jobStatusId));
+        jobService.waitForJobStateIsCompletedOrDieById(jobStatusId, 1, JobService.DEFAULT_WAIT_INTERVAL_IN_SECONDS);
     }
 
 }

@@ -20,13 +20,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.cli.model;
+package com.synopsys.integration.polaris.common.cli.model.v1;
 
-public class ToolInfo {
+public class ToolInfoV1 {
     private String toolVersion;
     private String jobId;
     private String jobStatusUrl;
     private String jobStatus;
+    private String issueApiUrl;
 
     public String getToolVersion() {
         return toolVersion;
@@ -58,5 +59,13 @@ public class ToolInfo {
 
     public void setJobStatus(final String jobStatus) {
         this.jobStatus = jobStatus;
+    }
+
+    public String getIssueApiUrl() {
+        return issueApiUrl;
+    }
+
+    public void setIssueApiUrl(final String issueApiUrl) {
+        this.issueApiUrl = issueApiUrl;
     }
 }

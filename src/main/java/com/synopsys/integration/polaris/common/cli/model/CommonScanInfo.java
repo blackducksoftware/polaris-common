@@ -22,32 +22,32 @@
  */
 package com.synopsys.integration.polaris.common.cli.model;
 
-public class ProjectInfo {
-    private String projectId;
-    private String branchId;
-    private String revisionId;
+public class CommonScanInfo {
+    private String cliVersion;
+    private String scanTime;
+    private String issueApiUrl;
 
-    public String getProjectId() {
-        return projectId;
+    public String getCliVersion() {
+        return cliVersion;
     }
 
-    public void setProjectId(final String projectId) {
-        this.projectId = projectId;
+    public void setCliVersion(final String cliVersion) {
+        this.cliVersion = cliVersion;
     }
 
-    public String getBranchId() {
-        return branchId;
+    public String getScanTime() {
+        return scanTime;
     }
 
-    public void setBranchId(final String branchId) {
-        this.branchId = branchId;
+    public void setScanTime(final String scanTime) {
+        this.scanTime = scanTime;
     }
 
-    public String getRevisionId() {
-        return revisionId;
+    public String getIssueApiUrl() {
+        return issueApiUrl;
     }
 
-    public void setRevisionId(final String revisionId) {
-        this.revisionId = revisionId;
+    public void setIssueApiUrl(final String issueApiUrl) {
+        this.issueApiUrl = issueApiUrl;
     }
 }

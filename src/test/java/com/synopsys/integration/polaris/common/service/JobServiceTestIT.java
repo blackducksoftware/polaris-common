@@ -23,15 +23,15 @@ import com.synopsys.integration.polaris.common.cli.PolarisCliExecutable;
 import com.synopsys.integration.polaris.common.cli.PolarisCliResponseUtility;
 import com.synopsys.integration.polaris.common.cli.PolarisCliRunner;
 import com.synopsys.integration.polaris.common.cli.PolarisDownloadUtility;
-import com.synopsys.integration.polaris.common.cli.model.CoverityToolInfo;
-import com.synopsys.integration.polaris.common.cli.model.PolarisCliResponseModel;
+import com.synopsys.integration.polaris.common.cli.model.v1.CliScanV1;
+import com.synopsys.integration.polaris.common.cli.model.v1.CoverityToolInfoV1;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfig;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfigBuilder;
 import com.synopsys.integration.polaris.common.exception.PolarisIntegrationException;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 
 public class JobServiceTestIT {
-    private PolarisCliResponseModel polarisCliResponseModel;
+    private CliScanV1 cliScanV1;
     private JobService jobService;
     private IntLogger logger;
 
@@ -71,7 +71,7 @@ public class JobServiceTestIT {
         assumeTrue(executableOutput.getReturnCode() == 0, "'polaris analyze' returned a nonzero exit code");
 
         final PolarisCliResponseUtility polarisCliResponseUtility = PolarisCliResponseUtility.defaultUtility(logger);
-        polarisCliResponseModel = polarisCliResponseUtility.getPolarisCliResponseModelFromDefaultLocation(emptyProjectDirectory.getAbsolutePath());
+        cliScanV1 = polarisCliResponseUtility.getPolarisCliResponseModelFromDefaultLocation(emptyProjectDirectory.getAbsolutePath());
 
         final PolarisServicesFactory polarisServicesFactory = polarisServerConfig.createPolarisServicesFactory(logger);
         jobService = polarisServicesFactory.createJobService();
@@ -79,9 +79,9 @@ public class JobServiceTestIT {
 
     @Test
     public void testWaitForJobToCompleteByUrl() throws IntegrationException, InterruptedException {
-        final Optional<String> potentialJobStatusUrl = Optional.ofNullable(polarisCliResponseModel)
-                                                           .map(PolarisCliResponseModel::getCoverityToolInfo)
-                                                           .map(CoverityToolInfo::getJobStatusUrl);
+        final Optional<String> potentialJobStatusUrl = Optional.ofNullable(cliScanV1)
+                                                           .map(CliScanV1::getCoverityToolInfo)
+                                                           .map(CoverityToolInfoV1::getJobStatusUrl);
 
         assumeTrue(potentialJobStatusUrl.isPresent(), "Coverity jobStatusUrl is missing from the cli-scan.json-- this test needs to be updated");
         final String jobStatusUrl = potentialJobStatusUrl.get();
@@ -93,9 +93,9 @@ public class JobServiceTestIT {
 
     @Test
     public void testWaitForJobToCompleteById() throws IntegrationException, InterruptedException {
-        final Optional<String> potentialJobId = Optional.ofNullable(polarisCliResponseModel)
-                                                    .map(PolarisCliResponseModel::getCoverityToolInfo)
-                                                    .map(CoverityToolInfo::getJobId);
+        final Optional<String> potentialJobId = Optional.ofNullable(cliScanV1)
+                                                    .map(CliScanV1::getCoverityToolInfo)
+                                                    .map(CoverityToolInfoV1::getJobId);
 
         assumeTrue(potentialJobId.isPresent(), "Coverity jobId is missing from the cli-scan.json-- this test needs to be updated");
         final String jobStatusId = potentialJobId.get();

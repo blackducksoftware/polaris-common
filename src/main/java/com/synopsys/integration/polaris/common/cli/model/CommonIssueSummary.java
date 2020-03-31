@@ -22,32 +22,38 @@
  */
 package com.synopsys.integration.polaris.common.cli.model;
 
-public class ScanInfo {
-    private String cliVersion;
-    private String scanTime;
-    private String issueApiUrl;
+import java.util.Map;
 
-    public String getCliVersion() {
-        return cliVersion;
+import com.google.gson.annotations.SerializedName;
+
+public class CommonIssueSummary {
+    private Map<String, Integer> issuesBySeverity;
+    private String summaryUrl;
+
+    @SerializedName("total")
+    private Integer totalIssueCount;
+
+    public Map<String, Integer> getIssuesBySeverity() {
+        return issuesBySeverity;
     }
 
-    public void setCliVersion(final String cliVersion) {
-        this.cliVersion = cliVersion;
+    public void setIssuesBySeverity(final Map<String, Integer> issuesBySeverity) {
+        this.issuesBySeverity = issuesBySeverity;
     }
 
-    public String getScanTime() {
-        return scanTime;
+    public String getSummaryUrl() {
+        return summaryUrl;
     }
 
-    public void setScanTime(final String scanTime) {
-        this.scanTime = scanTime;
+    public void setSummaryUrl(final String summaryUrl) {
+        this.summaryUrl = summaryUrl;
     }
 
-    public String getIssueApiUrl() {
-        return issueApiUrl;
+    public Integer getTotalIssueCount() {
+        return totalIssueCount;
     }
 
-    public void setIssueApiUrl(final String issueApiUrl) {
-        this.issueApiUrl = issueApiUrl;
+    public void setTotalIssueCount(final Integer totalIssueCount) {
+        this.totalIssueCount = totalIssueCount;
     }
 }

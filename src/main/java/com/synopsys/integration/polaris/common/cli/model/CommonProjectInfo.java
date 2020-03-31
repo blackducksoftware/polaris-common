@@ -22,5 +22,32 @@
  */
 package com.synopsys.integration.polaris.common.cli.model;
 
-public class BlackDuckScaToolInfo extends ToolInfo {
+public class CommonProjectInfo {
+    private String projectId;
+    private String branchId;
+    private String revisionId;
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(final String projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getBranchId() {
+        return branchId;
+    }
+
+    public void setBranchId(final String branchId) {
+        this.branchId = branchId;
+    }
+
+    public String getRevisionId() {
+        return revisionId;
+    }
+
+    public void setRevisionId(final String revisionId) {
+        this.revisionId = revisionId;
+    }
 }

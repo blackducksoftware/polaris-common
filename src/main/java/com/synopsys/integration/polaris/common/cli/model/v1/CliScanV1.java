@@ -20,21 +20,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.cli.model;
+package com.synopsys.integration.polaris.common.cli.model.v1;
 
 import com.google.gson.annotations.SerializedName;
+import com.synopsys.integration.polaris.common.cli.model.CommonIssueSummary;
+import com.synopsys.integration.polaris.common.cli.model.CommonProjectInfo;
+import com.synopsys.integration.polaris.common.cli.model.CommonScanInfo;
 
-public class PolarisCliResponseModel {
+public class CliScanV1 {
     private String version;
-    private ScanInfo scanInfo;
-    private ProjectInfo projectInfo;
-    private IssueSummary issueSummary;
+    private CommonScanInfo scanInfo;
+    private CommonProjectInfo projectInfo;
+    private CommonIssueSummary issueSummary;
 
     @SerializedName("coverity")
-    private CoverityToolInfo coverityToolInfo;
+    private ToolInfoV1 coverityToolInfo;
 
     @SerializedName("sca")
-    private BlackDuckScaToolInfo blackDuckScaToolInfo;
+    private ToolInfoV1 blackDuckScaToolInfo;
 
     public String getVersion() {
         return version;
@@ -44,43 +47,43 @@ public class PolarisCliResponseModel {
         this.version = version;
     }
 
-    public ScanInfo getScanInfo() {
+    public CommonScanInfo getScanInfo() {
         return scanInfo;
     }
 
-    public void setScanInfo(final ScanInfo scanInfo) {
+    public void setScanInfo(final CommonScanInfo scanInfo) {
         this.scanInfo = scanInfo;
     }
 
-    public ProjectInfo getProjectInfo() {
+    public CommonProjectInfo getProjectInfo() {
         return projectInfo;
     }
 
-    public void setProjectInfo(final ProjectInfo projectInfo) {
+    public void setProjectInfo(final CommonProjectInfo projectInfo) {
         this.projectInfo = projectInfo;
     }
 
-    public IssueSummary getIssueSummary() {
+    public CommonIssueSummary getIssueSummary() {
         return issueSummary;
     }
 
-    public void setIssueSummary(final IssueSummary issueSummary) {
+    public void setIssueSummary(final CommonIssueSummary issueSummary) {
         this.issueSummary = issueSummary;
     }
 
-    public CoverityToolInfo getCoverityToolInfo() {
+    public ToolInfoV1 getCoverityToolInfo() {
         return coverityToolInfo;
     }
 
-    public void setCoverityToolInfo(final CoverityToolInfo coverityToolInfo) {
+    public void setCoverityToolInfo(final ToolInfoV1 coverityToolInfo) {
         this.coverityToolInfo = coverityToolInfo;
     }
 
-    public BlackDuckScaToolInfo getBlackDuckScaToolInfo() {
+    public ToolInfoV1 getBlackDuckScaToolInfo() {
         return blackDuckScaToolInfo;
     }
 
-    public void setBlackDuckScaToolInfo(final BlackDuckScaToolInfo blackDuckScaToolInfo) {
+    public void setBlackDuckScaToolInfo(final ToolInfoV1 blackDuckScaToolInfo) {
         this.blackDuckScaToolInfo = blackDuckScaToolInfo;
     }
 

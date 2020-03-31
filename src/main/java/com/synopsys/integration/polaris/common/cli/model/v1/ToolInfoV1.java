@@ -20,27 +20,45 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.cli.model;
+package com.synopsys.integration.polaris.common.cli.model.v1;
 
-public class ScanInfo {
-    private String cliVersion;
-    private String scanTime;
+public class ToolInfoV1 {
+    private String toolVersion;
+    private String jobId;
+    private String jobStatusUrl;
+    private String jobStatus;
     private String issueApiUrl;
 
-    public String getCliVersion() {
-        return cliVersion;
+    public String getToolVersion() {
+        return toolVersion;
     }
 
-    public void setCliVersion(final String cliVersion) {
-        this.cliVersion = cliVersion;
+    public void setToolVersion(final String toolVersion) {
+        this.toolVersion = toolVersion;
     }
 
-    public String getScanTime() {
-        return scanTime;
+    public String getJobId() {
+        return jobId;
     }
 
-    public void setScanTime(final String scanTime) {
-        this.scanTime = scanTime;
+    public void setJobId(final String jobId) {
+        this.jobId = jobId;
+    }
+
+    public String getJobStatusUrl() {
+        return jobStatusUrl;
+    }
+
+    public void setJobStatusUrl(final String jobStatusUrl) {
+        this.jobStatusUrl = jobStatusUrl;
+    }
+
+    public String getJobStatus() {
+        return jobStatus;
+    }
+
+    public void setJobStatus(final String jobStatus) {
+        this.jobStatus = jobStatus;
     }
 
     public String getIssueApiUrl() {

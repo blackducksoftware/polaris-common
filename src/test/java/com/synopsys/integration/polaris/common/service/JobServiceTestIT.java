@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
@@ -23,15 +25,15 @@ import com.synopsys.integration.polaris.common.cli.PolarisCliExecutable;
 import com.synopsys.integration.polaris.common.cli.PolarisCliResponseUtility;
 import com.synopsys.integration.polaris.common.cli.PolarisCliRunner;
 import com.synopsys.integration.polaris.common.cli.PolarisDownloadUtility;
-import com.synopsys.integration.polaris.common.cli.model.CoverityToolInfo;
-import com.synopsys.integration.polaris.common.cli.model.PolarisCliResponseModel;
+import com.synopsys.integration.polaris.common.cli.model.CliCommonResponseModel;
+import com.synopsys.integration.polaris.common.cli.model.CommonToolInfo;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfig;
 import com.synopsys.integration.polaris.common.configuration.PolarisServerConfigBuilder;
 import com.synopsys.integration.polaris.common.exception.PolarisIntegrationException;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
 
 public class JobServiceTestIT {
-    private PolarisCliResponseModel polarisCliResponseModel;
+    private CliCommonResponseModel cliCommonResponseModel;
     private JobService jobService;
     private IntLogger logger;
 
@@ -71,7 +73,7 @@ public class JobServiceTestIT {
         assumeTrue(executableOutput.getReturnCode() == 0, "'polaris analyze' returned a nonzero exit code");
 
         final PolarisCliResponseUtility polarisCliResponseUtility = PolarisCliResponseUtility.defaultUtility(logger);
-        polarisCliResponseModel = polarisCliResponseUtility.getPolarisCliResponseModelFromDefaultLocation(emptyProjectDirectory.getAbsolutePath());
+        cliCommonResponseModel = polarisCliResponseUtility.getPolarisCliResponseModelFromDefaultLocation(emptyProjectDirectory.getAbsolutePath());
 
         final PolarisServicesFactory polarisServicesFactory = polarisServerConfig.createPolarisServicesFactory(logger);
         jobService = polarisServicesFactory.createJobService();
@@ -79,30 +81,26 @@ public class JobServiceTestIT {
 
     @Test
     public void testWaitForJobToCompleteByUrl() throws IntegrationException, InterruptedException {
-        final Optional<String> potentialJobStatusUrl = Optional.ofNullable(polarisCliResponseModel)
-                                                           .map(PolarisCliResponseModel::getCoverityToolInfo)
-                                                           .map(CoverityToolInfo::getJobStatusUrl);
+        final List<CommonToolInfo> tools = cliCommonResponseModel.getTools();
+        Assert.assertFalse("No tools found in the cli-scan.json response model", tools.isEmpty());
 
-        assumeTrue(potentialJobStatusUrl.isPresent(), "Coverity jobStatusUrl is missing from the cli-scan.json-- this test needs to be updated");
-        final String jobStatusUrl = potentialJobStatusUrl.get();
+        final String jobStatusUrl = cliCommonResponseModel.getTools().get(0).getJobStatusUrl();
 
         logger.info("Waiting for job at URL: " + jobStatusUrl);
 
-        jobService.waitForJobStateIsCompletedOrDieByUrl(jobStatusUrl, 1, JobService.DEFAULT_WAIT_INTERVAL_IN_SECONDS);
+        jobService.waitForJobStateIsCompletedOrDieByUrl(jobStatusUrl, 3, JobService.DEFAULT_WAIT_INTERVAL_IN_SECONDS);
     }
 
     @Test
     public void testWaitForJobToCompleteById() throws IntegrationException, InterruptedException {
-        final Optional<String> potentialJobId = Optional.ofNullable(polarisCliResponseModel)
-                                                    .map(PolarisCliResponseModel::getCoverityToolInfo)
-                                                    .map(CoverityToolInfo::getJobId);
+        final List<CommonToolInfo> tools = cliCommonResponseModel.getTools();
+        Assert.assertFalse("No tools found in the cli-scan.json response model", tools.isEmpty());
 
-        assumeTrue(potentialJobId.isPresent(), "Coverity jobId is missing from the cli-scan.json-- this test needs to be updated");
-        final String jobStatusId = potentialJobId.get();
+        final String jobId = cliCommonResponseModel.getTools().get(0).getJobId();
 
-        logger.info("Waiting for job at URL: " + jobStatusId);
+        logger.info("Waiting for job at URL: " + jobId);
 
-        jobService.waitForJobStateIsCompletedOrDieById(jobStatusId, 1, JobService.DEFAULT_WAIT_INTERVAL_IN_SECONDS);
+        jobService.waitForJobStateIsCompletedOrDieById(jobId, 3, JobService.DEFAULT_WAIT_INTERVAL_IN_SECONDS);
     }
 
 }

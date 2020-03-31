@@ -26,7 +26,7 @@ import java.util.Map;
 
 import com.google.gson.annotations.SerializedName;
 
-public class IssueSummary {
+public class CommonIssueSummary {
     private Map<String, Integer> issuesBySeverity;
     private String summaryUrl;
 

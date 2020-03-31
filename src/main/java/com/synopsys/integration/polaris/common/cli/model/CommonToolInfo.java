@@ -22,11 +22,21 @@
  */
 package com.synopsys.integration.polaris.common.cli.model;
 
-public class ToolInfo {
+public class CommonToolInfo {
+    private String toolName;
     private String toolVersion;
     private String jobId;
     private String jobStatusUrl;
     private String jobStatus;
+    private String issueApiUrl;
+
+    public String getToolName() {
+        return toolName;
+    }
+
+    public void setToolName(final String toolName) {
+        this.toolName = toolName;
+    }
 
     public String getToolVersion() {
         return toolVersion;
@@ -58,5 +68,13 @@ public class ToolInfo {
 
     public void setJobStatus(final String jobStatus) {
         this.jobStatus = jobStatus;
+    }
+
+    public String getIssueApiUrl() {
+        return issueApiUrl;
+    }
+
+    public void setIssueApiUrl(final String issueApiUrl) {
+        this.issueApiUrl = issueApiUrl;
     }
 }

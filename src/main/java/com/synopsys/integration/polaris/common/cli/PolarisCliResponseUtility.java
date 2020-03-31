@@ -73,28 +73,31 @@ public class PolarisCliResponseUtility {
 
     public CliCommonResponseModel getPolarisCliResponseModel(final Path pathToJson) throws PolarisIntegrationException {
         try (BufferedReader reader = Files.newBufferedReader(pathToJson)) {
-            final JsonObject versionlessModel = gson.fromJson(reader, JsonObject.class);
-            final String versionString = versionlessModel.get("version").getAsString();
-            final PolarisCliResponseVersion polarisCliResponseVersion = PolarisCliResponseVersion.parse(versionString)
-                                                                            .orElseThrow(() -> new PolarisIntegrationException("Version " + versionString + " is not a valid version of cli-scan.json"));
-
-            CliCommonResponseAdapter cliCommonResponseAdapter = new CliCommonResponseAdapter(gson);
             logger.debug("Attempting to retrieve CliCommonResponseModel from " + pathToJson.toString());
-            final int majorVersion = polarisCliResponseVersion.getMajor();
-            if (majorVersion == 1) {
-                return cliCommonResponseAdapter.fromCliScanV1(gson.fromJson(versionlessModel, CliScanV1.class));
-            } else if (majorVersion == 2) {
-                return cliCommonResponseAdapter.fromCliScanV2(gson.fromJson(versionlessModel, CliScanV2.class));
-            } else {
-                throw new PolarisIntegrationException("Version " + versionString + " of the cli-scan.json is not supported.");
-            }
+            return getPolarisCliResponseModelFromJsonObject(gson.fromJson(reader, JsonObject.class));
         } catch (final IOException e) {
             throw new PolarisIntegrationException("There was a problem parsing the Polaris CLI response json at " + pathToJson.toString(), e);
         }
     }
 
-    public CliCommonResponseModel getPolarisCliResponseModelFromString(final String rawPolarisCliResponse) {
-        return gson.fromJson(rawPolarisCliResponse, CliCommonResponseModel.class);
+    public CliCommonResponseModel getPolarisCliResponseModelFromString(final String rawPolarisCliResponse) throws PolarisIntegrationException {
+        return getPolarisCliResponseModelFromJsonObject(gson.fromJson(rawPolarisCliResponse, JsonObject.class));
+    }
+
+    public CliCommonResponseModel getPolarisCliResponseModelFromJsonObject(final JsonObject versionlessModel) throws PolarisIntegrationException {
+        final String versionString = versionlessModel.get("version").getAsString();
+        final PolarisCliResponseVersion polarisCliResponseVersion = PolarisCliResponseVersion.parse(versionString)
+                                                                        .orElseThrow(() -> new PolarisIntegrationException("Version " + versionString + " is not a valid version of cli-scan.json"));
+
+        CliCommonResponseAdapter cliCommonResponseAdapter = new CliCommonResponseAdapter(gson);
+        final int majorVersion = polarisCliResponseVersion.getMajor();
+        if (majorVersion == 1) {
+            return cliCommonResponseAdapter.fromCliScanV1(gson.fromJson(versionlessModel, CliScanV1.class));
+        } else if (majorVersion == 2) {
+            return cliCommonResponseAdapter.fromCliScanV2(gson.fromJson(versionlessModel, CliScanV2.class));
+        } else {
+            throw new PolarisIntegrationException("Version " + versionString + " of the cli-scan.json is not supported.");
+        }
     }
 
 }

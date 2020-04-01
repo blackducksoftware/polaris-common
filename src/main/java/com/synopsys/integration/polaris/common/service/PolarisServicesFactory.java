@@ -79,6 +79,10 @@ public class PolarisServicesFactory {
         return new GroupService(createAuthService());
     }
 
+    public CountService createCountService() {
+        return new CountService(createPolarisService());
+    }
+
     public IntLogger getLogger() {
         return logger;
     }

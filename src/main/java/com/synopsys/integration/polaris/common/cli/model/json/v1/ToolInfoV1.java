@@ -20,7 +20,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.cli.model.v1;
+package com.synopsys.integration.polaris.common.cli.model.json.v1;
 
 public class ToolInfoV1 {
     private String toolVersion;

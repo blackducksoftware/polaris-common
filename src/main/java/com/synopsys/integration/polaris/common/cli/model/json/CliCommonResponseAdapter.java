@@ -20,7 +20,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.cli.model;
+package com.synopsys.integration.polaris.common.cli.model.json;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,9 +29,11 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.polaris.common.cli.model.v1.CliScanV1;
-import com.synopsys.integration.polaris.common.cli.model.v1.ToolInfoV1;
-import com.synopsys.integration.polaris.common.cli.model.v2.CliScanV2;
+import com.synopsys.integration.polaris.common.cli.model.CliCommonResponseModel;
+import com.synopsys.integration.polaris.common.cli.model.CommonToolInfo;
+import com.synopsys.integration.polaris.common.cli.model.json.v1.CliScanV1;
+import com.synopsys.integration.polaris.common.cli.model.json.v1.ToolInfoV1;
+import com.synopsys.integration.polaris.common.cli.model.json.v2.CliScanV2;
 
 public class CliCommonResponseAdapter {
     private final Gson gson;
@@ -75,6 +77,7 @@ public class CliCommonResponseAdapter {
             return Optional.empty();
         }
 
+        //TODO investigate BeanUtils.copyProperties?
         final CommonToolInfo commonToolInfo = new CommonToolInfo();
         commonToolInfo.setIssueApiUrl(toolInfoV1.getIssueApiUrl());
         commonToolInfo.setJobId(toolInfoV1.getJobId());

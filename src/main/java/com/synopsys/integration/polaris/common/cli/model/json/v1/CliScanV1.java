@@ -20,12 +20,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.cli.model.v1;
+package com.synopsys.integration.polaris.common.cli.model.json.v1;
 
 import com.google.gson.annotations.SerializedName;
 import com.synopsys.integration.polaris.common.cli.model.CommonIssueSummary;
 import com.synopsys.integration.polaris.common.cli.model.CommonProjectInfo;
 import com.synopsys.integration.polaris.common.cli.model.CommonScanInfo;
+
+import java.io.Serializable;
 
 public class CliScanV1 {
     private String version;

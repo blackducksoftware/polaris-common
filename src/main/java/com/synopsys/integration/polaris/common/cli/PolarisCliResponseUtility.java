@@ -31,10 +31,10 @@ import java.nio.file.Paths;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.synopsys.integration.log.IntLogger;
-import com.synopsys.integration.polaris.common.cli.model.CliCommonResponseAdapter;
+import com.synopsys.integration.polaris.common.cli.model.json.CliCommonResponseAdapter;
 import com.synopsys.integration.polaris.common.cli.model.CliCommonResponseModel;
-import com.synopsys.integration.polaris.common.cli.model.v1.CliScanV1;
-import com.synopsys.integration.polaris.common.cli.model.v2.CliScanV2;
+import com.synopsys.integration.polaris.common.cli.model.json.v1.CliScanV1;
+import com.synopsys.integration.polaris.common.cli.model.json.v2.CliScanV2;
 import com.synopsys.integration.polaris.common.exception.PolarisIntegrationException;
 
 public class PolarisCliResponseUtility {

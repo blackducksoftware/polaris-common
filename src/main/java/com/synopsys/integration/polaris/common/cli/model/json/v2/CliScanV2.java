@@ -22,7 +22,7 @@
  */
 package com.synopsys.integration.polaris.common.cli.model.json.v2;
 
-import com.synopsys.integration.polaris.common.cli.model.json.adapter.CliScanResponse;
+import com.synopsys.integration.polaris.common.cli.model.json.CliScanResponse;
 import com.synopsys.integration.polaris.common.cli.model.json.v1.IssueSummaryV1;
 import com.synopsys.integration.polaris.common.cli.model.json.v1.ProjectInfoV1;
 import com.synopsys.integration.polaris.common.cli.model.json.v1.ScanInfoV1;

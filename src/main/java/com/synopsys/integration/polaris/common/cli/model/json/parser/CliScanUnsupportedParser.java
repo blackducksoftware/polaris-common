@@ -1,12 +1,13 @@
-package com.synopsys.integration.polaris.common.cli.model.json.adapter;
+package com.synopsys.integration.polaris.common.cli.model.json.parser;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.synopsys.integration.polaris.common.cli.model.CliCommonResponseModel;
+import com.synopsys.integration.polaris.common.cli.model.json.UnsupportedVersionCliScanResponse;
 import com.synopsys.integration.polaris.common.exception.PolarisIntegrationException;
 
-public class CliScanUnsupportedParser extends CliScanParser<UnsupportedVersionCliScan> {
+public class CliScanUnsupportedParser extends CliScanParser<UnsupportedVersionCliScanResponse> {
     private final String versionString;
 
     public CliScanUnsupportedParser(Gson gson, String versionString) {
@@ -15,7 +16,7 @@ public class CliScanUnsupportedParser extends CliScanParser<UnsupportedVersionCl
     }
 
     @Override
-    public TypeToken<UnsupportedVersionCliScan> getTypeToken() {
+    public TypeToken<UnsupportedVersionCliScanResponse> getTypeToken() {
         return null;
     }
 

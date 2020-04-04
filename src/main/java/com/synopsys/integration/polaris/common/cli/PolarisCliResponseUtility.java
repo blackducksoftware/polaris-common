@@ -31,7 +31,7 @@ import java.nio.file.Paths;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.synopsys.integration.log.IntLogger;
-import com.synopsys.integration.polaris.common.cli.model.json.adapter.CliCommonResponseAdapter;
+import com.synopsys.integration.polaris.common.cli.model.json.CliCommonResponseAdapter;
 import com.synopsys.integration.polaris.common.cli.model.CliCommonResponseModel;
 import com.synopsys.integration.polaris.common.exception.PolarisIntegrationException;
 

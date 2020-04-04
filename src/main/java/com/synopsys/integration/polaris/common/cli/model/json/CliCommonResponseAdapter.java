@@ -20,12 +20,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.cli.model.json.adapter;
+package com.synopsys.integration.polaris.common.cli.model.json;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.synopsys.integration.polaris.common.cli.PolarisCliResponseVersion;
 import com.synopsys.integration.polaris.common.cli.model.CliCommonResponseModel;
+import com.synopsys.integration.polaris.common.cli.model.json.parser.*;
 import com.synopsys.integration.polaris.common.exception.PolarisIntegrationException;
 
 public class CliCommonResponseAdapter {

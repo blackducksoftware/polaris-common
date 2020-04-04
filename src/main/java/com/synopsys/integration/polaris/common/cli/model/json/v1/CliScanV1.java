@@ -23,7 +23,7 @@
 package com.synopsys.integration.polaris.common.cli.model.json.v1;
 
 import com.google.gson.annotations.SerializedName;
-import com.synopsys.integration.polaris.common.cli.model.json.adapter.CliScanResponse;
+import com.synopsys.integration.polaris.common.cli.model.json.CliScanResponse;
 
 public class CliScanV1 implements CliScanResponse {
     public String version;

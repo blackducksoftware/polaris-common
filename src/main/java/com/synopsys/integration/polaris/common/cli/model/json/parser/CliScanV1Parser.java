@@ -1,4 +1,4 @@
-package com.synopsys.integration.polaris.common.cli.model.json.adapter;
+package com.synopsys.integration.polaris.common.cli.model.json.parser;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

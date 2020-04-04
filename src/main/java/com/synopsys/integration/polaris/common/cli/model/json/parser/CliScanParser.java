@@ -1,9 +1,10 @@
-package com.synopsys.integration.polaris.common.cli.model.json.adapter;
+package com.synopsys.integration.polaris.common.cli.model.json.parser;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.synopsys.integration.polaris.common.cli.model.*;
+import com.synopsys.integration.polaris.common.cli.model.json.CliScanResponse;
 import com.synopsys.integration.polaris.common.cli.model.json.v1.IssueSummaryV1;
 import com.synopsys.integration.polaris.common.cli.model.json.v1.ProjectInfoV1;
 import com.synopsys.integration.polaris.common.cli.model.json.v1.ScanInfoV1;

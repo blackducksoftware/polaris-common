@@ -24,13 +24,9 @@ package com.synopsys.integration.polaris.common.cli.model;
 
 import java.util.Map;
 
-import com.google.gson.annotations.SerializedName;
-
 public class CommonIssueSummary {
     private Map<String, Integer> issuesBySeverity;
     private String summaryUrl;
-
-    @SerializedName("total")
     private Integer totalIssueCount;
 
     public Map<String, Integer> getIssuesBySeverity() {
@@ -56,4 +52,5 @@ public class CommonIssueSummary {
     public void setTotalIssueCount(final Integer totalIssueCount) {
         this.totalIssueCount = totalIssueCount;
     }
+
 }

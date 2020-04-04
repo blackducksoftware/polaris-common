@@ -22,6 +22,8 @@
  */
 package com.synopsys.integration.polaris.common.cli.model;
 
+import java.util.Optional;
+
 public class CommonToolInfo {
     private String toolName;
     private String toolVersion;
@@ -70,11 +72,12 @@ public class CommonToolInfo {
         this.jobStatus = jobStatus;
     }
 
-    public String getIssueApiUrl() {
-        return issueApiUrl;
+    public Optional<String> getIssueApiUrl() {
+        return Optional.ofNullable(issueApiUrl);
     }
 
     public void setIssueApiUrl(final String issueApiUrl) {
         this.issueApiUrl = issueApiUrl;
     }
+
 }

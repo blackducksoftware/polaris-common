@@ -23,49 +23,9 @@
 package com.synopsys.integration.polaris.common.cli.model.json.v1;
 
 public class ToolInfoV1 {
-    private String toolVersion;
-    private String jobId;
-    private String jobStatusUrl;
-    private String jobStatus;
-    private String issueApiUrl;
+    public String toolVersion;
+    public String jobId;
+    public String jobStatusUrl;
+    public String jobStatus;
 
-    public String getToolVersion() {
-        return toolVersion;
-    }
-
-    public void setToolVersion(final String toolVersion) {
-        this.toolVersion = toolVersion;
-    }
-
-    public String getJobId() {
-        return jobId;
-    }
-
-    public void setJobId(final String jobId) {
-        this.jobId = jobId;
-    }
-
-    public String getJobStatusUrl() {
-        return jobStatusUrl;
-    }
-
-    public void setJobStatusUrl(final String jobStatusUrl) {
-        this.jobStatusUrl = jobStatusUrl;
-    }
-
-    public String getJobStatus() {
-        return jobStatus;
-    }
-
-    public void setJobStatus(final String jobStatus) {
-        this.jobStatus = jobStatus;
-    }
-
-    public String getIssueApiUrl() {
-        return issueApiUrl;
-    }
-
-    public void setIssueApiUrl(final String issueApiUrl) {
-        this.issueApiUrl = issueApiUrl;
-    }
 }

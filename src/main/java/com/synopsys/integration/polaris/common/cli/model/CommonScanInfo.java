@@ -50,4 +50,5 @@ public class CommonScanInfo {
     public void setIssueApiUrl(final String issueApiUrl) {
         this.issueApiUrl = issueApiUrl;
     }
+
 }

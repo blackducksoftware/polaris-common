@@ -22,56 +22,18 @@
  */
 package com.synopsys.integration.polaris.common.cli.model.json.v2;
 
-import com.synopsys.integration.polaris.common.cli.model.CommonIssueSummary;
-import com.synopsys.integration.polaris.common.cli.model.CommonProjectInfo;
-import com.synopsys.integration.polaris.common.cli.model.CommonScanInfo;
-import com.synopsys.integration.polaris.common.cli.model.CommonToolInfo;
+import com.synopsys.integration.polaris.common.cli.model.json.adapter.CliScanResponse;
+import com.synopsys.integration.polaris.common.cli.model.json.v1.IssueSummaryV1;
+import com.synopsys.integration.polaris.common.cli.model.json.v1.ProjectInfoV1;
+import com.synopsys.integration.polaris.common.cli.model.json.v1.ScanInfoV1;
 
-public class CliScanV2 {
-    private String version;
-    private CommonScanInfo scanInfo;
-    private CommonProjectInfo projectInfo;
-    private CommonIssueSummary issueSummary;
-    private CommonToolInfo[] tools;
+import java.util.List;
 
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(final String version) {
-        this.version = version;
-    }
-
-    public CommonScanInfo getScanInfo() {
-        return scanInfo;
-    }
-
-    public void setScanInfo(final CommonScanInfo scanInfo) {
-        this.scanInfo = scanInfo;
-    }
-
-    public CommonProjectInfo getProjectInfo() {
-        return projectInfo;
-    }
-
-    public void setProjectInfo(final CommonProjectInfo projectInfo) {
-        this.projectInfo = projectInfo;
-    }
-
-    public CommonIssueSummary getIssueSummary() {
-        return issueSummary;
-    }
-
-    public void setIssueSummary(final CommonIssueSummary issueSummary) {
-        this.issueSummary = issueSummary;
-    }
-
-    public CommonToolInfo[] getTools() {
-        return tools;
-    }
-
-    public void setTools(final CommonToolInfo[] tools) {
-        this.tools = tools;
-    }
+public class CliScanV2 implements CliScanResponse {
+    public String version;
+    public ScanInfoV1 scanInfo;
+    public ProjectInfoV1 projectInfo;
+    public IssueSummaryV1 issueSummary;
+    public List<ToolInfoV2> tools;
 
 }

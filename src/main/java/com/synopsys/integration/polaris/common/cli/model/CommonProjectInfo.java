@@ -50,4 +50,5 @@ public class CommonProjectInfo {
     public void setRevisionId(final String revisionId) {
         this.revisionId = revisionId;
     }
+
 }

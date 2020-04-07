@@ -20,37 +20,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.cli.model;
+package com.synopsys.integration.polaris.common.cli.model.json.v2;
 
-import java.util.Map;
+import com.synopsys.integration.polaris.common.cli.model.json.v1.ToolInfoV1;
 
-public class CommonIssueSummary {
-    private Map<String, Integer> issuesBySeverity;
-    private String summaryUrl;
-    private Integer totalIssueCount;
-
-    public Map<String, Integer> getIssuesBySeverity() {
-        return issuesBySeverity;
-    }
-
-    public void setIssuesBySeverity(final Map<String, Integer> issuesBySeverity) {
-        this.issuesBySeverity = issuesBySeverity;
-    }
-
-    public String getSummaryUrl() {
-        return summaryUrl;
-    }
-
-    public void setSummaryUrl(final String summaryUrl) {
-        this.summaryUrl = summaryUrl;
-    }
-
-    public Integer getTotalIssueCount() {
-        return totalIssueCount;
-    }
-
-    public void setTotalIssueCount(final Integer totalIssueCount) {
-        this.totalIssueCount = totalIssueCount;
-    }
+public class ToolInfoV2 extends ToolInfoV1 {
+    public String toolName;
+    public String issueApiUrl;
 
 }

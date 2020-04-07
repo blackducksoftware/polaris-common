@@ -31,19 +31,19 @@ import java.nio.file.Paths;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.synopsys.integration.log.IntLogger;
-import com.synopsys.integration.polaris.common.cli.model.CliCommonResponseAdapter;
+import com.synopsys.integration.polaris.common.cli.model.json.CliCommonResponseAdapter;
 import com.synopsys.integration.polaris.common.cli.model.CliCommonResponseModel;
-import com.synopsys.integration.polaris.common.cli.model.v1.CliScanV1;
-import com.synopsys.integration.polaris.common.cli.model.v2.CliScanV2;
 import com.synopsys.integration.polaris.common.exception.PolarisIntegrationException;
 
 public class PolarisCliResponseUtility {
     private final IntLogger logger;
     private final Gson gson;
+    private final CliCommonResponseAdapter cliCommonResponseAdapter;
 
     public PolarisCliResponseUtility(final IntLogger logger, final Gson gson) {
         this.logger = logger;
         this.gson = gson;
+        cliCommonResponseAdapter = new CliCommonResponseAdapter(gson);
     }
 
     public static PolarisCliResponseUtility defaultUtility(final IntLogger logger) {
@@ -89,15 +89,7 @@ public class PolarisCliResponseUtility {
         final PolarisCliResponseVersion polarisCliResponseVersion = PolarisCliResponseVersion.parse(versionString)
                                                                         .orElseThrow(() -> new PolarisIntegrationException("Version " + versionString + " is not a valid version of cli-scan.json"));
 
-        CliCommonResponseAdapter cliCommonResponseAdapter = new CliCommonResponseAdapter(gson);
-        final int majorVersion = polarisCliResponseVersion.getMajor();
-        if (majorVersion == 1) {
-            return cliCommonResponseAdapter.fromCliScanV1(gson.fromJson(versionlessModel, CliScanV1.class));
-        } else if (majorVersion == 2) {
-            return cliCommonResponseAdapter.fromCliScanV2(gson.fromJson(versionlessModel, CliScanV2.class));
-        } else {
-            throw new PolarisIntegrationException("Version " + versionString + " of the cli-scan.json is not supported.");
-        }
+        return cliCommonResponseAdapter.fromJson(versionString, polarisCliResponseVersion, versionlessModel);
     }
 
 }

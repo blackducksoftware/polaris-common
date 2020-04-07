@@ -20,37 +20,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.cli.model;
+package com.synopsys.integration.polaris.common.cli.model.json.v1;
 
-import java.util.Map;
+import com.google.gson.annotations.SerializedName;
+import com.synopsys.integration.polaris.common.cli.model.json.CliScanResponse;
 
-public class CommonIssueSummary {
-    private Map<String, Integer> issuesBySeverity;
-    private String summaryUrl;
-    private Integer totalIssueCount;
+public class CliScanV1 implements CliScanResponse {
+    public String version;
+    public ScanInfoV1 scanInfo;
+    public ProjectInfoV1 projectInfo;
+    public IssueSummaryV1 issueSummary;
 
-    public Map<String, Integer> getIssuesBySeverity() {
-        return issuesBySeverity;
-    }
+    @SerializedName("coverity")
+    public ToolInfoV1 coverityToolInfo;
 
-    public void setIssuesBySeverity(final Map<String, Integer> issuesBySeverity) {
-        this.issuesBySeverity = issuesBySeverity;
-    }
-
-    public String getSummaryUrl() {
-        return summaryUrl;
-    }
-
-    public void setSummaryUrl(final String summaryUrl) {
-        this.summaryUrl = summaryUrl;
-    }
-
-    public Integer getTotalIssueCount() {
-        return totalIssueCount;
-    }
-
-    public void setTotalIssueCount(final Integer totalIssueCount) {
-        this.totalIssueCount = totalIssueCount;
-    }
+    @SerializedName("sca")
+    public ToolInfoV1 blackDuckScaToolInfo;
 
 }

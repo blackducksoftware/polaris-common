@@ -20,37 +20,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.polaris.common.cli.model;
+package com.synopsys.integration.polaris.common.cli.model.json.v2;
 
-import java.util.Map;
+import com.synopsys.integration.polaris.common.cli.model.json.CliScanResponse;
+import com.synopsys.integration.polaris.common.cli.model.json.v1.IssueSummaryV1;
+import com.synopsys.integration.polaris.common.cli.model.json.v1.ProjectInfoV1;
+import com.synopsys.integration.polaris.common.cli.model.json.v1.ScanInfoV1;
 
-public class CommonIssueSummary {
-    private Map<String, Integer> issuesBySeverity;
-    private String summaryUrl;
-    private Integer totalIssueCount;
+import java.util.List;
 
-    public Map<String, Integer> getIssuesBySeverity() {
-        return issuesBySeverity;
-    }
-
-    public void setIssuesBySeverity(final Map<String, Integer> issuesBySeverity) {
-        this.issuesBySeverity = issuesBySeverity;
-    }
-
-    public String getSummaryUrl() {
-        return summaryUrl;
-    }
-
-    public void setSummaryUrl(final String summaryUrl) {
-        this.summaryUrl = summaryUrl;
-    }
-
-    public Integer getTotalIssueCount() {
-        return totalIssueCount;
-    }
-
-    public void setTotalIssueCount(final Integer totalIssueCount) {
-        this.totalIssueCount = totalIssueCount;
-    }
+public class CliScanV2 implements CliScanResponse {
+    public String version;
+    public ScanInfoV1 scanInfo;
+    public ProjectInfoV1 projectInfo;
+    public IssueSummaryV1 issueSummary;
+    public List<ToolInfoV2> tools;
 
 }

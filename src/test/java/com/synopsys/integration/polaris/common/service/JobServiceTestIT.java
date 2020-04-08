@@ -88,7 +88,7 @@ public class JobServiceTestIT {
 
         logger.info("Waiting for job at URL: " + jobStatusUrl);
 
-        jobService.waitForJobStateIsCompletedOrDieByUrl(jobStatusUrl, 3, JobService.DEFAULT_WAIT_INTERVAL_IN_SECONDS);
+        jobService.waitForJobStateIsCompletedOrDieByUrl(jobStatusUrl, 3 * 60L, JobService.DEFAULT_WAIT_INTERVAL);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class JobServiceTestIT {
 
         logger.info("Waiting for job at URL: " + jobId);
 
-        jobService.waitForJobStateIsCompletedOrDieById(jobId, 3, JobService.DEFAULT_WAIT_INTERVAL_IN_SECONDS);
+        jobService.waitForJobStateIsCompletedOrDieById(jobId, 3 * 60L, JobService.DEFAULT_WAIT_INTERVAL);
     }
 
 }

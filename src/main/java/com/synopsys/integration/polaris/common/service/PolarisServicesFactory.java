@@ -32,7 +32,6 @@ public class PolarisServicesFactory {
     private final AccessTokenPolarisHttpClient httpClient;
     private final Gson gson;
     private final PolarisJsonTransformer polarisJsonTransformer;
-
     private int defaultPageSize;
 
     public PolarisServicesFactory(final IntLogger logger, final AccessTokenPolarisHttpClient httpClient, final Gson gson) {
@@ -89,6 +88,10 @@ public class PolarisServicesFactory {
 
     public Gson getGson() {
         return gson;
+    }
+
+    public AccessTokenPolarisHttpClient getHttpClient() {
+        return httpClient;
     }
 
     public void setDefaultPageSize(final int defaultPageSize) {

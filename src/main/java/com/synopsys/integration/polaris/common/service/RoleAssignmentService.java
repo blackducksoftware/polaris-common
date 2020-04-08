@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.google.gson.reflect.TypeToken;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.polaris.common.api.PolarisRelationshipSingle;
 import com.synopsys.integration.polaris.common.api.PolarisResource;
@@ -51,8 +50,6 @@ public class RoleAssignmentService {
     public static final String INCLUDE_ROLES = "role";
     public static final String INCLUDE_USERS = "user";
 
-    private static final TypeToken ROLE_ASSIGNMENT_RESOURCES = new TypeToken<RoleAssignmentResources>() {};
-
     final AccessTokenPolarisHttpClient polarisHttpClient;
     private final PolarisService polarisService;
     private final AuthService authService;
@@ -64,7 +61,7 @@ public class RoleAssignmentService {
     }
 
     public List<RoleAssignmentResource> getAll() throws IntegrationException {
-        return authService.getAll(AuthService.ROLE_ASSIGNMENTS_API_SPEC, ROLE_ASSIGNMENT_RESOURCES.getType());
+        return authService.getAll(AuthService.ROLE_ASSIGNMENTS_API_SPEC, RoleAssignmentResources.class);
     }
 
     public List<RoleAssignmentResource> getFiltered(final PolarisParamBuilder polarisParamBuilder) throws IntegrationException {
@@ -72,13 +69,13 @@ public class RoleAssignmentService {
     }
 
     public List<RoleAssignmentResource> getFiltered(final Collection<PolarisParamBuilder> polarisParamBuilders) throws IntegrationException {
-        return authService.getFiltered(AuthService.ROLE_ASSIGNMENTS_API_SPEC, polarisParamBuilders, ROLE_ASSIGNMENT_RESOURCES.getType());
+        return authService.getFiltered(AuthService.ROLE_ASSIGNMENTS_API_SPEC, polarisParamBuilders, RoleAssignmentResources.class);
     }
 
     public RoleAssignmentResources getRoleAssignmentsForProjectWithIncluded(final String projectId, final String... included) throws IntegrationException {
         final PolarisParamBuilder projectFilter = createProjectFilter(projectId);
         final PolarisPagedRequestCreator requestCreator = authService.generatePagedRequestCreatorWithInclude(AuthService.ROLE_ASSIGNMENTS_API_SPEC, projectFilter, included);
-        final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(requestCreator, ROLE_ASSIGNMENT_RESOURCES.getType());
+        final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(requestCreator, RoleAssignmentResources.class);
         return polarisService.getPopulatedResponse(pagedRequestWrapper);
     }
 

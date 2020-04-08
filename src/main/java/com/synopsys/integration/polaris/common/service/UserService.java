@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.google.gson.reflect.TypeToken;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.polaris.common.api.PolarisRelationship;
 import com.synopsys.integration.polaris.common.api.PolarisRelationshipMultiple;
@@ -44,9 +43,6 @@ import com.synopsys.integration.polaris.common.api.auth.model.user.UserResource;
 import com.synopsys.integration.polaris.common.api.auth.model.user.UserResources;
 
 public class UserService {
-    private static final TypeToken USER_RESOURCES = new TypeToken<UserResources>() {};
-    private static final TypeToken EMAIL_DETAILS_RESOURCE = new TypeToken<EmailDetailsResources>() {};
-
     private final AuthService authService;
 
     public UserService(final AuthService authService) {
@@ -54,7 +50,7 @@ public class UserService {
     }
 
     public List<UserResource> getAllUsers() throws IntegrationException {
-        return authService.getAll(AuthService.USERS_API_SPEC, USER_RESOURCES.getType());
+        return authService.getAll(AuthService.USERS_API_SPEC, UserResources.class);
     }
 
     public Set<UserResource> getUsersForGroup(final GroupResource group) throws IntegrationException {
@@ -94,7 +90,7 @@ public class UserService {
             return Optional.of(email);
         } else {
             final PolarisRelationship emailDetails = user.getRelationships().getEmailDetails();
-            return authService.getAttributeFromRelationship(emailDetails.getLinks(), (EmailDetailsResource resource) -> resource.getAttributes().getEmail(), EMAIL_DETAILS_RESOURCE.getType());
+            return authService.getAttributeFromRelationship(emailDetails.getLinks(), (EmailDetailsResource resource) -> resource.getAttributes().getEmail(), EmailDetailsResources.class);
         }
     }
 

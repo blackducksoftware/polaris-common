@@ -84,7 +84,7 @@ public class JobService {
     public void waitForJobStateIsCompletedOrDieByUrl(final String jobApiUrl, final long timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
         WaitJob waitJob = WaitJob.createUsingSystemTimeWhenInvoked(logger, timeoutInSeconds, waitIntervalInSeconds, () -> hasJobEnded(jobApiUrl));
         if (!waitJob.waitFor()) {
-            final String maximumDurationString = DurationFormatUtils.formatDurationHMS(waitIntervalInSeconds * 1000);
+            final String maximumDurationString = DurationFormatUtils.formatDurationHMS(timeoutInSeconds * 1000);
             throw new PolarisIntegrationException(String.format("Job at url %s did not end in the provided timeout of %s", jobApiUrl, maximumDurationString));
         }
 

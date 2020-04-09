@@ -25,6 +25,7 @@ package com.synopsys.integration.polaris.common.service;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import com.google.gson.reflect.TypeToken;
 import com.synopsys.integration.exception.IntegrationException;
@@ -83,7 +84,8 @@ public class JobService {
     public void waitForJobStateIsCompletedOrDieByUrl(final String jobApiUrl, final long timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
         WaitJob waitJob = WaitJob.createUsingSystemTimeWhenInvoked(logger, timeoutInSeconds, waitIntervalInSeconds, () -> hasJobEnded(jobApiUrl));
         if (!waitJob.waitFor()) {
-            throw new PolarisIntegrationException(String.format("Job at url %s did not end in the provided timeout of %s minutes.", jobApiUrl, timeoutInSeconds));
+            final String maximumDurationString = DurationFormatUtils.formatDurationHMS(waitIntervalInSeconds * 1000);
+            throw new PolarisIntegrationException(String.format("Job at url %s did not end in the provided timeout of %s", jobApiUrl, maximumDurationString));
         }
 
         final JobResource jobResource = this.getJobByUrl(jobApiUrl);

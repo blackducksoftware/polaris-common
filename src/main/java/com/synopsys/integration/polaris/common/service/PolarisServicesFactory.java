@@ -82,6 +82,10 @@ public class PolarisServicesFactory {
         return new CountService(createPolarisService());
     }
 
+    public ContextsService createContextsService() {
+        return new ContextsService(createAuthService());
+    }
+
     public IntLogger getLogger() {
         return logger;
     }

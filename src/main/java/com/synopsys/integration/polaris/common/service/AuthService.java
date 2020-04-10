@@ -48,7 +48,7 @@ import com.synopsys.integration.rest.request.Request;
 public class AuthService {
     public static final String AUTH_API_SPEC_STRING = "/api/auth";
     public static final PolarisRequestSpec ROLE_ASSIGNMENTS_API_SPEC = PolarisRequestSpec.of(AUTH_API_SPEC_STRING + "/role-assignments");
-    public static final PolarisRequestSpec LICENSES_API_SPEC = PolarisRequestSpec.of(AUTH_API_SPEC_STRING + "/licenses");
+    public static final PolarisRequestSpec CONTEXTS_API_SPEC = PolarisRequestSpec.of(AUTH_API_SPEC_STRING + "/contexts");
     public static final PolarisRequestSpec USERS_API_SPEC = PolarisRequestSpec.of(AUTH_API_SPEC_STRING + "/users");
     public static final PolarisRequestSpec GROUPS_API_SPEC = PolarisRequestSpec.of(AUTH_API_SPEC_STRING + "/groups");
     private final AccessTokenPolarisHttpClient polarisHttpClient;

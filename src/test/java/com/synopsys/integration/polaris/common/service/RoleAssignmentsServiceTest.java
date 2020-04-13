@@ -1,5 +1,6 @@
 package com.synopsys.integration.polaris.common.service;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -35,7 +36,7 @@ public class RoleAssignmentsServiceTest {
         final RoleAssignmentService roleAssignmentsService = polarisServicesFactory.createRoleAssignmentService();
 
         final List<RoleAssignmentResource> roleAssignments = roleAssignmentsService.getAll();
-        assertTrue(!roleAssignments.isEmpty(), "Expected role assignments to exist");
+        assertFalse(roleAssignments.isEmpty(), "Expected role assignments to exist");
     }
 
     @Test

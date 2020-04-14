@@ -1,8 +1,8 @@
 /**
  * polaris-common
- *
+ * <p>
  * Copyright (c) 2020 Synopsys, Inc.
- *
+ * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -10,9 +10,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -31,7 +31,6 @@ import com.synopsys.integration.polaris.common.cli.model.json.v1.IssueSummaryV1;
 import com.synopsys.integration.polaris.common.cli.model.json.v1.ProjectInfoV1;
 import com.synopsys.integration.polaris.common.cli.model.json.v1.ScanInfoV1;
 import com.synopsys.integration.polaris.common.cli.model.json.v1.ToolInfoV1;
-import com.synopsys.integration.polaris.common.cli.model.json.v2.ToolInfoV2;
 import com.synopsys.integration.polaris.common.exception.PolarisIntegrationException;
 
 import java.util.function.Consumer;
@@ -86,25 +85,6 @@ public abstract class CliScanParser<T extends CliScanResponse> {
             commonIssueSummary.setTotalIssueCount(issueSummaryV1.total);
 
             consumer.accept(commonIssueSummary);
-        }
-    }
-
-    protected void fromToolInfoV1(final ToolInfoV1 toolInfoV1, final String toolName, Consumer<CommonToolInfo> consumer) {
-        if (toolInfoV1 != null) {
-            CommonToolInfo commonToolInfo = createCommonToolInfo(toolInfoV1);
-            commonToolInfo.setToolName(toolName);
-
-            consumer.accept(commonToolInfo);
-        }
-    }
-
-    protected void fromToolInfoV2(final ToolInfoV2 toolInfoV2, Consumer<CommonToolInfo> consumer) {
-        if (toolInfoV2 != null) {
-            CommonToolInfo commonToolInfo = createCommonToolInfo(toolInfoV2);
-            commonToolInfo.setToolName(toolInfoV2.toolName);
-            commonToolInfo.setIssueApiUrl(toolInfoV2.issueApiUrl);
-
-            consumer.accept(commonToolInfo);
         }
     }
 

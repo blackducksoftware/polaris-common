@@ -3,8 +3,8 @@ package com.synopsys.integration.polaris.common.service;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
 
 import com.google.gson.Gson;

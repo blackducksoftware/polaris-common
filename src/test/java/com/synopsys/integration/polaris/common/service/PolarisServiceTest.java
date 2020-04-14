@@ -9,12 +9,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.platform.commons.util.StringUtils;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
+import org.opentest4j.AssertionFailedError;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.exception.IntegrationException;
@@ -38,6 +43,16 @@ import com.synopsys.integration.rest.response.Response;
 import com.synopsys.integration.rest.support.AuthenticationSupport;
 
 public class PolarisServiceTest {
+    public static String PAGE_ONE_OFFSET = "0";
+    public static String PAGE_TWO_OFFSET = "25";
+    public static String PAGE_THREE_OFFSET = "50";
+    public static String PAGE_FOUR_OFFSET = "75";
+    public static String PAGE_FIVE_OFFSET = "100";
+    public static String PAGE_SIX_OFFSET = "125";
+    public static String PAGE_SEVEN_OFFSET = "150";
+    public static String PAGE_EIGHT_OFFSET = "175";
+    public static String PAGE_NINE_OFFSET = "200";
+    public static String PAGE_TEN_OFFSET = "225";
     private final PolarisRequestFactory polarisRequestFactory = new PolarisRequestFactory();
 
     @Test
@@ -70,13 +85,11 @@ public class PolarisServiceTest {
         assertNotNull(meta);
     }
 
-    @Test
-    public void testGettingAllOnePageTotal() throws IOException, IntegrationException {
-        Map<String, String> offsetsToResults = new HashMap<>();
-        offsetsToResults.put("0", "projects_all_on_one_page.json");
-
+    @ParameterizedTest
+    @MethodSource("createGetAllMockData")
+    public void testGetAll(Map<String, String> offsetsToResults, int expectedTotal) throws IOException, IntegrationException {
         AccessTokenPolarisHttpClient polarisHttpClient = Mockito.mock(AccessTokenPolarisHttpClient.class);
-        mockClientBehavior(polarisHttpClient, offsetsToResults, 100);
+        mockClientBehavior(polarisHttpClient, offsetsToResults);
 
         PolarisJsonTransformer polarisJsonTransformer = new PolarisJsonTransformer(PolarisServicesFactory.createDefaultGson(), new PrintStreamIntLogger(System.out, LogLevel.INFO));
 
@@ -84,69 +97,87 @@ public class PolarisServiceTest {
         final PolarisPagedRequestCreator requestCreator = (limit, offset) -> PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset)
                                                                                  .uri(requestUri)
                                                                                  .build();
+
         final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(requestCreator, ProjectV0Resources.class);
 
         PolarisService polarisService = new PolarisService(polarisHttpClient, polarisJsonTransformer, PolarisRequestFactory.DEFAULT_LIMIT);
 
         List<ProjectV0Resource> allPagesResponse = polarisService.getAllResponses(pagedRequestWrapper);
-        assertEquals(16, allPagesResponse.size());
+        assertEquals(expectedTotal, allPagesResponse.size());
     }
 
-    @Test
-    public void testGettingAllMultiplePagesTotal() throws IntegrationException, IOException {
-        Map<String, String> offsetsToResults = new HashMap<>();
-        offsetsToResults.put("0", "projects_page_1_of_10.json");
-        offsetsToResults.put("25", "projects_page_2_of_10.json");
-        offsetsToResults.put("50", "projects_page_3_of_10.json");
-        offsetsToResults.put("75", "projects_page_4_of_10.json");
-        offsetsToResults.put("100", "projects_page_5_of_10.json");
-        offsetsToResults.put("125", "projects_page_6_of_10.json");
-        offsetsToResults.put("150", "projects_page_7_of_10.json");
-        offsetsToResults.put("175", "projects_page_8_of_10.json");
-        offsetsToResults.put("200", "projects_page_9_of_10.json");
-        offsetsToResults.put("225", "projects_page_10_of_10.json");
+    private static Stream<Arguments> createGetAllMockData() {
+        final Map<String, String> getAllOnOnePageMap = new HashMap<>();
+        getAllOnOnePageMap.put(PAGE_ONE_OFFSET, "projects_all_on_one_page.json");
 
-        AccessTokenPolarisHttpClient polarisHttpClient = Mockito.mock(AccessTokenPolarisHttpClient.class);
-        mockClientBehavior(polarisHttpClient, offsetsToResults, 100);
+        final Map<String, String> getAllMultiPageMap = new HashMap<>();
+        getAllMultiPageMap.put(PAGE_ONE_OFFSET, "projects_page_1_of_10.json");
+        getAllMultiPageMap.put(PAGE_TWO_OFFSET, "projects_page_2_of_10.json");
+        getAllMultiPageMap.put(PAGE_THREE_OFFSET, "projects_page_3_of_10.json");
+        getAllMultiPageMap.put(PAGE_FOUR_OFFSET, "projects_page_4_of_10.json");
+        getAllMultiPageMap.put(PAGE_FIVE_OFFSET, "projects_page_5_of_10.json");
+        getAllMultiPageMap.put(PAGE_SIX_OFFSET, "projects_page_6_of_10.json");
+        getAllMultiPageMap.put(PAGE_SEVEN_OFFSET, "projects_page_7_of_10.json");
+        getAllMultiPageMap.put(PAGE_EIGHT_OFFSET, "projects_page_8_of_10.json");
+        getAllMultiPageMap.put(PAGE_NINE_OFFSET, "projects_page_9_of_10.json");
+        getAllMultiPageMap.put(PAGE_TEN_OFFSET, "projects_page_10_of_10.json");
 
-        PolarisJsonTransformer polarisJsonTransformer = new PolarisJsonTransformer(PolarisServicesFactory.createDefaultGson(), new PrintStreamIntLogger(System.out, LogLevel.INFO));
+        final Map<String, String> lessProjectsThanExpectedMap = new HashMap<>(getAllMultiPageMap);
+        lessProjectsThanExpectedMap.remove(PAGE_TEN_OFFSET);
 
-        final String requestUri = PolarisService.PROJECT_API_SPEC;
-        final PolarisPagedRequestCreator requestCreator = (limit, offset) -> PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset)
-                                                                                 .uri(requestUri)
-                                                                                 .build();
-        final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(requestCreator, ProjectV0Resources.class);
+        final Map<String, String> changingTotalMap = new HashMap<>(getAllMultiPageMap);
+        changingTotalMap.put(PAGE_FIVE_OFFSET, "projects_page_5_of_5.json");
 
-        PolarisService polarisService = new PolarisService(polarisHttpClient, polarisJsonTransformer, PolarisRequestFactory.DEFAULT_LIMIT);
+        final Map<String, String> duplicatedDataMap = new HashMap<>(getAllMultiPageMap);
+        duplicatedDataMap.put(PAGE_TWO_OFFSET, "projects_page_1_of_10.json");
 
-        List<ProjectV0Resource> allPagesResponse = polarisService.getAllResponses(pagedRequestWrapper);
-        assertEquals(241, allPagesResponse.size());
+        return Stream.of(
+            Arguments.of(getAllOnOnePageMap, 16),
+            Arguments.of(getAllMultiPageMap, 241),
+            Arguments.of(lessProjectsThanExpectedMap, 225),
+            Arguments.of(changingTotalMap, 241),
+            Arguments.of(duplicatedDataMap, 241)
+        );
     }
 
-    private void mockClientBehavior(AccessTokenPolarisHttpClient polarisHttpClient, Map<String, String> offsetsToResults, int limit) throws IOException, IntegrationException {
+    private void mockClientBehavior(AccessTokenPolarisHttpClient polarisHttpClient, Map<String, String> offsetsToResults) throws IOException, IntegrationException {
         for (Map.Entry<String, String> entry : offsetsToResults.entrySet()) {
             Response response = Mockito.mock(Response.class);
-            Mockito.when(response.getContentString()).thenReturn(getText(entry.getValue()));
+            Mockito.when(response.getContentString()).thenReturn(getPreparedContentStringFrom(entry.getValue()));
 
-            ArgumentMatcher<Request> argRequest = createRequestMatcher(PolarisService.PROJECT_API_SPEC, Integer.parseInt(entry.getKey()), limit);
-            Mockito.when(polarisHttpClient.execute(Mockito.argThat(argRequest))).thenReturn(response);
+            ArgumentMatcher<Request> isMockedRequest = request -> requestMatches(request, PolarisService.PROJECT_API_SPEC, entry.getKey());
+            Mockito.when(polarisHttpClient.execute(Mockito.argThat(isMockedRequest))).thenReturn(response);
         }
+
+        Response emptyResponse = Mockito.mock(Response.class);
+        Mockito.when(emptyResponse.getContentString()).thenReturn(getPreparedContentStringFrom("projects_no_more_results.json"));
+        ArgumentMatcher<Request> isOutOfBounds = request -> requestOffsetOutOfBounds(request, PolarisService.PROJECT_API_SPEC, offsetsToResults);
+
+        Mockito.when(polarisHttpClient.execute(Mockito.argThat(isOutOfBounds))).thenReturn(emptyResponse)
+            .thenThrow(new AssertionFailedError("Client requested more pages after getting back a page of empty results."));
     }
 
-    private ArgumentMatcher<Request> createRequestMatcher(String uri, int offset, int limit) {
-        return new ArgumentMatcher<Request>() {
-            @Override
-            public boolean matches(Request request) {
-                if (null != request && request.getUri().equals(uri)) {
-                    String requestOffset = request.getQueryParameters().get(PolarisRequestFactory.OFFSET_PARAMETER).stream().findFirst().get();
-                    return requestOffset.equals(Integer.toString(offset));
-                }
-                return false;
-            }
-        };
+    private Boolean requestMatches(Request request, String uri, String offset) {
+        if (null != request && request.getUri().equals(uri)) {
+            return request.getQueryParameters()
+                       .get(PolarisRequestFactory.OFFSET_PARAMETER)
+                       .stream()
+                       .allMatch(requestOffset -> requestOffset.equals(offset));
+        }
+        return false;
     }
 
-    private String getText(String resourceName) throws IOException {
+    private Boolean requestOffsetOutOfBounds(Request request, final String uri, Map<String, String> offsetsToResults) {
+        if (null != request && request.getUri().equals(uri)) {
+            return request.getQueryParameters()
+                       .get(PolarisRequestFactory.OFFSET_PARAMETER)
+                       .stream()
+                       .noneMatch(offsetsToResults::containsKey);
+        }
+        return false;
+    }
+
+    private String getPreparedContentStringFrom(String resourceName) throws IOException {
         return IOUtils.toString(getClass().getResourceAsStream("/PolarisService/" + resourceName), StandardCharsets.UTF_8);
     }
 

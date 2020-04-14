@@ -12,7 +12,8 @@ description = 'A library for using various capabilities of Polaris.'
 apply plugin: 'com.synopsys.integration.library'
 
 dependencies {
-    api 'com.synopsys.integration:polaris-common-api:0.0.13'
+    api 'com.synopsys.integration:polaris-common-api:0.0.14-SNAPSHOT'
 
     testImplementation 'org.mockito:mockito-core:2.18.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.3.1'
 }

@@ -1,0 +1,20 @@
+{
+  "data": [
+    {
+      "type": "contexts",
+      "id": "23uo2u4ogl1ob39jddujkcnh90",
+      "attributes": {
+        "current": true,
+        "organizationname": "ngptest",
+        "username": "defaultqa"
+      },
+      "relationships": {},
+      "links": {
+        "self": {
+          "href": "https://dev01.dev.polaris.synopsys.com/api/auth/latest/contexts/23uo2u4ogl1ob39jddujkcnh90"
+        }
+      }
+    }
+  ],
+  "included": []
+}

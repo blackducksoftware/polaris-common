@@ -22,7 +22,6 @@
  */
 package com.synopsys.integration.polaris.common.service;
 
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,6 +34,7 @@ import java.util.function.Function;
 
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.polaris.common.api.PolarisResource;
+import com.synopsys.integration.polaris.common.api.PolarisResources;
 import com.synopsys.integration.polaris.common.api.PolarisResourcesSingle;
 import com.synopsys.integration.polaris.common.api.auth.PolarisRelationshipLinks;
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestCreator;
@@ -46,15 +46,11 @@ import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient
 import com.synopsys.integration.rest.request.Request;
 
 public class AuthService {
-    private static final String AUTH_API_SPEC_STRING = "/api/auth";
-    private static final String USERS_API_SPEC_STRING = AUTH_API_SPEC_STRING + "/users";
-    private static final String GROUPS_API_SPEC_STRING = AUTH_API_SPEC_STRING + "/groups";
-    private static final String ROLE_ASSIGNMENTS_API_SPEC_STRING = AUTH_API_SPEC_STRING + "/role-assignments";
-
-    public static final PolarisRequestSpec USERS_API_SPEC = PolarisRequestSpec.of(USERS_API_SPEC_STRING);
-    public static final PolarisRequestSpec GROUPS_API_SPEC = PolarisRequestSpec.of(GROUPS_API_SPEC_STRING);
-    public static final PolarisRequestSpec ROLE_ASSIGNMENTS_API_SPEC = PolarisRequestSpec.of(ROLE_ASSIGNMENTS_API_SPEC_STRING);
-
+    public static final String AUTH_API_SPEC_STRING = "/api/auth";
+    public static final PolarisRequestSpec ROLE_ASSIGNMENTS_API_SPEC = PolarisRequestSpec.of(AUTH_API_SPEC_STRING + "/role-assignments");
+    public static final PolarisRequestSpec LICENSES_API_SPEC = PolarisRequestSpec.of(AUTH_API_SPEC_STRING + "/licenses");
+    public static final PolarisRequestSpec USERS_API_SPEC = PolarisRequestSpec.of(AUTH_API_SPEC_STRING + "/users");
+    public static final PolarisRequestSpec GROUPS_API_SPEC = PolarisRequestSpec.of(AUTH_API_SPEC_STRING + "/groups");
     private final AccessTokenPolarisHttpClient polarisHttpClient;
     private final PolarisService polarisService;
 
@@ -63,23 +59,24 @@ public class AuthService {
         this.polarisService = polarisService;
     }
 
-    public <R extends PolarisResource> List<R> getAll(final PolarisRequestSpec polarisRequestSpec, final Type resourcesType) throws IntegrationException {
+    public <R extends PolarisResource, S extends PolarisResources<R>> List<R> getAll(final PolarisRequestSpec polarisRequestSpec, final Class<S> resourcesType) throws IntegrationException {
         return getFiltered(polarisRequestSpec, (PolarisParamBuilder) null, resourcesType);
     }
 
-    public <R extends PolarisResource> List<R> getFiltered(final PolarisRequestSpec polarisRequestSpec, final PolarisParamBuilder paramBuilder, final Type resourcesType) throws IntegrationException {
+    public <R extends PolarisResource, S extends PolarisResources<R>> List<R> getFiltered(final PolarisRequestSpec polarisRequestSpec, final PolarisParamBuilder paramBuilder, final Class<S> resourcesType) throws IntegrationException {
         final List<PolarisParamBuilder> paramBuilders = paramBuilder == null ? Arrays.asList() : Arrays.asList(paramBuilder);
         return getFiltered(polarisRequestSpec, paramBuilders, resourcesType);
     }
 
-    public <R extends PolarisResource> List<R> getFiltered(final PolarisRequestSpec polarisRequestSpec, final Collection<PolarisParamBuilder> paramBuilders, final Type resourcesType) throws IntegrationException {
+    public <R extends PolarisResource, S extends PolarisResources<R>> List<R> getFiltered(final PolarisRequestSpec polarisRequestSpec, final Collection<PolarisParamBuilder> paramBuilders, final Class<S> resourcesType)
+        throws IntegrationException {
         final String uri = polarisHttpClient.getPolarisServerUrl() + polarisRequestSpec.getSpec();
         final PolarisPagedRequestCreator createPagedRequest = (limit, offset) -> createPagedRequest(uri, paramBuilders, limit, offset);
         final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(createPagedRequest, resourcesType);
         return polarisService.getAllResponses(pagedRequestWrapper);
     }
 
-    public <R extends PolarisResource, T> Optional<T> getAttributeFromRelationship(final PolarisRelationshipLinks relationshipLinks, final Function<R, T> extractAttribute, final Type resourcesType)
+    public <R extends PolarisResource, S extends PolarisResourcesSingle<R>, T> Optional<T> getAttributeFromRelationship(final PolarisRelationshipLinks relationshipLinks, final Function<R, T> extractAttribute, final Class<S> resourcesType)
         throws IntegrationException {
         final String uri = relationshipLinks.getRelated();
         final Request resourceRequest = PolarisRequestFactory.createDefaultPolarisGetRequest(uri);

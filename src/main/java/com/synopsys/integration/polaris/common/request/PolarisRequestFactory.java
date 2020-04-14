@@ -31,7 +31,7 @@ import com.synopsys.integration.rest.HttpMethod;
 import com.synopsys.integration.rest.request.Request;
 
 public class PolarisRequestFactory {
-    public static String DEFAULT_MIME_TYPE = "application/vnd.api+json";
+    public static final String DEFAULT_MIME_TYPE = "application/vnd.api+json";
 
     public static final String LIMIT_PARAMETER = "page[limit]";
     public static final String OFFSET_PARAMETER = "page[offset]";

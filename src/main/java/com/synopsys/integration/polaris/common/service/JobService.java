@@ -25,6 +25,7 @@ package com.synopsys.integration.polaris.common.service;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import com.google.gson.reflect.TypeToken;
 import com.synopsys.integration.exception.IntegrationException;
@@ -41,8 +42,8 @@ import com.synopsys.integration.rest.request.Request;
 import com.synopsys.integration.wait.WaitJob;
 
 public class JobService {
-    public static final int DEFAULT_JOB_TIMEOUT_IN_MINUTES = 30;
-    public static final int DEFAULT_WAIT_INTERVAL_IN_SECONDS = 5;
+    public static final long DEFAULT_TIMEOUT = 30 * 60L;
+    public static final int DEFAULT_WAIT_INTERVAL = 5;
 
     private static final String JOB_SERVICE_API_SPEC = "/api/jobs";
     private static final String JOBS_API_SPEC = JOB_SERVICE_API_SPEC + "/jobs";
@@ -68,22 +69,23 @@ public class JobService {
     }
 
     public void waitForJobStateIsCompletedOrDieById(final String jobId) throws IntegrationException, InterruptedException {
-        waitForJobStateIsCompletedOrDieById(jobId, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_WAIT_INTERVAL_IN_SECONDS);
+        waitForJobStateIsCompletedOrDieById(jobId, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_WAIT_INTERVAL);
     }
 
-    public void waitForJobStateIsCompletedOrDieById(final String jobId, final int timeoutInMinutes, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
+    public void waitForJobStateIsCompletedOrDieById(final String jobId, final long timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
         final String uri = polarisHttpClient.getPolarisServerUrl() + JOBS_API_SPEC + "/" + jobId;
-        waitForJobStateIsCompletedOrDieByUrl(uri, timeoutInMinutes, waitIntervalInSeconds);
+        waitForJobStateIsCompletedOrDieByUrl(uri, timeoutInSeconds, waitIntervalInSeconds);
     }
 
     public void waitForJobStateIsCompletedOrDieByUrl(final String jobApiUrl) throws IntegrationException, InterruptedException {
-        waitForJobStateIsCompletedOrDieByUrl(jobApiUrl, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_WAIT_INTERVAL_IN_SECONDS);
+        waitForJobStateIsCompletedOrDieByUrl(jobApiUrl, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_WAIT_INTERVAL);
     }
 
-    public void waitForJobStateIsCompletedOrDieByUrl(final String jobApiUrl, final int timeoutInMinutes, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
-        WaitJob waitJob = WaitJob.createUsingSystemTimeWhenInvoked(logger, timeoutInMinutes * 60L, waitIntervalInSeconds, () -> hasJobEnded(jobApiUrl));
+    public void waitForJobStateIsCompletedOrDieByUrl(final String jobApiUrl, final long timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
+        WaitJob waitJob = WaitJob.createUsingSystemTimeWhenInvoked(logger, timeoutInSeconds, waitIntervalInSeconds, () -> hasJobEnded(jobApiUrl));
         if (!waitJob.waitFor()) {
-            throw new PolarisIntegrationException(String.format("Job at url %s did not end in the provided timeout of %s minutes.", jobApiUrl, timeoutInMinutes));
+            final String maximumDurationString = DurationFormatUtils.formatDurationHMS(timeoutInSeconds * 1000);
+            throw new PolarisIntegrationException(String.format("Job at url %s did not end in the provided timeout of %s", jobApiUrl, maximumDurationString));
         }
 
         final JobResource jobResource = this.getJobByUrl(jobApiUrl);

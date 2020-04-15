@@ -24,12 +24,11 @@ package com.synopsys.integration.polaris.common.service;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -151,31 +150,51 @@ public <R extends PolarisResource> Optional<R> getFirstResponse2(final Request r
 
     public <R extends PolarisResource, W extends PolarisResources<R>> W getPopulatedResponse(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int pageSize) throws IntegrationException {
         W populatedResources = null;
-        final Set<R> allData = new HashSet<>();
-        final Set<PolarisResourceSparse> allIncluded = new HashSet<>();
+        final List<R> allData = new ArrayList<>();
+        final List<PolarisResourceSparse> allIncluded = new ArrayList<>();
 
-        int totalExpected = 0;
+        Integer totalExpected = null;
         int offset = 0;
+        boolean totalExpectedHasNotbeenSet = true;
+        boolean thisPageHadData;
+        boolean isMoreData = true;
         do {
             final W wrappedResponse = executePagedRequest(polarisPagedRequestWrapper, offset, pageSize);
+            if (wrappedResponse == null) {
+                break;
+            }
+
             if (null == populatedResources) {
                 populatedResources = wrappedResponse;
             }
-            if (wrappedResponse != null) {
+
+            if (totalExpectedHasNotbeenSet) {
                 final PolarisResourcesPagination meta = wrappedResponse.getMeta();
-                totalExpected = meta.getTotal().intValue();
-
-                final List<R> data = wrappedResponse.getData();
-                allData.addAll(data);
-
-                final List<PolarisResourceSparse> included = wrappedResponse.getIncluded();
-                allIncluded.addAll(included);
-
-                offset += pageSize;
+                totalExpected = Optional.ofNullable(meta)
+                                    .map(PolarisResourcesPagination::getTotal)
+                                    .map(BigDecimal::intValue)
+                                    .orElse(null);
+                totalExpectedHasNotbeenSet = false;
             }
-        } while (totalExpected > allData.size());
 
-        // Happens if all of the content strings serialized from allData are null -- rotte
+            final List<R> data = wrappedResponse.getData();
+            if (data != null) {
+                allData.addAll(data);
+            }
+
+            final List<PolarisResourceSparse> included = wrappedResponse.getIncluded();
+            if (included != null) {
+                allIncluded.addAll(included);
+            }
+
+            if (totalExpected != null) {
+                isMoreData = totalExpected > allData.size();
+            }
+            thisPageHadData = data != null && !data.isEmpty();
+            offset += pageSize;
+        } while (isMoreData && thisPageHadData);
+
+        // If wrappedResponse is null, populatedResources could be null -- rotte APR 2020
         if (populatedResources != null) {
             populatedResources.setData(new ArrayList<>(allData));
             populatedResources.setIncluded(new ArrayList<>(allIncluded));

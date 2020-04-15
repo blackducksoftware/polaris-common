@@ -79,7 +79,7 @@ public class AuthService {
     public <R extends PolarisResource, S extends PolarisResourcesSingle<R>, T> Optional<T> getAttributeFromRelationship(final PolarisRelationshipLinks relationshipLinks, final Function<R, T> extractAttribute, final Class<S> resourcesType)
         throws IntegrationException {
         final String uri = relationshipLinks.getRelated();
-        final Request resourceRequest = PolarisRequestFactory.createDefaultPolarisGetRequest(uri);
+        final Request resourceRequest = PolarisRequestFactory.createDefaultPolarisPagedGetRequest(uri);
         final PolarisResourcesSingle<R> response = polarisService.get(resourcesType, resourceRequest);
 
         return response.getData().map(extractAttribute);
@@ -109,7 +109,7 @@ public class AuthService {
         return (limit, offset) -> PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset).uri(uri).queryParameters(queryParameters).build();
     }
 
-    public Request createPagedRequest(final String uri, final Collection<PolarisParamBuilder> paramBuilders, final int limit, final int offset) {
+    private Request createPagedRequest(final String uri, final Collection<PolarisParamBuilder> paramBuilders, final int limit, final int offset) {
         final Request.Builder pagedRequestBuilder = PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset);
         pagedRequestBuilder.uri(uri);
         if (paramBuilders != null) {

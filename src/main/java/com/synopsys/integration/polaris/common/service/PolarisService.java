@@ -94,6 +94,13 @@ public class PolarisService {
         }
     }
 
+    /* TODO: Refactor this implementation. The following should compile, but doesn't. --rotte APR 2020
+public <R extends PolarisResource> Optional<R> getFirstResponse2(final Request request, final Type resourcesType) throws IntegrationException {
+    return getAllResponses(request, resourcesType)
+               .stream()
+               .findFirst();
+}
+ */
     public <R extends PolarisResource> Optional<R> getFirstResponse(final Request request, final Type resourcesType) throws IntegrationException {
         try (final Response response = polarisHttpClient.execute(request)) {
             response.throwExceptionForError();
@@ -105,6 +112,19 @@ public class PolarisService {
                 }
             }
             return Optional.empty();
+        } catch (final IOException e) {
+            throw new IntegrationException(e);
+        }
+    }
+
+    public <R extends PolarisResource> List<R> getAllResponses(final Request request, final Type resourcesType) throws IntegrationException {
+        try (final Response response = polarisHttpClient.execute(request)) {
+            response.throwExceptionForError();
+            final PolarisResources<R> wrappedResponse = polarisJsonTransformer.getResponse(response, resourcesType);
+            if (wrappedResponse != null && wrappedResponse.getData() != null) {
+                return wrappedResponse.getData();
+            }
+            return Collections.emptyList();
         } catch (final IOException e) {
             throw new IntegrationException(e);
         }

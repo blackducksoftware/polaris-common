@@ -40,14 +40,20 @@ public class PolarisRequestFactory {
     public static final int DEFAULT_OFFSET = 0;
 
     public static Request createDefaultPolarisGetRequest(final String requestUri) {
-        return createCommonPolarisGetRequest(requestUri, DEFAULT_LIMIT);
+        return createDefaultBuilder()
+                   .uri(requestUri)
+                   .build();
     }
 
-    public static Request createCommonPolarisGetRequest(final String requestUri, final int limit) {
-        return createCommonPolarisGetRequest(requestUri, limit, DEFAULT_OFFSET);
+    public static Request createDefaultPolarisPagedGetRequest(final String requestUri) {
+        return createCommonPolarisPagedGetRequest(requestUri, DEFAULT_LIMIT);
     }
 
-    public static Request createCommonPolarisGetRequest(final String requestUri, final int limit, final int offset) {
+    public static Request createCommonPolarisPagedGetRequest(final String requestUri, final int limit) {
+        return createCommonPolarisPagedGetRequest(requestUri, limit, DEFAULT_OFFSET);
+    }
+
+    public static Request createCommonPolarisPagedGetRequest(final String requestUri, final int limit, final int offset) {
         return createDefaultPagedRequestBuilder(limit, offset)
                    .uri(requestUri)
                    .build();

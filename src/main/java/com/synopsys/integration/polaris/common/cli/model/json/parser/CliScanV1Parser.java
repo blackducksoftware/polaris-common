@@ -28,9 +28,11 @@ import com.google.gson.reflect.TypeToken;
 import com.synopsys.integration.polaris.common.cli.model.CliCommonResponseModel;
 import com.synopsys.integration.polaris.common.cli.model.CommonToolInfo;
 import com.synopsys.integration.polaris.common.cli.model.json.v1.CliScanV1;
+import com.synopsys.integration.polaris.common.cli.model.json.v1.ToolInfoV1;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class CliScanV1Parser extends CliScanParser<CliScanV1> {
     public CliScanV1Parser(Gson gson) {
@@ -57,6 +59,15 @@ public class CliScanV1Parser extends CliScanParser<CliScanV1> {
 
         return cliCommonResponseModel;
 
+    }
+
+    private void fromToolInfoV1(final ToolInfoV1 toolInfoV1, final String toolName, Consumer<CommonToolInfo> consumer) {
+        if (toolInfoV1 != null) {
+            CommonToolInfo commonToolInfo = createCommonToolInfo(toolInfoV1);
+            commonToolInfo.setToolName(toolName);
+
+            consumer.accept(commonToolInfo);
+        }
     }
 
 }

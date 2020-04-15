@@ -47,13 +47,6 @@ public class PolarisServiceTest {
     public static String PAGE_ONE_OFFSET = "0";
     public static String PAGE_TWO_OFFSET = "25";
     public static String PAGE_THREE_OFFSET = "50";
-    public static String PAGE_FOUR_OFFSET = "75";
-    public static String PAGE_FIVE_OFFSET = "100";
-    public static String PAGE_SIX_OFFSET = "125";
-    public static String PAGE_SEVEN_OFFSET = "150";
-    public static String PAGE_EIGHT_OFFSET = "175";
-    public static String PAGE_NINE_OFFSET = "200";
-    public static String PAGE_TEN_OFFSET = "225";
     private final PolarisRequestFactory polarisRequestFactory = new PolarisRequestFactory();
 
     @Test
@@ -115,32 +108,25 @@ public class PolarisServiceTest {
         getAllOnOnePageMap.put(PAGE_ONE_OFFSET, "projects_all_on_one_page.json");
 
         final Map<String, String> getAllMultiPageMap = new HashMap<>();
-        getAllMultiPageMap.put(PAGE_ONE_OFFSET, "projects_page_1_of_10.json");
-        getAllMultiPageMap.put(PAGE_TWO_OFFSET, "projects_page_2_of_10.json");
-        getAllMultiPageMap.put(PAGE_THREE_OFFSET, "projects_page_3_of_10.json");
-        getAllMultiPageMap.put(PAGE_FOUR_OFFSET, "projects_page_4_of_10.json");
-        getAllMultiPageMap.put(PAGE_FIVE_OFFSET, "projects_page_5_of_10.json");
-        getAllMultiPageMap.put(PAGE_SIX_OFFSET, "projects_page_6_of_10.json");
-        getAllMultiPageMap.put(PAGE_SEVEN_OFFSET, "projects_page_7_of_10.json");
-        getAllMultiPageMap.put(PAGE_EIGHT_OFFSET, "projects_page_8_of_10.json");
-        getAllMultiPageMap.put(PAGE_NINE_OFFSET, "projects_page_9_of_10.json");
-        getAllMultiPageMap.put(PAGE_TEN_OFFSET, "projects_page_10_of_10.json");
+        getAllMultiPageMap.put(PAGE_ONE_OFFSET, "projects_page_1_of_3.json");
+        getAllMultiPageMap.put(PAGE_TWO_OFFSET, "projects_page_2_of_3.json");
+        getAllMultiPageMap.put(PAGE_THREE_OFFSET, "projects_page_3_of_3.json");
 
         final Map<String, String> lessProjectsThanExpectedMap = new HashMap<>(getAllMultiPageMap);
-        lessProjectsThanExpectedMap.remove(PAGE_TEN_OFFSET);
+        lessProjectsThanExpectedMap.remove(PAGE_THREE_OFFSET);
 
         final Map<String, String> changingTotalMap = new HashMap<>(getAllMultiPageMap);
-        changingTotalMap.put(PAGE_FIVE_OFFSET, "projects_page_5_of_5.json");
+        changingTotalMap.put(PAGE_TWO_OFFSET, "projects_page_2_of_2.json");
 
         final Map<String, String> duplicatedDataMap = new HashMap<>(getAllMultiPageMap);
-        duplicatedDataMap.put(PAGE_TWO_OFFSET, "projects_page_1_of_10.json");
+        duplicatedDataMap.put(PAGE_TWO_OFFSET, "projects_page_1_of_3.json");
 
         return Stream.of(
             Arguments.of(getAllOnOnePageMap, 16),
-            Arguments.of(getAllMultiPageMap, 241),
-            Arguments.of(lessProjectsThanExpectedMap, 225),
-            Arguments.of(changingTotalMap, 241),
-            Arguments.of(duplicatedDataMap, 241)
+            Arguments.of(getAllMultiPageMap, 66),
+            Arguments.of(lessProjectsThanExpectedMap, 50),
+            Arguments.of(changingTotalMap, 66),
+            Arguments.of(duplicatedDataMap, 66)
         );
     }
 

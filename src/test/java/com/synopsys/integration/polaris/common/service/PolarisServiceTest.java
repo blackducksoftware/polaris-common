@@ -86,33 +86,6 @@ public class PolarisServiceTest {
         assertNotNull(meta);
     }
 
-    @Test
-    public void testGetAllNoMeta() {
-        AccessTokenPolarisHttpClient polarisHttpClient = Mockito.mock(AccessTokenPolarisHttpClient.class);
-        final Map<String, String> getAllOnOnePageMap = new HashMap<>();
-        getAllOnOnePageMap.put(PAGE_ONE_OFFSET, "contexts_all_on_one_page.json");
-
-        mockClientBehavior(polarisHttpClient, AuthService.CONTEXTS_API_SPEC.getSpec(), getAllOnOnePageMap, "resources_no_more_results.json");
-
-        PolarisJsonTransformer polarisJsonTransformer = new PolarisJsonTransformer(PolarisServicesFactory.createDefaultGson(), new PrintStreamIntLogger(System.out, LogLevel.INFO));
-
-        final String requestUri = AuthService.CONTEXTS_API_SPEC.getSpec();
-        final PolarisPagedRequestCreator requestCreator = (limit, offset) -> PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset)
-                                                                                 .uri(requestUri)
-                                                                                 .build();
-
-        final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(requestCreator, ProjectV0Resources.class);
-
-        PolarisService polarisService = new PolarisService(polarisHttpClient, polarisJsonTransformer, PolarisRequestFactory.DEFAULT_LIMIT);
-
-        try {
-            List<ProjectV0Resource> allPagesResponse = polarisService.getAllResponses(pagedRequestWrapper);
-            assertEquals(1, allPagesResponse.size());
-        } catch (IntegrationException e) {
-            fail("Mocked response caused PolarisService::GetAllResponses to throw an unexpected IntegrationException, which should never happen in this test.", e);
-        }
-    }
-
     @ParameterizedTest
     @MethodSource("createGetAllMockData")
     public void testGetAll(Map<String, String> offsetsToResults, int expectedTotal) {

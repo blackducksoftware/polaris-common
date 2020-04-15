@@ -155,7 +155,7 @@ public <R extends PolarisResource> Optional<R> getFirstResponse2(final Request r
 
         Integer totalExpected = null;
         int offset = 0;
-        boolean totalExpectedHasNotbeenSet = true;
+        boolean totalExpectedHasNotBeenSet = true;
         boolean thisPageHadData;
         boolean isMoreData = true;
         do {
@@ -168,13 +168,13 @@ public <R extends PolarisResource> Optional<R> getFirstResponse2(final Request r
                 populatedResources = wrappedResponse;
             }
 
-            if (totalExpectedHasNotbeenSet) {
+            if (totalExpectedHasNotBeenSet) {
                 final PolarisResourcesPagination meta = wrappedResponse.getMeta();
                 totalExpected = Optional.ofNullable(meta)
                                     .map(PolarisResourcesPagination::getTotal)
                                     .map(BigDecimal::intValue)
                                     .orElse(null);
-                totalExpectedHasNotbeenSet = false;
+                totalExpectedHasNotBeenSet = false;
             }
 
             final List<R> data = wrappedResponse.getData();

@@ -2,6 +2,7 @@ package com.synopsys.integration.polaris.common.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
@@ -85,11 +86,38 @@ public class PolarisServiceTest {
         assertNotNull(meta);
     }
 
+    @Test
+    public void testGetAllNoMeta() {
+        AccessTokenPolarisHttpClient polarisHttpClient = Mockito.mock(AccessTokenPolarisHttpClient.class);
+        final Map<String, String> getAllOnOnePageMap = new HashMap<>();
+        getAllOnOnePageMap.put(PAGE_ONE_OFFSET, "contexts_all_on_one_page.json");
+
+        mockClientBehavior(polarisHttpClient, AuthService.CONTEXTS_API_SPEC.getSpec(), getAllOnOnePageMap, "resources_no_more_results.json");
+
+        PolarisJsonTransformer polarisJsonTransformer = new PolarisJsonTransformer(PolarisServicesFactory.createDefaultGson(), new PrintStreamIntLogger(System.out, LogLevel.INFO));
+
+        final String requestUri = AuthService.CONTEXTS_API_SPEC.getSpec();
+        final PolarisPagedRequestCreator requestCreator = (limit, offset) -> PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset)
+                                                                                 .uri(requestUri)
+                                                                                 .build();
+
+        final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(requestCreator, ProjectV0Resources.class);
+
+        PolarisService polarisService = new PolarisService(polarisHttpClient, polarisJsonTransformer, PolarisRequestFactory.DEFAULT_LIMIT);
+
+        try {
+            List<ProjectV0Resource> allPagesResponse = polarisService.getAllResponses(pagedRequestWrapper);
+            assertEquals(1, allPagesResponse.size());
+        } catch (IntegrationException e) {
+            fail("Mocked response caused PolarisService::GetAllResponses to throw an unexpected IntegrationException, which should never happen in this test.", e);
+        }
+    }
+
     @ParameterizedTest
     @MethodSource("createGetAllMockData")
-    public void testGetAll(Map<String, String> offsetsToResults, int expectedTotal) throws IOException, IntegrationException {
+    public void testGetAll(Map<String, String> offsetsToResults, int expectedTotal) {
         AccessTokenPolarisHttpClient polarisHttpClient = Mockito.mock(AccessTokenPolarisHttpClient.class);
-        mockClientBehavior(polarisHttpClient, offsetsToResults);
+        mockClientBehavior(polarisHttpClient, PolarisService.PROJECT_API_SPEC, offsetsToResults, "projects_no_more_results.json");
 
         PolarisJsonTransformer polarisJsonTransformer = new PolarisJsonTransformer(PolarisServicesFactory.createDefaultGson(), new PrintStreamIntLogger(System.out, LogLevel.INFO));
 
@@ -101,9 +129,12 @@ public class PolarisServiceTest {
         final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(requestCreator, ProjectV0Resources.class);
 
         PolarisService polarisService = new PolarisService(polarisHttpClient, polarisJsonTransformer, PolarisRequestFactory.DEFAULT_LIMIT);
-
-        List<ProjectV0Resource> allPagesResponse = polarisService.getAllResponses(pagedRequestWrapper);
-        assertEquals(expectedTotal, allPagesResponse.size());
+        try {
+            List<ProjectV0Resource> allPagesResponse = polarisService.getAllResponses(pagedRequestWrapper);
+            assertEquals(expectedTotal, allPagesResponse.size());
+        } catch (IntegrationException e) {
+            fail("Mocked response caused PolarisService::GetAllResponses to throw an unexpected IntegrationException, which should never happen in this test.", e);
+        }
     }
 
     private static Stream<Arguments> createGetAllMockData() {
@@ -140,21 +171,25 @@ public class PolarisServiceTest {
         );
     }
 
-    private void mockClientBehavior(AccessTokenPolarisHttpClient polarisHttpClient, Map<String, String> offsetsToResults) throws IOException, IntegrationException {
-        for (Map.Entry<String, String> entry : offsetsToResults.entrySet()) {
-            Response response = Mockito.mock(Response.class);
-            Mockito.when(response.getContentString()).thenReturn(getPreparedContentStringFrom(entry.getValue()));
+    private void mockClientBehavior(AccessTokenPolarisHttpClient polarisHttpClient, String uri, Map<String, String> offsetsToResults, String emptyResultsPage) {
+        try {
+            for (Map.Entry<String, String> entry : offsetsToResults.entrySet()) {
+                Response response = Mockito.mock(Response.class);
+                Mockito.when(response.getContentString()).thenReturn(getPreparedContentStringFrom(entry.getValue()));
 
-            ArgumentMatcher<Request> isMockedRequest = request -> requestMatches(request, PolarisService.PROJECT_API_SPEC, entry.getKey());
-            Mockito.when(polarisHttpClient.execute(Mockito.argThat(isMockedRequest))).thenReturn(response);
+                ArgumentMatcher<Request> isMockedRequest = request -> requestMatches(request, uri, entry.getKey());
+                Mockito.when(polarisHttpClient.execute(Mockito.argThat(isMockedRequest))).thenReturn(response);
+            }
+
+            Response emptyResponse = Mockito.mock(Response.class);
+            Mockito.when(emptyResponse.getContentString()).thenReturn(getPreparedContentStringFrom(emptyResultsPage));
+            ArgumentMatcher<Request> isOutOfBounds = request -> requestOffsetOutOfBounds(request, uri, offsetsToResults);
+
+            Mockito.when(polarisHttpClient.execute(Mockito.argThat(isOutOfBounds))).thenReturn(emptyResponse)
+                .thenThrow(new AssertionFailedError("Client requested more pages after getting back a page of empty results."));
+        } catch (IOException | IntegrationException e) {
+            fail("Unexpected " + e.getClass() + " was thrown while mocking client behavior. Please check the test for errors.", e);
         }
-
-        Response emptyResponse = Mockito.mock(Response.class);
-        Mockito.when(emptyResponse.getContentString()).thenReturn(getPreparedContentStringFrom("projects_no_more_results.json"));
-        ArgumentMatcher<Request> isOutOfBounds = request -> requestOffsetOutOfBounds(request, PolarisService.PROJECT_API_SPEC, offsetsToResults);
-
-        Mockito.when(polarisHttpClient.execute(Mockito.argThat(isOutOfBounds))).thenReturn(emptyResponse)
-            .thenThrow(new AssertionFailedError("Client requested more pages after getting back a page of empty results."));
     }
 
     private Boolean requestMatches(Request request, String uri, String offset) {

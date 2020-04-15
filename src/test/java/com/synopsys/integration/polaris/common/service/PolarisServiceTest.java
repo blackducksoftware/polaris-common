@@ -29,7 +29,7 @@ public class PolarisServiceTest {
 
     @Test
     public void createDefaultPolarisGetRequestTest() {
-        final Request request = polarisRequestFactory.createDefaultPolarisGetRequest("https://google.com");
+        final Request request = polarisRequestFactory.createDefaultPolarisPagedGetRequest("https://google.com");
         assertNotNull(request);
     }
 
@@ -48,7 +48,7 @@ public class PolarisServiceTest {
         final PolarisService polarisService = new PolarisService(httpClient, new PolarisJsonTransformer(gson, logger), PolarisRequestFactory.DEFAULT_LIMIT);
 
         final String requestUri = baseUrl + "/api/common/v0/branches";
-        final Request request = polarisRequestFactory.createDefaultPolarisGetRequest(requestUri);
+        final Request request = polarisRequestFactory.createDefaultPolarisPagedGetRequest(requestUri);
 
         final PolarisResources<BranchV0Resource> branchV0Resources = polarisService.get(BranchV0Resources.class, request);
         final List<BranchV0Resource> branchV0ResourceList = branchV0Resources.getData();

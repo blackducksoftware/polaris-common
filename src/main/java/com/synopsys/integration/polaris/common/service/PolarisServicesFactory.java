@@ -23,9 +23,11 @@
 package com.synopsys.integration.polaris.common.service;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
+import com.synopsys.integration.rest.RestConstants;
 
 public class PolarisServicesFactory {
     private final IntLogger logger;
@@ -40,6 +42,14 @@ public class PolarisServicesFactory {
         this.gson = gson;
         this.polarisJsonTransformer = new PolarisJsonTransformer(gson, logger);
         this.defaultPageSize = PolarisRequestFactory.DEFAULT_LIMIT;
+    }
+
+    public static Gson createDefaultGson() {
+        return PolarisServicesFactory.createDefaultGsonBuilder().create();
+    }
+
+    public static GsonBuilder createDefaultGsonBuilder() {
+        return new GsonBuilder().setDateFormat(RestConstants.JSON_DATE_FORMAT);
     }
 
     public PolarisService createPolarisService() {
@@ -80,6 +90,10 @@ public class PolarisServicesFactory {
 
     public CountService createCountService() {
         return new CountService(createPolarisService());
+    }
+
+    public ContextsService createContextsService() {
+        return new ContextsService(createPolarisService(), httpClient);
     }
 
     public IntLogger getLogger() {

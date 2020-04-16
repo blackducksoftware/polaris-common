@@ -48,7 +48,7 @@ import com.synopsys.integration.rest.request.Request;
 public class AuthService {
     public static final String AUTH_API_SPEC_STRING = "/api/auth";
     public static final PolarisRequestSpec ROLE_ASSIGNMENTS_API_SPEC = PolarisRequestSpec.of(AUTH_API_SPEC_STRING + "/role-assignments");
-    public static final PolarisRequestSpec LICENSES_API_SPEC = PolarisRequestSpec.of(AUTH_API_SPEC_STRING + "/licenses");
+    public static final PolarisRequestSpec CONTEXTS_API_SPEC = PolarisRequestSpec.of(AUTH_API_SPEC_STRING + "/contexts");
     public static final PolarisRequestSpec USERS_API_SPEC = PolarisRequestSpec.of(AUTH_API_SPEC_STRING + "/users");
     public static final PolarisRequestSpec GROUPS_API_SPEC = PolarisRequestSpec.of(AUTH_API_SPEC_STRING + "/groups");
     private final AccessTokenPolarisHttpClient polarisHttpClient;
@@ -79,7 +79,7 @@ public class AuthService {
     public <R extends PolarisResource, S extends PolarisResourcesSingle<R>, T> Optional<T> getAttributeFromRelationship(final PolarisRelationshipLinks relationshipLinks, final Function<R, T> extractAttribute, final Class<S> resourcesType)
         throws IntegrationException {
         final String uri = relationshipLinks.getRelated();
-        final Request resourceRequest = PolarisRequestFactory.createDefaultPolarisGetRequest(uri);
+        final Request resourceRequest = PolarisRequestFactory.createDefaultPolarisPagedGetRequest(uri);
         final PolarisResourcesSingle<R> response = polarisService.get(resourcesType, resourceRequest);
 
         return response.getData().map(extractAttribute);
@@ -109,7 +109,7 @@ public class AuthService {
         return (limit, offset) -> PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset).uri(uri).queryParameters(queryParameters).build();
     }
 
-    public Request createPagedRequest(final String uri, final Collection<PolarisParamBuilder> paramBuilders, final int limit, final int offset) {
+    private Request createPagedRequest(final String uri, final Collection<PolarisParamBuilder> paramBuilders, final int limit, final int offset) {
         final Request.Builder pagedRequestBuilder = PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset);
         pagedRequestBuilder.uri(uri);
         if (paramBuilders != null) {

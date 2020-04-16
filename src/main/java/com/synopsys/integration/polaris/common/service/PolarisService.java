@@ -24,12 +24,11 @@ package com.synopsys.integration.polaris.common.service;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -95,6 +94,13 @@ public class PolarisService {
         }
     }
 
+    /* TODO: Refactor this implementation. The following should compile, but doesn't. --rotte APR 2020
+public <R extends PolarisResource> Optional<R> getFirstResponse2(final Request request, final Type resourcesType) throws IntegrationException {
+    return getAllResponses(request, resourcesType)
+               .stream()
+               .findFirst();
+}
+ */
     public <R extends PolarisResource> Optional<R> getFirstResponse(final Request request, final Type resourcesType) throws IntegrationException {
         try (final Response response = polarisHttpClient.execute(request)) {
             response.throwExceptionForError();
@@ -106,6 +112,19 @@ public class PolarisService {
                 }
             }
             return Optional.empty();
+        } catch (final IOException e) {
+            throw new IntegrationException(e);
+        }
+    }
+
+    public <R extends PolarisResource> List<R> getAllResponses(final Request request, final Type resourcesType) throws IntegrationException {
+        try (final Response response = polarisHttpClient.execute(request)) {
+            response.throwExceptionForError();
+            final PolarisResources<R> wrappedResponse = polarisJsonTransformer.getResponse(response, resourcesType);
+            if (wrappedResponse != null && wrappedResponse.getData() != null) {
+                return wrappedResponse.getData();
+            }
+            return Collections.emptyList();
         } catch (final IOException e) {
             throw new IntegrationException(e);
         }
@@ -131,31 +150,51 @@ public class PolarisService {
 
     public <R extends PolarisResource, W extends PolarisResources<R>> W getPopulatedResponse(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int pageSize) throws IntegrationException {
         W populatedResources = null;
-        final Set<R> allData = new HashSet<>();
-        final Set<PolarisResourceSparse> allIncluded = new HashSet<>();
+        final List<R> allData = new ArrayList<>();
+        final List<PolarisResourceSparse> allIncluded = new ArrayList<>();
 
-        int totalExpected = 0;
+        Integer totalExpected = null;
         int offset = 0;
+        boolean totalExpectedHasNotBeenSet = true;
+        boolean thisPageHadData;
+        boolean isMoreData = true;
         do {
             final W wrappedResponse = executePagedRequest(polarisPagedRequestWrapper, offset, pageSize);
+            if (wrappedResponse == null) {
+                break;
+            }
+
             if (null == populatedResources) {
                 populatedResources = wrappedResponse;
             }
-            if (wrappedResponse != null) {
+
+            if (totalExpectedHasNotBeenSet) {
                 final PolarisResourcesPagination meta = wrappedResponse.getMeta();
-                totalExpected = meta.getTotal().intValue();
-
-                final List<R> data = wrappedResponse.getData();
-                allData.addAll(data);
-
-                final List<PolarisResourceSparse> included = wrappedResponse.getIncluded();
-                allIncluded.addAll(included);
-
-                offset += pageSize;
+                totalExpected = Optional.ofNullable(meta)
+                                    .map(PolarisResourcesPagination::getTotal)
+                                    .map(BigDecimal::intValue)
+                                    .orElse(null);
+                totalExpectedHasNotBeenSet = false;
             }
-        } while (totalExpected > allData.size());
 
-        // Happens if all of the content strings serialized from allData are null -- rotte
+            final List<R> data = wrappedResponse.getData();
+            if (data != null) {
+                allData.addAll(data);
+            }
+
+            final List<PolarisResourceSparse> included = wrappedResponse.getIncluded();
+            if (included != null) {
+                allIncluded.addAll(included);
+            }
+
+            if (totalExpected != null) {
+                isMoreData = totalExpected > allData.size();
+            }
+            thisPageHadData = data != null && !data.isEmpty();
+            offset += pageSize;
+        } while (isMoreData && thisPageHadData);
+
+        // If wrappedResponse is null, populatedResources could be null -- rotte APR 2020
         if (populatedResources != null) {
             populatedResources.setData(new ArrayList<>(allData));
             populatedResources.setIncluded(new ArrayList<>(allIncluded));

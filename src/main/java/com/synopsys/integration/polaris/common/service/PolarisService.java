@@ -148,6 +148,7 @@ public <R extends PolarisResource> Optional<R> getFirstResponse2(final Request r
         return getPopulatedResponse(polarisPagedRequestWrapper, defaultPageSize);
     }
 
+    // TODO: Cognitive complexity should be reduced even more here --rotte APR 2020
     public <R extends PolarisResource, W extends PolarisResources<R>> W getPopulatedResponse(final PolarisPagedRequestWrapper polarisPagedRequestWrapper, final int pageSize) throws IntegrationException {
         W populatedResources = null;
         final List<R> allData = new ArrayList<>();
@@ -177,20 +178,16 @@ public <R extends PolarisResource> Optional<R> getFirstResponse2(final Request r
                 totalExpectedHasNotBeenSet = false;
             }
 
-            final List<R> data = wrappedResponse.getData();
-            if (data != null) {
-                allData.addAll(data);
-            }
+            final List<R> data = Optional.ofNullable(wrappedResponse.getData()).orElse(Collections.emptyList());
+            allData.addAll(data);
 
-            final List<PolarisResourceSparse> included = wrappedResponse.getIncluded();
-            if (included != null) {
-                allIncluded.addAll(included);
-            }
+            final List<PolarisResourceSparse> included = Optional.ofNullable(wrappedResponse.getIncluded()).orElse(Collections.emptyList());
+            allIncluded.addAll(included);
 
             if (totalExpected != null) {
                 isMoreData = totalExpected > allData.size();
             }
-            thisPageHadData = data != null && !data.isEmpty();
+            thisPageHadData = !data.isEmpty();
             offset += pageSize;
         } while (isMoreData && thisPageHadData);
 

@@ -47,35 +47,34 @@ public class PolarisServiceTest {
     public static String PAGE_ONE_OFFSET = "0";
     public static String PAGE_TWO_OFFSET = "25";
     public static String PAGE_THREE_OFFSET = "50";
-    private final PolarisRequestFactory polarisRequestFactory = new PolarisRequestFactory();
 
     @Test
     public void createDefaultPolarisGetRequestTest() {
-        final Request request = polarisRequestFactory.createDefaultPolarisPagedGetRequest("https://google.com");
+        Request request = PolarisRequestFactory.createDefaultPolarisPagedGetRequest("https://google.com");
         assertNotNull(request);
     }
 
     @Test
     public void executeGetRequestTestIT() throws IntegrationException {
-        final String baseUrl = System.getenv(AccessTokenPolarisHttpClientTestIT.ENV_POLARIS_URL);
-        final String accessToken = System.getenv(AccessTokenPolarisHttpClientTestIT.ENV_POLARIS_ACCESS_TOKEN);
+        String baseUrl = System.getenv(AccessTokenPolarisHttpClientTestIT.ENV_POLARIS_URL);
+        String accessToken = System.getenv(AccessTokenPolarisHttpClientTestIT.ENV_POLARIS_ACCESS_TOKEN);
 
         assumeTrue(StringUtils.isNotBlank(baseUrl));
         assumeTrue(StringUtils.isNotBlank(accessToken));
 
-        final Gson gson = new Gson();
-        final IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
-        final AccessTokenPolarisHttpClient httpClient = new AccessTokenPolarisHttpClient(logger, 100, true, ProxyInfo.NO_PROXY_INFO, baseUrl, accessToken, gson, new AuthenticationSupport());
+        Gson gson = new Gson();
+        IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
+        AccessTokenPolarisHttpClient httpClient = new AccessTokenPolarisHttpClient(logger, 100, true, ProxyInfo.NO_PROXY_INFO, baseUrl, accessToken, gson, new AuthenticationSupport());
 
-        final PolarisService polarisService = new PolarisService(httpClient, new PolarisJsonTransformer(gson, logger), PolarisRequestFactory.DEFAULT_LIMIT);
+        PolarisService polarisService = new PolarisService(httpClient, new PolarisJsonTransformer(gson, logger), PolarisRequestFactory.DEFAULT_LIMIT);
 
-        final String requestUri = baseUrl + "/api/common/v0/branches";
-        final Request request = polarisRequestFactory.createDefaultPolarisPagedGetRequest(requestUri);
+        String requestUri = baseUrl + "/api/common/v0/branches";
+        Request request = PolarisRequestFactory.createDefaultPolarisPagedGetRequest(requestUri);
 
-        final PolarisResources<BranchV0Resource> branchV0Resources = polarisService.get(BranchV0Resources.class, request);
-        final List<BranchV0Resource> branchV0ResourceList = branchV0Resources.getData();
+        PolarisResources<BranchV0Resource> branchV0Resources = polarisService.get(BranchV0Resources.class, request);
+        List<BranchV0Resource> branchV0ResourceList = branchV0Resources.getData();
         assertNotNull(branchV0ResourceList);
-        final PolarisResourcesPagination meta = branchV0Resources.getMeta();
+        PolarisResourcesPagination meta = branchV0Resources.getMeta();
         assertNotNull(meta);
     }
 
@@ -88,11 +87,11 @@ public class PolarisServiceTest {
         PolarisJsonTransformer polarisJsonTransformer = new PolarisJsonTransformer(PolarisServicesFactory.createDefaultGson(), new PrintStreamIntLogger(System.out, LogLevel.INFO));
 
         final String requestUri = PolarisService.PROJECT_API_SPEC;
-        final PolarisPagedRequestCreator requestCreator = (limit, offset) -> PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset)
-                                                                                 .uri(requestUri)
-                                                                                 .build();
+        PolarisPagedRequestCreator requestCreator = (limit, offset) -> PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset)
+                                                                           .uri(requestUri)
+                                                                           .build();
 
-        final PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(requestCreator, ProjectV0Resources.class);
+        PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(requestCreator, ProjectV0Resources.class);
 
         PolarisService polarisService = new PolarisService(polarisHttpClient, polarisJsonTransformer, PolarisRequestFactory.DEFAULT_LIMIT);
         try {
@@ -104,21 +103,21 @@ public class PolarisServiceTest {
     }
 
     private static Stream<Arguments> createGetAllMockData() {
-        final Map<String, String> getAllOnOnePageMap = new HashMap<>();
+        Map<String, String> getAllOnOnePageMap = new HashMap<>();
         getAllOnOnePageMap.put(PAGE_ONE_OFFSET, "projects_all_on_one_page.json");
 
-        final Map<String, String> getAllMultiPageMap = new HashMap<>();
+        Map<String, String> getAllMultiPageMap = new HashMap<>();
         getAllMultiPageMap.put(PAGE_ONE_OFFSET, "projects_page_1_of_3.json");
         getAllMultiPageMap.put(PAGE_TWO_OFFSET, "projects_page_2_of_3.json");
         getAllMultiPageMap.put(PAGE_THREE_OFFSET, "projects_page_3_of_3.json");
 
-        final Map<String, String> lessProjectsThanExpectedMap = new HashMap<>(getAllMultiPageMap);
+        Map<String, String> lessProjectsThanExpectedMap = new HashMap<>(getAllMultiPageMap);
         lessProjectsThanExpectedMap.remove(PAGE_THREE_OFFSET);
 
-        final Map<String, String> changingTotalMap = new HashMap<>(getAllMultiPageMap);
+        Map<String, String> changingTotalMap = new HashMap<>(getAllMultiPageMap);
         changingTotalMap.put(PAGE_TWO_OFFSET, "projects_page_2_of_2.json");
 
-        final Map<String, String> duplicatedDataMap = new HashMap<>(getAllMultiPageMap);
+        Map<String, String> duplicatedDataMap = new HashMap<>(getAllMultiPageMap);
         duplicatedDataMap.put(PAGE_TWO_OFFSET, "projects_page_1_of_3.json");
 
         return Stream.of(
@@ -161,7 +160,7 @@ public class PolarisServiceTest {
         return false;
     }
 
-    private Boolean requestOffsetOutOfBounds(Request request, final String uri, Map<String, String> offsetsToResults) {
+    private Boolean requestOffsetOutOfBounds(Request request, String uri, Map<String, String> offsetsToResults) {
         if (null != request && request.getUri().equals(uri)) {
             return request.getQueryParameters()
                        .get(PolarisRequestFactory.OFFSET_PARAMETER)

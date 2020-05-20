@@ -52,44 +52,44 @@ public class JobService {
     private final AccessTokenPolarisHttpClient polarisHttpClient;
     private final PolarisService polarisService;
 
-    public JobService(final AccessTokenPolarisHttpClient polarisHttpClient, final PolarisService polarisService) {
+    public JobService(AccessTokenPolarisHttpClient polarisHttpClient, PolarisService polarisService) {
         this.logger = polarisHttpClient.getLogger();
         this.polarisHttpClient = polarisHttpClient;
         this.polarisService = polarisService;
     }
 
-    public JobResource getJobById(final String jobId) throws IntegrationException {
-        final String uri = polarisHttpClient.getPolarisServerUrl() + JOBS_API_SPEC + "/" + jobId;
+    public JobResource getJobById(String jobId) throws IntegrationException {
+        String uri = polarisHttpClient.getPolarisServerUrl() + JOBS_API_SPEC + "/" + jobId;
         return getJobByUrl(uri);
     }
 
-    public JobResource getJobByUrl(final String jobApiUrl) throws IntegrationException {
-        final Request request = PolarisRequestFactory.createDefaultRequestBuilder().uri(jobApiUrl).build();
+    public JobResource getJobByUrl(String jobApiUrl) throws IntegrationException {
+        Request request = PolarisRequestFactory.createDefaultBuilder().uri(jobApiUrl).build();
         return polarisService.get(JOB_RESOURCE.getType(), request);
     }
 
-    public void waitForJobStateIsCompletedOrDieById(final String jobId) throws IntegrationException, InterruptedException {
+    public void waitForJobStateIsCompletedOrDieById(String jobId) throws IntegrationException, InterruptedException {
         waitForJobStateIsCompletedOrDieById(jobId, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_WAIT_INTERVAL);
     }
 
-    public void waitForJobStateIsCompletedOrDieById(final String jobId, final long timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
-        final String uri = polarisHttpClient.getPolarisServerUrl() + JOBS_API_SPEC + "/" + jobId;
+    public void waitForJobStateIsCompletedOrDieById(String jobId, long timeoutInSeconds, int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
+        String uri = polarisHttpClient.getPolarisServerUrl() + JOBS_API_SPEC + "/" + jobId;
         waitForJobStateIsCompletedOrDieByUrl(uri, timeoutInSeconds, waitIntervalInSeconds);
     }
 
-    public void waitForJobStateIsCompletedOrDieByUrl(final String jobApiUrl) throws IntegrationException, InterruptedException {
+    public void waitForJobStateIsCompletedOrDieByUrl(String jobApiUrl) throws IntegrationException, InterruptedException {
         waitForJobStateIsCompletedOrDieByUrl(jobApiUrl, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_WAIT_INTERVAL);
     }
 
-    public void waitForJobStateIsCompletedOrDieByUrl(final String jobApiUrl, final long timeoutInSeconds, final int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
+    public void waitForJobStateIsCompletedOrDieByUrl(String jobApiUrl, long timeoutInSeconds, int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
         WaitJob waitJob = WaitJob.createUsingSystemTimeWhenInvoked(logger, timeoutInSeconds, waitIntervalInSeconds, () -> hasJobEnded(jobApiUrl));
         if (!waitJob.waitFor()) {
-            final String maximumDurationString = DurationFormatUtils.formatDurationHMS(timeoutInSeconds * 1000);
+            String maximumDurationString = DurationFormatUtils.formatDurationHMS(timeoutInSeconds * 1000);
             throw new PolarisIntegrationException(String.format("Job at url %s did not end in the provided timeout of %s", jobApiUrl, maximumDurationString));
         }
 
-        final JobResource jobResource = this.getJobByUrl(jobApiUrl);
-        final JobStatus.StateEnum jobState = Optional.ofNullable(jobResource)
+        JobResource jobResource = this.getJobByUrl(jobApiUrl);
+        JobStatus.StateEnum jobState = Optional.ofNullable(jobResource)
                                                  .map(JobResource::getData)
                                                  .map(Job::getAttributes)
                                                  .map(JobAttributes::getStatus)
@@ -97,11 +97,11 @@ public class JobService {
                                                  .orElseThrow(() -> new PolarisIntegrationException(String.format("Job at url %s ended but its state cannot be determined.", jobApiUrl)));
 
         if (!JobStatus.StateEnum.COMPLETED.equals(jobState)) {
-            final StringBuilder errorMessageBuilder = new StringBuilder();
+            StringBuilder errorMessageBuilder = new StringBuilder();
             errorMessageBuilder.append(String.format("Job at url %s ended with state %s instead of %s", jobApiUrl, jobState, JobStatus.StateEnum.COMPLETED));
             if (JobStatus.StateEnum.FAILED.equals(jobState)) {
                 // Niether Data nor Attributes can be null because they were validated above -- rotte MAR 2020
-                final FailureInfo failureInfo = jobResource.getData().getAttributes().getFailureInfo();
+                FailureInfo failureInfo = jobResource.getData().getAttributes().getFailureInfo();
                 if (failureInfo != null && StringUtils.isNotBlank(failureInfo.getUserFriendlyFailureReason())) {
                     errorMessageBuilder.append(String.format(" because: %s", failureInfo.getUserFriendlyFailureReason()));
                 }
@@ -112,11 +112,11 @@ public class JobService {
         }
     }
 
-    private boolean hasJobEnded(final String jobApiUrl) throws IntegrationException {
-        final String jobStatusPrefix = "Job at url " + jobApiUrl;
+    private boolean hasJobEnded(String jobApiUrl) throws IntegrationException {
+        String jobStatusPrefix = "Job at url " + jobApiUrl;
 
         try {
-            final Optional<JobStatus> optionalJobStatus = Optional.ofNullable(getJobByUrl(jobApiUrl))
+            Optional<JobStatus> optionalJobStatus = Optional.ofNullable(getJobByUrl(jobApiUrl))
                                                               .map(JobResource::getData)
                                                               .map(Job::getAttributes)
                                                               .map(JobAttributes::getStatus);
@@ -126,14 +126,14 @@ public class JobService {
                 return false;
             }
 
-            final JobStatus jobStatus = optionalJobStatus.get();
-            final JobStatus.StateEnum stateEnum = jobStatus.getState();
+            JobStatus jobStatus = optionalJobStatus.get();
+            JobStatus.StateEnum stateEnum = jobStatus.getState();
             if (JobStatus.StateEnum.QUEUED.equals(stateEnum) || JobStatus.StateEnum.RUNNING.equals(stateEnum) || JobStatus.StateEnum.DISPATCHED.equals(stateEnum)) {
                 logger.info(jobStatusPrefix + " was found with status " + stateEnum.toString() + ". Progress: " + jobStatus.getProgress());
                 return false;
             }
 
-        } catch (final IntegrationException e) {
+        } catch (IntegrationException e) {
             if (e.getMessage() != null && e.getMessage().contains("404")) {
                 logger.info(jobStatusPrefix + " could not be found.");
             } else {

@@ -26,6 +26,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.synopsys.integration.rest.HttpUrl;
+import com.synopsys.integration.rest.support.UrlSupport;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -49,16 +51,18 @@ public class AccessTokenPolarisHttpClient extends AuthenticatingIntHttpClient {
     private static final String ACCESS_TOKEN_REQUEST_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
     private final Gson gson;
+    private final UrlSupport urlSupport;
     private final AuthenticationSupport authenticationSupport;
-    private final String baseUrl;
+    private final HttpUrl baseUrl;
     private final String accessToken;
 
     public AccessTokenPolarisHttpClient(
-        final IntLogger logger, final int timeout, final boolean alwaysTrustServerCertificate, final ProxyInfo proxyInfo, final String baseUrl, final String accessToken, final Gson gson, final AuthenticationSupport authenticationSupport) {
+        final IntLogger logger, final int timeout, final boolean alwaysTrustServerCertificate, final ProxyInfo proxyInfo, final HttpUrl baseUrl, final String accessToken, final Gson gson, final UrlSupport urlSupport, final AuthenticationSupport authenticationSupport) {
         super(logger, timeout, alwaysTrustServerCertificate, proxyInfo);
         this.baseUrl = baseUrl;
         this.accessToken = accessToken;
         this.gson = gson;
+        this.urlSupport = urlSupport;
         this.authenticationSupport = authenticationSupport;
 
         if (StringUtils.isBlank(accessToken)) {
@@ -94,11 +98,21 @@ public class AccessTokenPolarisHttpClient extends AuthenticatingIntHttpClient {
         final RequestBuilder requestBuilder = createRequestBuilder(HttpMethod.POST, headers);
         requestBuilder.setEntity(httpEntity);
 
-        return authenticationSupport.attemptAuthentication(this, baseUrl, AccessTokenPolarisHttpClient.AUTHENTICATION_SPEC, requestBuilder);
+        HttpUrl authenticationUrl = urlSupport.appendRelativeUrl(baseUrl, AccessTokenPolarisHttpClient.AUTHENTICATION_SPEC);
+        return authenticationSupport.attemptAuthentication(this, authenticationUrl, requestBuilder);
     }
 
-    public String getPolarisServerUrl() {
+    public HttpUrl getPolarisServerUrl() {
         return baseUrl;
+    }
+
+    public HttpUrl appendToPolarisUrl(String relativeUrl) {
+        try {
+            return urlSupport.appendRelativeUrl(baseUrl, relativeUrl);
+        } catch (IntegrationException e) {
+            //TODO if supporting this library is important, we should do better
+            throw new RuntimeException(String.format("Can't combine the base url () with relative url ().", baseUrl.string(), relativeUrl));
+        }
     }
 
 }

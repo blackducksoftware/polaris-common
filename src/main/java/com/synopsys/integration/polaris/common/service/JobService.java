@@ -24,6 +24,7 @@ package com.synopsys.integration.polaris.common.service;
 
 import java.util.Optional;
 
+import com.synopsys.integration.rest.HttpUrl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
@@ -59,12 +60,12 @@ public class JobService {
     }
 
     public JobResource getJobById(String jobId) throws IntegrationException {
-        String uri = polarisHttpClient.getPolarisServerUrl() + JOBS_API_SPEC + "/" + jobId;
-        return getJobByUrl(uri);
+        HttpUrl url = polarisHttpClient.appendToPolarisUrl(JOBS_API_SPEC + "/" + jobId);
+        return getJobByUrl(url);
     }
 
-    public JobResource getJobByUrl(String jobApiUrl) throws IntegrationException {
-        Request request = PolarisRequestFactory.createDefaultBuilder().uri(jobApiUrl).build();
+    public JobResource getJobByUrl(HttpUrl jobApiUrl) throws IntegrationException {
+        Request request = PolarisRequestFactory.createDefaultBuilder().url(jobApiUrl).build();
         return polarisService.get(JOB_RESOURCE.getType(), request);
     }
 
@@ -73,15 +74,15 @@ public class JobService {
     }
 
     public void waitForJobStateIsCompletedOrDieById(String jobId, long timeoutInSeconds, int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
-        String uri = polarisHttpClient.getPolarisServerUrl() + JOBS_API_SPEC + "/" + jobId;
-        waitForJobStateIsCompletedOrDieByUrl(uri, timeoutInSeconds, waitIntervalInSeconds);
+        HttpUrl url = polarisHttpClient.appendToPolarisUrl(JOBS_API_SPEC + "/" + jobId);
+        waitForJobStateIsCompletedOrDieByUrl(url, timeoutInSeconds, waitIntervalInSeconds);
     }
 
-    public void waitForJobStateIsCompletedOrDieByUrl(String jobApiUrl) throws IntegrationException, InterruptedException {
+    public void waitForJobStateIsCompletedOrDieByUrl(HttpUrl jobApiUrl) throws IntegrationException, InterruptedException {
         waitForJobStateIsCompletedOrDieByUrl(jobApiUrl, polarisHttpClient.getTimeoutInSeconds(), DEFAULT_WAIT_INTERVAL);
     }
 
-    public void waitForJobStateIsCompletedOrDieByUrl(String jobApiUrl, long timeoutInSeconds, int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
+    public void waitForJobStateIsCompletedOrDieByUrl(HttpUrl jobApiUrl, long timeoutInSeconds, int waitIntervalInSeconds) throws IntegrationException, InterruptedException {
         WaitJob waitJob = WaitJob.createUsingSystemTimeWhenInvoked(logger, timeoutInSeconds, waitIntervalInSeconds, () -> hasJobEnded(jobApiUrl));
         if (!waitJob.waitFor()) {
             String maximumDurationString = DurationFormatUtils.formatDurationHMS(timeoutInSeconds * 1000);
@@ -112,7 +113,7 @@ public class JobService {
         }
     }
 
-    private boolean hasJobEnded(String jobApiUrl) throws IntegrationException {
+    private boolean hasJobEnded(HttpUrl jobApiUrl) throws IntegrationException {
         String jobStatusPrefix = "Job at url " + jobApiUrl;
 
         try {

@@ -30,6 +30,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.synopsys.integration.exception.IntegrationException;
+import com.synopsys.integration.rest.HttpUrl;
+import com.synopsys.integration.rest.support.UrlSupport;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -71,7 +74,8 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
     private final BuilderProperties builderProperties;
     private IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
     private Gson gson = new Gson();
-    private AuthenticationSupport authenticationSupport = new AuthenticationSupport();
+    private UrlSupport urlSupport = new UrlSupport();
+    private AuthenticationSupport authenticationSupport = new AuthenticationSupport(urlSupport);
 
     public PolarisServerConfigBuilder() {
         Set<BuilderPropertyKey> propertyKeys = new HashSet<>();
@@ -92,13 +96,13 @@ public class PolarisServerConfigBuilder extends IntegrationBuilder<PolarisServer
 
     @Override
     protected PolarisServerConfig buildWithoutValidation() {
-        URL polarisURL = null;
+        HttpUrl polarisURL = null;
         try {
-            polarisURL = new URL(getUrl());
-        } catch (MalformedURLException e) {
+            polarisURL = new HttpUrl(getUrl());
+        } catch (IntegrationException e) {
         }
 
-        return new PolarisServerConfig(polarisURL, getTimeoutInSeconds(), getAccessToken(), getProxyInfo(), isTrustCert(), gson, authenticationSupport);
+        return new PolarisServerConfig(polarisURL, getTimeoutInSeconds(), getAccessToken(), getProxyInfo(), isTrustCert(), gson, urlSupport, authenticationSupport);
     }
 
     private ProxyInfo getProxyInfo() {

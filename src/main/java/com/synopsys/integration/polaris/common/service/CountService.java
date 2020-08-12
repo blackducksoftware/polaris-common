@@ -29,6 +29,7 @@ import com.synopsys.integration.polaris.common.api.query.model.CountV0;
 import com.synopsys.integration.polaris.common.api.query.model.CountV0Attributes;
 import com.synopsys.integration.polaris.common.api.query.model.CountV0Resources;
 import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
+import com.synopsys.integration.rest.HttpUrl;
 import com.synopsys.integration.rest.request.Request;
 
 public class CountService {
@@ -40,7 +41,7 @@ public class CountService {
 
     public CountV0Resources getCountV0ResourcesFromIssueApiUrl(final String issueApiUrl) throws IntegrationException {
         final Request.Builder requestBuilder = PolarisRequestFactory.createDefaultBuilder()
-                                                   .uri(issueApiUrl);
+                                                   .url(new HttpUrl(issueApiUrl));
         final Request request = requestBuilder.build();
         return polarisService.get(CountV0Resources.class, request);
     }

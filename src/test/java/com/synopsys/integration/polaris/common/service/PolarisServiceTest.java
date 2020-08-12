@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.synopsys.integration.rest.HttpUrl;
+import com.synopsys.integration.rest.support.UrlSupport;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,9 +50,15 @@ public class PolarisServiceTest {
     public static String PAGE_TWO_OFFSET = "25";
     public static String PAGE_THREE_OFFSET = "50";
 
+    private HttpUrl BASE_URL = new HttpUrl("https://google.com");
+    private UrlSupport urlSupport = new UrlSupport();
+
+    public PolarisServiceTest() throws IntegrationException {
+    }
+
     @Test
-    public void createDefaultPolarisGetRequestTest() {
-        Request request = PolarisRequestFactory.createDefaultPolarisPagedGetRequest("https://google.com");
+    public void createDefaultPolarisGetRequestTest() throws IntegrationException {
+        Request request = PolarisRequestFactory.createDefaultPolarisPagedGetRequest(BASE_URL.string());
         assertNotNull(request);
     }
 
@@ -64,7 +72,7 @@ public class PolarisServiceTest {
 
         Gson gson = new Gson();
         IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
-        AccessTokenPolarisHttpClient httpClient = new AccessTokenPolarisHttpClient(logger, 100, true, ProxyInfo.NO_PROXY_INFO, baseUrl, accessToken, gson, new AuthenticationSupport());
+        AccessTokenPolarisHttpClient httpClient = new AccessTokenPolarisHttpClient(logger, 100, true, ProxyInfo.NO_PROXY_INFO, new HttpUrl(baseUrl), accessToken, gson, urlSupport, new AuthenticationSupport(urlSupport));
 
         PolarisService polarisService = new PolarisService(httpClient, new PolarisJsonTransformer(gson, logger), PolarisRequestFactory.DEFAULT_LIMIT);
 
@@ -80,15 +88,16 @@ public class PolarisServiceTest {
 
     @ParameterizedTest
     @MethodSource("createGetAllMockData")
-    public void testGetAll(Map<String, String> offsetsToResults, int expectedTotal) {
+    public void testGetAll(Map<String, String> offsetsToResults, int expectedTotal) throws IntegrationException {
+        final HttpUrl requestUri = urlSupport.appendRelativeUrl(BASE_URL, PolarisService.PROJECT_API_SPEC);
+
         AccessTokenPolarisHttpClient polarisHttpClient = Mockito.mock(AccessTokenPolarisHttpClient.class);
-        mockClientBehavior(polarisHttpClient, PolarisService.PROJECT_API_SPEC, offsetsToResults, "projects_no_more_results.json");
+        mockClientBehavior(polarisHttpClient, requestUri, offsetsToResults, "projects_no_more_results.json");
 
         PolarisJsonTransformer polarisJsonTransformer = new PolarisJsonTransformer(PolarisServicesFactory.createDefaultGson(), new PrintStreamIntLogger(System.out, LogLevel.INFO));
 
-        final String requestUri = PolarisService.PROJECT_API_SPEC;
         PolarisPagedRequestCreator requestCreator = (limit, offset) -> PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset)
-                                                                           .uri(requestUri)
+                                                                           .url(requestUri)
                                                                            .build();
 
         PolarisPagedRequestWrapper pagedRequestWrapper = new PolarisPagedRequestWrapper(requestCreator, ProjectV0Resources.class);
@@ -129,19 +138,19 @@ public class PolarisServiceTest {
         );
     }
 
-    private void mockClientBehavior(AccessTokenPolarisHttpClient polarisHttpClient, String uri, Map<String, String> offsetsToResults, String emptyResultsPage) {
+    private void mockClientBehavior(AccessTokenPolarisHttpClient polarisHttpClient, HttpUrl url, Map<String, String> offsetsToResults, String emptyResultsPage) {
         try {
             for (Map.Entry<String, String> entry : offsetsToResults.entrySet()) {
                 Response response = Mockito.mock(Response.class);
                 Mockito.when(response.getContentString()).thenReturn(getPreparedContentStringFrom(entry.getValue()));
 
-                ArgumentMatcher<Request> isMockedRequest = request -> requestMatches(request, uri, entry.getKey());
+                ArgumentMatcher<Request> isMockedRequest = request -> requestMatches(request, url, entry.getKey());
                 Mockito.when(polarisHttpClient.execute(Mockito.argThat(isMockedRequest))).thenReturn(response);
             }
 
             Response emptyResponse = Mockito.mock(Response.class);
             Mockito.when(emptyResponse.getContentString()).thenReturn(getPreparedContentStringFrom(emptyResultsPage));
-            ArgumentMatcher<Request> isOutOfBounds = request -> requestOffsetOutOfBounds(request, uri, offsetsToResults);
+            ArgumentMatcher<Request> isOutOfBounds = request -> requestOffsetOutOfBounds(request, url, offsetsToResults);
 
             Mockito.when(polarisHttpClient.execute(Mockito.argThat(isOutOfBounds))).thenReturn(emptyResponse)
                 .thenThrow(new AssertionFailedError("Client requested more pages after getting back a page of empty results."));
@@ -150,8 +159,8 @@ public class PolarisServiceTest {
         }
     }
 
-    private Boolean requestMatches(Request request, String uri, String offset) {
-        if (null != request && request.getUri().equals(uri)) {
+    private Boolean requestMatches(Request request, HttpUrl url, String offset) {
+        if (null != request && request.getUrl().equals(url)) {
             return request.getQueryParameters()
                        .get(PolarisRequestFactory.OFFSET_PARAMETER)
                        .stream()
@@ -160,8 +169,8 @@ public class PolarisServiceTest {
         return false;
     }
 
-    private Boolean requestOffsetOutOfBounds(Request request, String uri, Map<String, String> offsetsToResults) {
-        if (null != request && request.getUri().equals(uri)) {
+    private Boolean requestOffsetOutOfBounds(Request request, HttpUrl url, Map<String, String> offsetsToResults) {
+        if (null != request && request.getUrl().equals(url)) {
             return request.getQueryParameters()
                        .get(PolarisRequestFactory.OFFSET_PARAMETER)
                        .stream()

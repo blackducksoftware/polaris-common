@@ -33,6 +33,7 @@ import com.synopsys.integration.polaris.common.request.PolarisPagedRequestWrappe
 import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
 import com.synopsys.integration.polaris.common.request.param.FilterConstants;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
+import com.synopsys.integration.rest.HttpUrl;
 import com.synopsys.integration.rest.request.Request;
 
 public class ProjectService {
@@ -47,11 +48,11 @@ public class ProjectService {
     }
 
     public Optional<ProjectV0Resource> getProjectByName(final String projectName) throws IntegrationException {
-        final String uri = polarisHttpClient.getPolarisServerUrl() + PolarisService.PROJECT_API_SPEC;
+        final HttpUrl url = polarisHttpClient.appendToPolarisUrl(PolarisService.PROJECT_API_SPEC);
         final Request request =
             PolarisRequestFactory.createDefaultRequestBuilder()
                 .addQueryParameter(FilterConstants.FILTER_PROJECT_NAME_CONTAINS, projectName)
-                .uri(uri)
+                .url(url)
                 .build();
         return polarisService.getFirstResponse(request, PROJECT_RESOURCES.getType());
     }
@@ -62,9 +63,9 @@ public class ProjectService {
     }
 
     public Request createProjectGetRequest(final int limit, final int offset) {
-        final String uri = polarisHttpClient.getPolarisServerUrl() + PolarisService.PROJECT_API_SPEC;
+        final HttpUrl url = polarisHttpClient.appendToPolarisUrl(PolarisService.PROJECT_API_SPEC);
         return PolarisRequestFactory.createDefaultPagedRequestBuilder(limit, offset)
-                   .uri(uri)
+                   .url(url)
                    .build();
     }
 

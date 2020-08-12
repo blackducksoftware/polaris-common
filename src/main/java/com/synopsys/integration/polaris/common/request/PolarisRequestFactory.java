@@ -27,7 +27,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.rest.HttpMethod;
+import com.synopsys.integration.rest.HttpUrl;
 import com.synopsys.integration.rest.request.Request;
 
 public class PolarisRequestFactory {
@@ -39,23 +41,25 @@ public class PolarisRequestFactory {
     public static final int DEFAULT_LIMIT = 25;
     public static final int DEFAULT_OFFSET = 0;
 
-    public static Request createDefaultPolarisGetRequest(final String requestUri) {
+    public static Request createDefaultPolarisGetRequest(final String requestUri) throws IntegrationException {
+        HttpUrl httpUrl = new HttpUrl(requestUri);
         return createDefaultBuilder()
-                   .uri(requestUri)
+                   .url(httpUrl)
                    .build();
     }
 
-    public static Request createDefaultPolarisPagedGetRequest(final String requestUri) {
+    public static Request createDefaultPolarisPagedGetRequest(final String requestUri) throws IntegrationException {
         return createCommonPolarisPagedGetRequest(requestUri, DEFAULT_LIMIT);
     }
 
-    public static Request createCommonPolarisPagedGetRequest(final String requestUri, final int limit) {
+    public static Request createCommonPolarisPagedGetRequest(final String requestUri, final int limit) throws IntegrationException {
         return createCommonPolarisPagedGetRequest(requestUri, limit, DEFAULT_OFFSET);
     }
 
-    public static Request createCommonPolarisPagedGetRequest(final String requestUri, final int limit, final int offset) {
+    public static Request createCommonPolarisPagedGetRequest(final String requestUri, final int limit, final int offset) throws IntegrationException {
+        HttpUrl httpUrl = new HttpUrl(requestUri);
         return createDefaultPagedRequestBuilder(limit, offset)
-                   .uri(requestUri)
+                   .url(httpUrl)
                    .build();
     }
 

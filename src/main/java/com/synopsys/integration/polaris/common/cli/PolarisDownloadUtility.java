@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Optional;
 
+import com.synopsys.integration.rest.HttpUrl;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.lang3.StringUtils;
 
@@ -55,11 +56,11 @@ public class PolarisDownloadUtility {
     private final OperatingSystemType operatingSystemType;
     private final IntHttpClient intHttpClient;
     private final CleanupZipExpander cleanupZipExpander;
-    private final String polarisServerUrl;
+    private final HttpUrl polarisServerUrl;
     private final File installDirectory;
 
-    public PolarisDownloadUtility(IntLogger logger, OperatingSystemType operatingSystemType, IntHttpClient intHttpClient, CleanupZipExpander cleanupZipExpander, String polarisServerUrl, File downloadTargetDirectory) {
-        if (StringUtils.isBlank(polarisServerUrl)) {
+    public PolarisDownloadUtility(IntLogger logger, OperatingSystemType operatingSystemType, IntHttpClient intHttpClient, CleanupZipExpander cleanupZipExpander, HttpUrl polarisServerUrl, File downloadTargetDirectory) {
+        if (null == polarisServerUrl) {
             throw new IllegalArgumentException("A Polaris server url must be provided.");
         }
 
@@ -76,14 +77,14 @@ public class PolarisDownloadUtility {
         }
     }
 
-    public static PolarisDownloadUtility defaultUtility(IntLogger logger, String polarisServerUrl, ProxyInfo proxyInfo, File downloadTargetDirectory) {
+    public static PolarisDownloadUtility defaultUtility(IntLogger logger, HttpUrl polarisServerUrl, ProxyInfo proxyInfo, File downloadTargetDirectory) {
         OperatingSystemType operatingSystemType = OperatingSystemType.determineFromSystem();
         IntHttpClient intHttpClient = new IntHttpClient(logger, PolarisDownloadUtility.DEFAULT_POLARIS_TIMEOUT, false, proxyInfo);
         CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(logger);
         return new PolarisDownloadUtility(logger, operatingSystemType, intHttpClient, cleanupZipExpander, polarisServerUrl, downloadTargetDirectory);
     }
 
-    public static PolarisDownloadUtility defaultUtilityNoProxy(IntLogger logger, String polarisServerUrl, File downloadTargetDirectory) {
+    public static PolarisDownloadUtility defaultUtilityNoProxy(IntLogger logger, HttpUrl polarisServerUrl, File downloadTargetDirectory) {
         OperatingSystemType operatingSystemType = OperatingSystemType.determineFromSystem();
         IntHttpClient intHttpClient = new IntHttpClient(logger, PolarisDownloadUtility.DEFAULT_POLARIS_TIMEOUT, false, ProxyInfo.NO_PROXY_INFO);
         CleanupZipExpander cleanupZipExpander = new CleanupZipExpander(logger);
@@ -197,7 +198,7 @@ public class PolarisDownloadUtility {
         long lastTimeDownloaded = versionFile.lastModified();
         logger.debug(String.format("last time downloaded: %d", lastTimeDownloaded));
 
-        String swipDownloadUrl = String.format(downloadUrlFormat, "swip");
+        HttpUrl swipDownloadUrl = new HttpUrl(String.format(downloadUrlFormat, "swip"));
         Request swipDownloadRequest = new Request.Builder(swipDownloadUrl).build();
         try (Response downloadResponse = intHttpClient.execute(swipDownloadRequest)) {
             if (!downloadResponse.isStatusCodeError()) {
@@ -205,7 +206,7 @@ public class PolarisDownloadUtility {
             }
         }
 
-        String polarisDownloadUrl = String.format(downloadUrlFormat, "polaris");
+        HttpUrl polarisDownloadUrl = new HttpUrl(String.format(downloadUrlFormat, "polaris"));
         Request polarisDownloadRequest = new Request.Builder(polarisDownloadUrl).build();
         try (Response downloadResponse = intHttpClient.execute(polarisDownloadRequest)) {
             if (!downloadResponse.isStatusCodeError()) {

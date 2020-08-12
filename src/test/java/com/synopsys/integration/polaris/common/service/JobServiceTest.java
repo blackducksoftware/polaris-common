@@ -6,7 +6,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import com.synopsys.integration.rest.HttpUrl;
+import com.synopsys.integration.rest.RestConstants;
+import com.synopsys.integration.rest.proxy.ProxyInfo;
+import com.synopsys.integration.rest.support.UrlSupport;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
@@ -25,7 +30,7 @@ public class JobServiceTest {
     @Test
     public void testGetJobByUrl() throws IntegrationException {
         AccessTokenPolarisHttpClient polarisHttpClient = Mockito.mock(AccessTokenPolarisHttpClient.class);
-        String jobsApi = "https://polaris.synopsys.example.com/api/jobs/jobs/p10t3j6grt67pabjgp89djvln4";
+        HttpUrl jobsApi = new HttpUrl("https://polaris.synopsys.example.com/api/jobs/jobs/p10t3j6grt67pabjgp89djvln4");
         mockClientBehavior(polarisHttpClient, jobsApi, "jobservice_status.json");
 
         PolarisJsonTransformer polarisJsonTransformer = new PolarisJsonTransformer(PolarisServicesFactory.createDefaultGson(), new PrintStreamIntLogger(System.out, LogLevel.INFO));
@@ -39,12 +44,12 @@ public class JobServiceTest {
         assertEquals(JobStatus.StateEnum.COMPLETED, jobStatus.getState());
     }
 
-    private void mockClientBehavior(AccessTokenPolarisHttpClient polarisHttpClient, String uri, String results) {
+    private void mockClientBehavior(AccessTokenPolarisHttpClient polarisHttpClient, HttpUrl uri, String results) {
         try {
             Response response = Mockito.mock(Response.class);
             Mockito.when(response.getContentString()).thenReturn(getPreparedContentStringFrom(results));
 
-            ArgumentMatcher<Request> isMockedRequest = request -> null != request && request.getUri().equals(uri);
+            ArgumentMatcher<Request> isMockedRequest = request -> null != request && request.getUrl().equals(uri);
             Mockito.when(polarisHttpClient.execute(Mockito.argThat(isMockedRequest))).thenReturn(response);
         } catch (IOException | IntegrationException e) {
             fail("Unexpected " + e.getClass() + " was thrown while mocking client behavior. Please check the test for errors.", e);

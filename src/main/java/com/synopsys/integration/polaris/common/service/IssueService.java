@@ -38,6 +38,7 @@ import com.synopsys.integration.polaris.common.request.PolarisPagedRequestCreato
 import com.synopsys.integration.polaris.common.request.PolarisPagedRequestWrapper;
 import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
+import com.synopsys.integration.rest.HttpUrl;
 import com.synopsys.integration.rest.request.Request;
 
 public class IssueService {
@@ -59,8 +60,8 @@ public class IssueService {
     }
 
     public IssueResourcesSingle getIssueForProjectBranchAndIssueKeyWithDefaultIncluded(final String projectId, final String branchId, final String issueKey) throws IntegrationException {
-        final String uri = polarisHttpClient.getPolarisServerUrl() + PolarisService.GET_ISSUE_API_SPEC(issueKey);
-        final Request.Builder requestBuilder = createRequestBuilder(uri, projectId, branchId);
+        final HttpUrl url = polarisHttpClient.appendToPolarisUrl(PolarisService.GET_ISSUE_API_SPEC(issueKey));
+        final Request.Builder requestBuilder = createRequestBuilder(url, projectId, branchId);
         final Request request = requestBuilder.build();
         return polarisService.get(SINGLE_ISSUE_RESOURCES.getType(), request);
     }
@@ -77,17 +78,17 @@ public class IssueService {
     }
 
     public Request createIssuesGetRequest(final int limit, final int offset, final String projectId, final String branchId) {
-        final String uri = polarisHttpClient.getPolarisServerUrl() + PolarisService.ISSUES_API_SPEC;
-        final Request.Builder requestBuilder = createRequestBuilder(uri, projectId, branchId);
+        final HttpUrl url = polarisHttpClient.appendToPolarisUrl(PolarisService.ISSUES_API_SPEC);
+        final Request.Builder requestBuilder = createRequestBuilder(url, projectId, branchId);
         PolarisRequestFactory.populatePagedRequestBuilder(requestBuilder, limit, offset);
         return requestBuilder.build();
     }
 
-    private Request.Builder createRequestBuilder(final String uri, final String projectId, final String branchId) {
+    private Request.Builder createRequestBuilder(final HttpUrl url, final String projectId, final String branchId) {
         return PolarisRequestFactory.createDefaultRequestBuilder()
                    .addQueryParameter(PolarisService.PROJECT_ID, projectId)
                    .addQueryParameter(PolarisService.BRANCH_ID, branchId)
-                   .uri(uri);
+                   .url(url);
     }
 
 }

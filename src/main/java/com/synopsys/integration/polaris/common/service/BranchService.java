@@ -34,7 +34,9 @@ import com.synopsys.integration.polaris.common.request.PolarisPagedRequestWrappe
 import com.synopsys.integration.polaris.common.request.PolarisRequestFactory;
 import com.synopsys.integration.polaris.common.request.param.FilterConstants;
 import com.synopsys.integration.polaris.common.rest.AccessTokenPolarisHttpClient;
+import com.synopsys.integration.rest.HttpUrl;
 import com.synopsys.integration.rest.request.Request;
+import com.synopsys.integration.rest.support.UrlSupport;
 
 public class BranchService {
     private static final TypeToken BRANCH_RESOURCES = new TypeToken<BranchV0Resources>() {};
@@ -68,10 +70,10 @@ public class BranchService {
     }
 
     private Request.Builder createBranchForProjectIdRequestBuilder(final String projectId) {
-        final String uri = polarisHttpClient.getPolarisServerUrl() + PolarisService.BRANCHES_API_SPEC;
+        final HttpUrl url = polarisHttpClient.appendToPolarisUrl(PolarisService.BRANCHES_API_SPEC);
         return PolarisRequestFactory.createDefaultRequestBuilder()
                    .addQueryParameter(FilterConstants.FILTER_BRANCH_PROJECT_ID_EQUALS, projectId)
-                   .uri(uri);
+                   .url(url);
     }
 
 }

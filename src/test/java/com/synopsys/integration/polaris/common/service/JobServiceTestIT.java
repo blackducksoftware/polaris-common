@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.synopsys.integration.rest.HttpUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
@@ -90,7 +91,7 @@ public class JobServiceTestIT {
         logger.info("Waiting for job at URL: " + jobStatusUrl);
 
         try {
-            jobService.waitForJobStateIsCompletedOrDieByUrl(jobStatusUrl, 30L, JobService.DEFAULT_WAIT_INTERVAL);
+            jobService.waitForJobStateIsCompletedOrDieByUrl(new HttpUrl(jobStatusUrl), 30L, JobService.DEFAULT_WAIT_INTERVAL);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         } catch (IntegrationException ex) {

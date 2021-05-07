@@ -1,6 +1,6 @@
 package com.synopsys.integration.polaris.common.service;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.util.List;
@@ -22,7 +22,7 @@ import com.synopsys.integration.polaris.common.configuration.PolarisServerConfig
 public class UserServiceTest {
     @Test
     public void callGetAllUsersAndGetEmailTest() throws IntegrationException {
-        final PolarisServerConfigBuilder polarisServerConfigBuilder = PolarisServerConfig.newBuilder();
+        PolarisServerConfigBuilder polarisServerConfigBuilder = PolarisServerConfig.newBuilder();
         polarisServerConfigBuilder.setUrl(System.getenv("POLARIS_URL"));
         polarisServerConfigBuilder.setAccessToken(System.getenv("POLARIS_ACCESS_TOKEN"));
         polarisServerConfigBuilder.setGson(new Gson());
@@ -30,26 +30,26 @@ public class UserServiceTest {
         assumeTrue(StringUtils.isNotBlank(polarisServerConfigBuilder.getUrl()));
         assumeTrue(StringUtils.isNotBlank(polarisServerConfigBuilder.getAccessToken()));
 
-        final PolarisServerConfig polarisServerConfig = polarisServerConfigBuilder.build();
-        final IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
-        final PolarisServicesFactory polarisServicesFactory = polarisServerConfig.createPolarisServicesFactory(logger);
+        PolarisServerConfig polarisServerConfig = polarisServerConfigBuilder.build();
+        IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
+        PolarisServicesFactory polarisServicesFactory = polarisServerConfig.createPolarisServicesFactory(logger);
 
-        final UserService userService = polarisServicesFactory.createUserService();
-        final List<UserResource> users = userService.getAllUsers();
+        UserService userService = polarisServicesFactory.createUserService();
+        List<UserResource> users = userService.getAllUsers();
 
         if (!users.isEmpty()) {
-            final UserResource user = users
+            UserResource user = users
                                           .stream()
                                           .findAny()
                                           .orElseThrow(() -> new AssertionError("Missing list element"));
-            final Optional<String> optionalEmail = userService.getEmailForUser(user);
-            optionalEmail.ifPresent(email -> assertTrue("Expected email not to be blank", StringUtils.isNotBlank(email)));
+            Optional<String> optionalEmail = userService.getEmailForUser(user);
+            optionalEmail.ifPresent(email -> assertTrue(StringUtils.isNotBlank(email), "Expected email not to be blank"));
         }
     }
 
     @Test
     public void callGetUsersForGroupTest() throws IntegrationException {
-        final PolarisServerConfigBuilder polarisServerConfigBuilder = PolarisServerConfig.newBuilder();
+        PolarisServerConfigBuilder polarisServerConfigBuilder = PolarisServerConfig.newBuilder();
         polarisServerConfigBuilder.setUrl(System.getenv("POLARIS_URL"));
         polarisServerConfigBuilder.setAccessToken(System.getenv("POLARIS_ACCESS_TOKEN"));
         polarisServerConfigBuilder.setGson(new Gson());
@@ -57,15 +57,15 @@ public class UserServiceTest {
         assumeTrue(StringUtils.isNotBlank(polarisServerConfigBuilder.getUrl()));
         assumeTrue(StringUtils.isNotBlank(polarisServerConfigBuilder.getAccessToken()));
 
-        final PolarisServerConfig polarisServerConfig = polarisServerConfigBuilder.build();
-        final IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
-        final PolarisServicesFactory polarisServicesFactory = polarisServerConfig.createPolarisServicesFactory(logger);
+        PolarisServerConfig polarisServerConfig = polarisServerConfigBuilder.build();
+        IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
+        PolarisServicesFactory polarisServicesFactory = polarisServerConfig.createPolarisServicesFactory(logger);
 
-        final GroupService groupService = polarisServicesFactory.createGroupService();
+        GroupService groupService = polarisServicesFactory.createGroupService();
 
-        final GroupResource groupResource;
+        GroupResource groupResource;
         try {
-            final Optional<GroupResource> optionalGroupResource = groupService.getGroupByName("IntegrationsTeam");
+            Optional<GroupResource> optionalGroupResource = groupService.getGroupByName("IntegrationsTeam");
             if (optionalGroupResource.isPresent()) {
                 groupResource = optionalGroupResource.get();
             } else {
@@ -74,12 +74,12 @@ public class UserServiceTest {
                                     .findAny()
                                     .orElseThrow(() -> new IntegrationException());
             }
-        } catch (final IntegrationException e) {
+        } catch (IntegrationException e) {
             assumeTrue(e != null, "Something went wrong while retrieving groups, but this test is not for the group service");
             return;
         }
 
-        final UserService userService = polarisServicesFactory.createUserService();
+        UserService userService = polarisServicesFactory.createUserService();
         userService.getUsersForGroup(groupResource);
     }
 
